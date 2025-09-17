@@ -1,0 +1,52 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow-y: scroll;
+}
+
+main {
+    margin-bottom: auto;
+    width: 100vw;
+    height: 100vh;
+}
+
+/*
+Utils
+
+ */
+
+.no-pointer {
+    pointer-events: none;
+}
+
+button {
+    cursor: pointer;
+}
+button:disabled {
+    cursor: not-allowed;
+}
+
+.position-parent {
+    position: relative;
+}
+
+.position-child {
+    position: absolute;
+}
+
+.no-sel {
+    user-select: none;
+}
+
+.fit-content {
+    width: fit-content;
+    height: fit-content;
+}
+
+.mover-linear {
+    transition: left 1s linear, top 1s linear;
+}
+
+.center {
+    transform: translate(-50%, -50%);
+}
