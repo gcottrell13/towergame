@@ -7,7 +7,7 @@ export const FLOOR_DEFS_RAW = {
         basic: {
             name: 'Basic',
             background: images.BASIC_FLOOR_BG_PNG,
-            cost_to_build: 20,
+            cost_to_build: 10,
             rooms: ['hotel-basic-small', 'ad-1'],
         },
         'express-lobby': {

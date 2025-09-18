@@ -53,3 +53,10 @@ button:disabled {
 .first-child-grow :first-child {
     flex-grow: 1;
 }
+
+.hover-parent-display .hover-child-display {
+    display: none;
+}
+.hover-parent-display:hover .hover-child-display {
+    display: block;
+}

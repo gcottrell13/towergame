@@ -6,7 +6,7 @@ export const TEST_SAVE: SaveFile = {
         {
             id: 0 as uint,
             name: 'building',
-            max_width: 10 as uint,
+            max_width: 30 as uint,
             position: 50 as int,
             roof_height: 3 as uint,
             floors: [
@@ -23,21 +23,21 @@ export const TEST_SAVE: SaveFile = {
                             bottom_floor: 3 as int,
                         },
                     ],
-                    size_left: 10 as uint,
+                    size_left: 13 as uint,
                     size_right: 10 as uint,
                 },
                 {
                     height: 2 as int,
                     kind: 'basic' as any,
                     rooms: [],
-                    size_left: 15 as uint,
+                    size_left: 18 as uint,
                     size_right: 15 as uint,
                 },
                 {
                     height: 1 as int,
                     kind: null,
                     rooms: [],
-                    size_left: 20 as uint,
+                    size_left: 23 as uint,
                     size_right: 20 as uint,
                 },
             ],

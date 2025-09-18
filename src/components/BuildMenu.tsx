@@ -63,33 +63,30 @@ export function BuildMenu() {
         <div style={build_menu_style}>
             <div>Money: {save.money}</div>
             {construction?.type === 'room' && ROOM_DEFS[construction.value] ? (
-                <div>
+                <div style={{ display: 'flex', gap: '5px' }}>
                     Building: {ROOM_DEFS[construction.value].display_name}
-                    <button
-                        type="reset"
-                        style={{ marginLeft: '5px' }}
-                        onClick={() => set_construction(null)}
-                    >
+                    <button type="reset" onClick={() => set_construction(null)}>
                         Cancel
                     </button>
                 </div>
             ) : null}
             {construction?.type === 'rezone' &&
             FLOOR_DEFS.buildables[construction.value] ? (
-                <div>
+                <div style={{ display: 'flex', gap: '5px' }}>
                     Building Floor:{' '}
                     {FLOOR_DEFS.buildables[construction.value].name}
-                    <button
-                        type="reset"
-                        style={{ marginLeft: '5px' }}
-                        onClick={() => set_construction(null)}
-                    >
+                    <button type="reset" onClick={() => set_construction(null)}>
                         Cancel
                     </button>
                 </div>
             ) : null}
             {construction?.type === 'extend' ? (
-                <span>Extending floors</span>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                    <span>Extending floors</span>
+                    <button type="reset" onClick={() => set_construction(null)}>
+                        Cancel
+                    </button>
+                </div>
             ) : null}
 
             <div>
@@ -190,6 +187,7 @@ function RoomSelector() {
 
 function FloorSelector() {
     const [construction, set_construction] = useConstructionContext('rezone');
+    const [save] = useContext(SaveFileContext);
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(FLOOR_DEFS.buildables)
@@ -218,7 +216,10 @@ function FloorSelector() {
                                             ? 0
                                             : 100,
                                 }}
-                                disabled={construction?.value === def.id}
+                                disabled={
+                                    construction?.value === def.id ||
+                                    save.money < def.cost_to_build
+                                }
                                 onClick={() => {
                                     set_construction({
                                         type: 'rezone',

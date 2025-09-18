@@ -10,6 +10,7 @@ import {FLOOR_DEFS} from '../types/FloorDefinition.ts';
 import {BuildRoomOverlay} from "./BuildRoomOverlay.tsx";
 import {FloorRezoneOverlay} from "./FloorRezoneOverlay.tsx";
 import {useConstructionContext} from "../hooks/useConstructionContext.ts";
+import {FloorExtendOverlay} from "./FloorExtendOverlay.tsx";
 
 interface Props {
     floor: Floor;
@@ -52,6 +53,9 @@ export function FloorComponent({floor}: Props) {
                 {construction?.type === 'rezone' && floor_def.id !== construction.value ? (
                     <FloorRezoneOverlay floor_kind={construction.value} />
                 ) : null}
+                {construction?.type === 'extend' && (
+                    <FloorExtendOverlay />
+                )}
                 {floor.rooms.map((room) => (
                     <RoomComponentMemo key={room.position} room={room}/>
                 ))}

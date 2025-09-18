@@ -35,7 +35,14 @@ export function BuildRoomOverlay({ room_kind }: Props) {
             }}
             onMouseMove={(ev) => {
                 let loc = Math.floor(
-                    ev.nativeEvent.offsetX / PIXELS_PER_UNIT - floor.size_right,
+                    ev.nativeEvent.offsetX / PIXELS_PER_UNIT -
+                        floor.size_left -
+                        0.5,
+                );
+                console.log(
+                    ev.nativeEvent.offsetX,
+                    PIXELS_PER_UNIT,
+                    floor.size_left,
                 );
                 loc = Math.min(
                     // clamp between valid values
@@ -78,7 +85,7 @@ export function BuildRoomOverlay({ room_kind }: Props) {
                     className={'no-pointer'}
                     style={{
                         opacity: '50%',
-                        left: `${(bp_location + floor.size_right) * PIXELS_PER_UNIT}px`,
+                        left: `${(bp_location + floor.size_left) * PIXELS_PER_UNIT}px`,
                         position: 'absolute',
                     }}
                     src={room_def.sprite_empty}
