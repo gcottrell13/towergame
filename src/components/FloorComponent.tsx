@@ -32,6 +32,9 @@ export function FloorComponent({floor}: Props) {
 
     const style = {
         height: `${ROOM_HEIGHT}px`,
+        top: `-${floor.height * FLOOR_HEIGHT}px`,
+        left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
+        position: 'absolute',
     } as const;
 
     return (
@@ -39,7 +42,6 @@ export function FloorComponent({floor}: Props) {
             <div
                 style={style}
                 id={`floor-${floor.height}`}
-                className={'position-parent'}
             >
                 {floor_bg(floor)}
                 {floor.height > 1 ? roof_below(floor, building.floors[building.roof_height - floor.height + 1]) : null}
@@ -47,16 +49,7 @@ export function FloorComponent({floor}: Props) {
                     <BuildRoomOverlay room_kind={construction.value}/>
                 ) : null}
                 {floor.rooms.map((room) => (
-                    <div
-                        key={room.position}
-                        style={{
-                            left: `${(room.position + floor.size_left) * PIXELS_PER_UNIT}px`,
-                            top: '1px',
-                        }}
-                        className={'position-child'}
-                    >
-                        <RoomComponent room={room}/>
-                    </div>
+                    <RoomComponent key={room.position} room={room}/>
                 ))}
             </div>
         </FloorContext.Provider>
@@ -67,14 +60,14 @@ function floor_bg(floor: Floor) {
     const floor_def = floor.kind
         ? FLOOR_DEFS.buildables[floor.kind]
         : FLOOR_DEFS.empty;
-    const style = {
+    return <div style={{
         backgroundRepeat: 'repeat-x',
         width: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT}px`,
         height: `${ROOM_HEIGHT}px`,
         backgroundImage: `url(${floor_def.background})`,
         borderBottom: `2px solid black`,
-    };
-    return <div style={style} className={'position-child'}></div>;
+        position: 'absolute',
+    }}></div>;
 }
 
 function roof_below(floor: Floor, below: Floor | undefined) {
@@ -87,7 +80,6 @@ function roof_below(floor: Floor, below: Floor | undefined) {
         return null;
     return (
         <div
-            className={'position-child'}
             id={`floor-${below.height}-roof`}
             style={{
                 left: `-${(below.size_left - floor.size_left) * PIXELS_PER_UNIT}px`,
@@ -97,6 +89,7 @@ function roof_below(floor: Floor, below: Floor | undefined) {
                 height: `${ROOM_HEIGHT}px`,
                 borderBottom: `2px solid black`,
                 zIndex: -1,
+                position: 'absolute',
             }}>
         </div>
     );
@@ -109,9 +102,9 @@ export function TopRoofComponent() {
     const floor = building.floors[0];
     return (
         <div
-            className={'position-child'}
             id={`roof-${floor.height}`}
             style={{
+                position: 'absolute',
                 left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
                 top: `-${(floor.height + 1) * FLOOR_HEIGHT}px`,
                 backgroundRepeat: 'repeat-x',

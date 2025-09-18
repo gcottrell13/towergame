@@ -27,14 +27,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-.position-parent {
-    position: relative;
-}
-
-.position-child {
-    position: absolute;
-}
-
 .no-sel {
     user-select: none;
 }

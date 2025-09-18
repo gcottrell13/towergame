@@ -1,27 +1,23 @@
-import {useContext} from "react";
-import {SaveFileContext} from "../context/stateContext.ts";
-import {BuildingComponent} from "./BuildingComponent.tsx";
-import {FLOOR_HEIGHT, PIXELS_PER_UNIT} from "../constants.ts";
+import { useContext } from 'react';
+import { SaveFileContext } from '../context/stateContext.ts';
+import { BuildingComponent } from './BuildingComponent.tsx';
+import { FLOOR_HEIGHT } from '../constants.ts';
 
 export function AllBuildings() {
     const [state, _setState] = useContext(SaveFileContext);
+    const max = Math.max(...state.buildings.map((x) => x.floors.length));
+    const top = Math.max(0, max - 10) * FLOOR_HEIGHT;
     return (
-        <>
-            {state.buildings.map(building => {
-                const top = Math.max(0, building.floors.length - 10) * FLOOR_HEIGHT;
-                return (
-                    <div
-                        className='position-child'
-                        key={building.id}
-                        id={`building-${building.id}-container`}
-                        style={{
-                            top: `calc(100vh + ${top}px)`,
-                            left: `${building.position * PIXELS_PER_UNIT}px`,
-                        }}>
-                        <BuildingComponent building={building}/>
-                    </div>
-                );
-            })}
-        </>
-    )
+        <div
+            id={'game'}
+            style={{
+                top: `calc(100vh + ${top}px)`,
+                position: 'absolute',
+            }}
+        >
+            {state.buildings.map((building) => (
+                <BuildingComponent key={building.id} building={building} />
+            ))}
+        </div>
+    );
 }

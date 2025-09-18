@@ -76,10 +76,11 @@ export function BuildRoomOverlay({ room_kind }: Props) {
         >
             {bp_location !== null && (
                 <img
-                    className={'no-pointer position-child'}
+                    className={'no-pointer'}
                     style={{
                         opacity: '50%',
                         left: `${(bp_location + floor.size_right) * PIXELS_PER_UNIT}px`,
+                        position: 'absolute',
                     }}
                     src={room_def.sprite_empty}
                     alt={room_def.sprite_empty}

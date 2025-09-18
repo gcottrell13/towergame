@@ -1,6 +1,6 @@
-import { useCallback, useContext } from 'react';
-import { BuildingContext, SaveFileContext } from '../context/stateContext.ts';
-import type { Building } from '../types/Building.ts';
+import {useCallback, useContext} from 'react';
+import {BuildingContext, SaveFileContext} from '../context/stateContext.ts';
+import type {Building} from '../types/Building.ts';
 import {FLOOR_HEIGHT, PIXELS_PER_UNIT} from '../constants.ts';
 import {FloorComponent, TopRoofComponent} from './FloorComponent.tsx';
 
@@ -13,11 +13,11 @@ interface Props {
     building: Building;
 }
 
-export function BuildingComponent({ building }: Props) {
+export function BuildingComponent({building}: Props) {
     const [_saveFile, updateSaveFile] = useContext(SaveFileContext);
     const update = useCallback(
         (f: (b: Building) => void) => {
-            const new_b = { ...building };
+            const new_b = {...building};
             f(new_b);
             updateSaveFile((save) => {
                 save.buildings[building.id] = new_b;
@@ -33,32 +33,25 @@ export function BuildingComponent({ building }: Props) {
         <BuildingContext value={[building, update]}>
             <div
                 id={`building-${building.id}`}
-                className={'position-parent'}
+                style={{
+                    left: `${building.position * PIXELS_PER_UNIT}px`,
+                    position: 'absolute',
+                }}
             >
                 {Object.values(building.floors).map((floor) => (
-                    <div
-                        id={`floor-${floor.height}-container`}
-                        key={floor.height}
-                        className={'position-child'}
-                        style={{
-                            top: `-${floor.height * FLOOR_HEIGHT}px`,
-                            left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
-                        }}
-                    >
-                        <FloorComponent floor={floor} />
-                    </div>
+                    <FloorComponent key={floor.height} floor={floor}/>
                 ))}
-                <TopRoofComponent />
+                <TopRoofComponent/>
+                <div
+                    id={`ground-${building.id}`}
+                    style={{
+                        left: `-${building.position * PIXELS_PER_UNIT}px`,
+                        height: `${ground_depth}px`,
+                        position: 'absolute',
+                        ...ground_style,
+                    }}
+                ></div>
             </div>
-            <div
-                className={'position-child'}
-                id={`ground-${building.id}`}
-                style={{
-                    left: `-${building.position * PIXELS_PER_UNIT}px`,
-                    height: `${ground_depth}px`,
-                    ...ground_style,
-                }}
-            ></div>
         </BuildingContext>
     );
 }

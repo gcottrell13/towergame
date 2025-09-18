@@ -33,6 +33,8 @@ export type ConstructionContextValue = {
     value: FloorKind;
 } | {
     type: 'extend';
+} | {
+    type: 'destroy-room';
 };
 
 export const ConstructionContext = createContext<C<ConstructionContextValue | null>>([null, () => {}]);

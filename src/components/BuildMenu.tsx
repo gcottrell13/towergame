@@ -7,7 +7,7 @@ import {
 } from '../context/stateContext.ts';
 
 const build_menu_style = {
-    position: 'absolute',
+    position: 'fixed',
     display: 'flex',
     flexDirection: 'column',
     alignContent: 'space-around',
@@ -31,6 +31,7 @@ enum Menu {
     Rooms,
     Floors,
     Transportation,
+    Power,
 }
 
 export function BuildMenu() {
