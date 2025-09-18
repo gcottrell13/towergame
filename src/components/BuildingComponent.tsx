@@ -2,7 +2,7 @@ import {useCallback, useContext} from 'react';
 import {BuildingContext, SaveFileContext} from '../context/stateContext.ts';
 import type {Building} from '../types/Building.ts';
 import {FLOOR_HEIGHT, PIXELS_PER_UNIT} from '../constants.ts';
-import {FloorComponent, TopRoofComponent} from './FloorComponent.tsx';
+import {FloorComponentMemo, TopRoofComponent} from './FloorComponent.tsx';
 
 const ground_style = {
     background: 'saddlebrown',
@@ -39,7 +39,7 @@ export function BuildingComponent({building}: Props) {
                 }}
             >
                 {Object.values(building.floors).map((floor) => (
-                    <FloorComponent key={floor.height} floor={floor}/>
+                    <FloorComponentMemo key={floor.height} floor={floor}/>
                 ))}
                 <TopRoofComponent/>
                 <div

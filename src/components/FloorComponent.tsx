@@ -1,14 +1,15 @@
-import {useCallback, useContext} from 'react';
+import {memo, useCallback, useContext} from 'react';
 import {
     BuildingContext,
-    ConstructionContext,
     FloorContext,
 } from '../context/stateContext.ts';
 import type {Floor} from '../types/Floor.ts';
 import {FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT} from '../constants.ts';
-import {RoomComponent} from './RoomComponent.tsx';
+import {RoomComponentMemo} from './RoomComponent.tsx';
 import {FLOOR_DEFS} from '../types/FloorDefinition.ts';
 import {BuildRoomOverlay} from "./BuildRoomOverlay.tsx";
+import {FloorRezoneOverlay} from "./FloorRezoneOverlay.tsx";
+import {useConstructionContext} from "../hooks/useConstructionContext.ts";
 
 interface Props {
     floor: Floor;
@@ -27,7 +28,7 @@ export function FloorComponent({floor}: Props) {
         [floor, updateBuilding],
     );
 
-    const [construction,] = useContext(ConstructionContext);
+    const [construction,] = useConstructionContext("room", "rezone", "extend");
     const floor_def = floor.kind ? FLOOR_DEFS.buildables[floor.kind] : FLOOR_DEFS.empty;
 
     const style = {
@@ -48,13 +49,18 @@ export function FloorComponent({floor}: Props) {
                 {construction?.type === 'room' && floor_def.rooms.includes(construction.value) ? (
                     <BuildRoomOverlay room_kind={construction.value}/>
                 ) : null}
+                {construction?.type === 'rezone' && floor_def.id !== construction.value ? (
+                    <FloorRezoneOverlay floor_kind={construction.value} />
+                ) : null}
                 {floor.rooms.map((room) => (
-                    <RoomComponent key={room.position} room={room}/>
+                    <RoomComponentMemo key={room.position} room={room}/>
                 ))}
             </div>
         </FloorContext.Provider>
     );
 }
+
+export const FloorComponentMemo = memo(FloorComponent);
 
 function floor_bg(floor: Floor) {
     const floor_def = floor.kind

@@ -34,8 +34,13 @@ export function BuildRoomOverlay({ room_kind }: Props) {
                 width: `${(floor.size_right + floor.size_left) * PIXELS_PER_UNIT}px`,
             }}
             onMouseMove={(ev) => {
-                const loc = Math.floor(
+                let loc = Math.floor(
                     ev.nativeEvent.offsetX / PIXELS_PER_UNIT - floor.size_right,
+                );
+                loc = Math.min(
+                    // clamp between valid values
+                    Math.max(loc, -floor.size_left),
+                    floor.size_right - room_def.min_width,
                 );
                 // if colliding with other rooms, don't update position and just keep the last one
                 for (const other_room of floor.rooms) {
@@ -46,13 +51,7 @@ export function BuildRoomOverlay({ room_kind }: Props) {
                         return;
                 }
                 // TODO: check lower floors for tall rooms
-                set_bp_location(
-                    Math.min(
-                        // clamp between valid values
-                        Math.max(loc, -floor.size_left),
-                        floor.size_right - room_def.min_width,
-                    ),
-                );
+                set_bp_location(loc);
             }}
             onMouseLeave={() => {
                 set_bp_location(null);
@@ -63,7 +62,7 @@ export function BuildRoomOverlay({ room_kind }: Props) {
                     s.money = (s.money - room_def.cost_to_build) as int;
                 });
                 update_floor((f) => {
-                    f.rooms.splice(0, 0, {
+                    f.rooms = f.rooms.toSpliced(0, 0, {
                         width: room_def.min_width,
                         kind: room_def.id,
                         position: bp_location as int,

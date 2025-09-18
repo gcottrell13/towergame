@@ -1,10 +1,8 @@
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { useCallback, useContext, useState } from 'react';
-import {
-    ConstructionContext,
-    SaveFileContext,
-} from '../context/stateContext.ts';
+import { SaveFileContext } from '../context/stateContext.ts';
+import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 
 const build_menu_style = {
     position: 'fixed',
@@ -37,7 +35,11 @@ enum Menu {
 export function BuildMenu() {
     const [current_menu, set_current_menu] = useState<Menu>(Menu.Rooms);
 
-    const [construction, set_construction] = useContext(ConstructionContext);
+    const [construction, set_construction] = useConstructionContext(
+        'room',
+        'rezone',
+        'extend',
+    );
     const [save] = useContext(SaveFileContext);
 
     const set_menu = useCallback(
@@ -124,9 +126,8 @@ export function BuildMenu() {
 }
 
 function RoomSelector() {
-    const [construction, set_construction] = useContext(ConstructionContext);
+    const [construction, set_construction] = useConstructionContext('room');
     const [save] = useContext(SaveFileContext);
-    const cid = construction?.type === 'room' ? construction.value : null;
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(ROOM_DEFS)
@@ -152,9 +153,14 @@ function RoomSelector() {
                             <span>${def.cost_to_build}</span>
                             <button
                                 type={'button'}
-                                style={{ opacity: cid === def.id ? 0 : 100 }}
+                                style={{
+                                    opacity:
+                                        construction?.value === def.id
+                                            ? 0
+                                            : 100,
+                                }}
                                 disabled={
-                                    cid === def.id ||
+                                    construction?.value === def.id ||
                                     save.money < def.cost_to_build
                                 }
                                 onClick={() => {
@@ -174,8 +180,7 @@ function RoomSelector() {
 }
 
 function FloorSelector() {
-    const [construction, set_construction] = useContext(ConstructionContext);
-    const cid = construction?.type === 'rezone' ? construction.value : null;
+    const [construction, set_construction] = useConstructionContext('rezone');
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(FLOOR_DEFS.buildables)
@@ -198,8 +203,13 @@ function FloorSelector() {
                             <span>${def.cost_to_build}/m</span>
                             <button
                                 type={'button'}
-                                style={{ opacity: cid === def.id ? 0 : 100 }}
-                                disabled={cid === def.id}
+                                style={{
+                                    opacity:
+                                        construction?.value === def.id
+                                            ? 0
+                                            : 100,
+                                }}
+                                disabled={construction?.value === def.id}
                                 onClick={() => {
                                     set_construction({
                                         type: 'rezone',

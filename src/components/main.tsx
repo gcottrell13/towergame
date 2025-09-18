@@ -1,4 +1,4 @@
-import {ConstructionContext, type ConstructionContextValue, SaveFileContext} from "../context/stateContext.ts";
+import {SaveFileContext} from "../context/stateContext.ts";
 import {TEST_SAVE} from "../content/test_save.ts";
 import {AllBuildings} from "./AllBuildings.tsx";
 import {useCallback, useState} from "react";
@@ -23,12 +23,10 @@ export function Main() {
             state,
             setStateUpdate,
         ]}>
-            <ConstructionContext.Provider value={useState<ConstructionContextValue | null>(null)}>
-                <main>
-                    <AllBuildings />
-                    <BuildMenu />
-                </main>
-            </ConstructionContext.Provider>
+            <main>
+                <AllBuildings />
+                <BuildMenu />
+            </main>
         </SaveFileContext.Provider>
     )
 }
