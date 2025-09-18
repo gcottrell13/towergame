@@ -1,6 +1,6 @@
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { SaveFileContext } from '../context/stateContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 
@@ -49,6 +49,15 @@ export function BuildMenu() {
         },
         [set_construction],
     );
+
+    useEffect(() => {
+        if (
+            construction?.type === 'room' &&
+            save.money < ROOM_DEFS[construction.value].cost_to_build
+        ) {
+            set_construction(null);
+        }
+    }, [construction, save.money, set_construction]);
 
     return (
         <div style={build_menu_style}>
