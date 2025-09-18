@@ -2,7 +2,7 @@ import { useCallback, useContext } from 'react';
 import { BuildingContext, SaveFileContext } from '../context/stateContext.ts';
 import type { Building } from '../types/Building.ts';
 import {FLOOR_HEIGHT, PIXELS_PER_UNIT} from '../constants.ts';
-import { FloorComponent } from './FloorComponent.tsx';
+import {FloorComponent, TopRoofComponent} from './FloorComponent.tsx';
 
 const ground_style = {
     background: 'saddlebrown',
@@ -43,12 +43,12 @@ export function BuildingComponent({ building }: Props) {
                         style={{
                             top: `-${floor.height * FLOOR_HEIGHT}px`,
                             left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
-                            width: `${floor.size_left + floor.size_left * PIXELS_PER_UNIT}px`,
                         }}
                     >
                         <FloorComponent floor={floor} />
                     </div>
                 ))}
+                <TopRoofComponent />
             </div>
             <div
                 className={'position-child'}

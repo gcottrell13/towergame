@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
     overflow-y: scroll;
@@ -44,9 +45,19 @@ button:disabled {
 }
 
 .mover-linear {
-    transition: left 1s linear, top 1s linear;
+    transition:
+        left 1s linear,
+        top 1s linear;
+}
+
+.overflow-y-scroll {
+    overflow-y: scroll;
 }
 
 .center {
     transform: translate(-50%, -50%);
+}
+
+.first-child-grow :first-child {
+    flex-grow: 1;
 }

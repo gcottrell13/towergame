@@ -6,7 +6,7 @@ import type {IMAGES} from "../content/images.ts";
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
  * @asType string
  */
-export type RoomKind = symbol;
+export type RoomKind = number & {readonly __type: unique symbol};
 
 export interface RoomDefinition {
     id: RoomKind;
@@ -62,12 +62,14 @@ const ROOM_DEF_DEFAULTS: Partial<RoomDefinition> = {
     min_height: 1 as uint,
 };
 
-export const ROOM_DEFS: { [p: RoomKind]: RoomDefinition } = Object.fromEntries(
+export const ROOM_DEFS: {
+    [p: RoomKind]: RoomDefinition } = Object.fromEntries(
     Object.keys(ROOM_DEFS_RAW).map((id) => [
         id,
         {
             ...ROOM_DEF_DEFAULTS,
             ...(ROOM_DEFS_RAW[id as keyof typeof ROOM_DEFS_RAW] as any),
+            id,
         },
     ]),
 );

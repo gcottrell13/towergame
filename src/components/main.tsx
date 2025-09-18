@@ -1,10 +1,9 @@
-import {BuildingRoomContext, FloorRezoneContext, SaveFileContext} from "../context/stateContext.ts";
+import {ConstructionContext, type ConstructionContextValue, SaveFileContext} from "../context/stateContext.ts";
 import {TEST_SAVE} from "../content/test_save.ts";
 import {AllBuildings} from "./AllBuildings.tsx";
 import {useCallback, useState} from "react";
 import type {SaveFile} from "../types/SaveFile.ts";
-import type {RoomKind} from "../types/RoomDefinition.ts";
-import type {FloorKind} from "../types/FloorDefinition.ts";
+import {BuildMenu} from "./BuildMenu.tsx";
 
 export function Main() {
     const [state, setState] = useState(TEST_SAVE);
@@ -24,13 +23,12 @@ export function Main() {
             state,
             setStateUpdate,
         ]}>
-            <BuildingRoomContext.Provider value={useState<RoomKind | null>(null)}>
-                <FloorRezoneContext.Provider value={useState<FloorKind | null>(null)}>
-                    <main>
-                        <AllBuildings />
-                    </main>
-                </FloorRezoneContext.Provider>
-            </BuildingRoomContext.Provider>
+            <ConstructionContext.Provider value={useState<ConstructionContextValue | null>(null)}>
+                <main>
+                    <AllBuildings />
+                    <BuildMenu />
+                </main>
+            </ConstructionContext.Provider>
         </SaveFileContext.Provider>
     )
 }

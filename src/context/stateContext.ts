@@ -23,5 +23,16 @@ export const BuildingContext = createContext<StateItem<Building>>([{} as any, ()
 export const FloorContext = createContext<StateItem<Floor>>([{} as any, () => {}]);
 export const RoomContext = createContext<StateItem<Room>>([{} as any, () => {}]);
 
-export const BuildingRoomContext = createContext<[value: RoomKind | null, update: (s: RoomKind | null) => void ]>([null, () => {}]);
-export const FloorRezoneContext = createContext<[value: FloorKind | null, update: (s: FloorKind | null) => void ]>([null, () => {}]);
+type C<T> = [T, React.Dispatch<React.SetStateAction<T>>];
+
+export type ConstructionContextValue = {
+    type: "room";
+    value: RoomKind;
+} | {
+    type: 'rezone';
+    value: FloorKind;
+} | {
+    type: 'extend';
+};
+
+export const ConstructionContext = createContext<C<ConstructionContextValue | null>>([null, () => {}]);

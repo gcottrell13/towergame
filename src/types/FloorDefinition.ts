@@ -1,18 +1,17 @@
 import { as_uint_or_default, type uint } from './RestrictedTypes.ts';
 import type { RoomKind } from './RoomDefinition.ts';
 import { FLOOR_DEFS_RAW, type FloorDefRaw } from '../content/floor-defs.ts';
-import type {IMAGES} from "../content/images.ts";
 
 /**
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
  * @asType string
  */
-export type FloorKind = symbol;
+export type FloorKind = number & {readonly __type: unique symbol;}
 
 export interface FloorDefinition {
     id: FloorKind;
     name: string;
-    background: IMAGES;
+    background: string;
     cost_to_build: uint;
     tier: uint;
 
