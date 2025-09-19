@@ -39,7 +39,7 @@ export function BuildMenu() {
     const [current_menu, set_current_menu] = useState<Menu>(Menu.Rooms);
 
     const [position, set_position] = useState<'left' | 'right'>('left');
-    const [pinned, set_pinned] = useState(false);
+    const [pinned, set_pinned] = useState(true);
     const [mouse_in, set_mouse_in] = useState(false);
     const [rect, set_rect] = useState<DOMRect | null>(null);
     const ref = useRef<HTMLDivElement>(null);

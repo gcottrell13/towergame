@@ -57,7 +57,7 @@ export function FloorExtendOverlay() {
             <div
                 style={{
                     ...overlay_style,
-                    right: `-${(floor.size_left + floor.size_right + expand_right) * PIXELS_PER_UNIT}px`,
+                    right: `-${(floor.size_right + expand_right) * PIXELS_PER_UNIT}px`,
                     height: `${FLOOR_HEIGHT}px`,
                     width: `${expand_right * PIXELS_PER_UNIT}px`,
                     background: sufficient_funds
@@ -112,7 +112,7 @@ export function FloorExtendOverlay() {
             <div
                 style={{
                     ...overlay_style,
-                    left: `-${expand_left * PIXELS_PER_UNIT}px`,
+                    left: `-${(expand_left + floor.size_left) * PIXELS_PER_UNIT}px`,
                     height: `${FLOOR_HEIGHT}px`,
                     width: `${expand_left * PIXELS_PER_UNIT}px`,
                     background: sufficient_funds

@@ -60,6 +60,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
             style={{
                 ...style,
                 width: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT}px`,
+                left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
                 background: sufficient_funds
                     ? 'color-mix(in srgb, lawngreen 30%, transparent)'
                     : 'color-mix(in srgb, red 30%, transparent)',

@@ -32,6 +32,7 @@ export function BuildRoomOverlay({ room_kind }: Props) {
             style={{
                 ...style,
                 width: `${(floor.size_right + floor.size_left) * PIXELS_PER_UNIT}px`,
+                left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
             }}
             onMouseMove={(ev) => {
                 let loc = Math.floor(
