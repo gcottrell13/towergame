@@ -11,6 +11,20 @@ main {
     height: 100vh;
 }
 
+.build-number {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    border-right: 1px solid gray;
+    border-top: 1px solid gray;
+    padding: 1px;
+    border-top-right-radius: 5px;
+    background-color: lightgray;
+    font-family: monospace;
+    text-decoration: none;
+    color: black;
+}
+
 /*
 Utils
 

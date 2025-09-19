@@ -6,4 +6,10 @@ export default defineConfig({
     output: {
         assetPrefix: '/towergame/',
     },
+    source: {
+        define: {
+            BUILD_NUM: JSON.stringify(process.env.BUILD_NUM),
+            BUILD_LINK: JSON.stringify(process.env.BUILD_LINK),
+        },
+    },
 });

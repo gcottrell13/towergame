@@ -1,9 +1,14 @@
 import './App.css';
-import {Main} from "./components/main.tsx";
+import { Main } from './components/main.tsx';
 
 const App = () => {
     return (
-        <Main />
+        <>
+            <Main />
+            <a className="build-number" href={BUILD_LINK} target={'_blank'}>
+                Build #{BUILD_NUM}
+            </a>
+        </>
     );
 };
 
