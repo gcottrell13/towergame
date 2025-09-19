@@ -1,12 +1,11 @@
 import type { uint } from './RestrictedTypes.ts';
-import { ROOM_DEFS_RAW } from '../content/room-defs.ts';
-import type {IMAGES} from "../content/images.ts";
+import { ROOM_DEFS_RAW, RoomCategory } from '../content/room-defs.ts';
 
 /**
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
  * @asType string
  */
-export type RoomKind = number & {readonly __type: unique symbol};
+export type RoomKind = number & { readonly __type: unique symbol };
 
 export interface RoomDefinition {
     id: RoomKind;
@@ -31,26 +30,28 @@ export interface RoomDefinition {
      * @default null
      * @optional
      */
-    sprite_active: IMAGES | null;
-    sprite_empty: IMAGES;
+    sprite_active: string | null;
+    sprite_empty: string;
 
     /**
      * @default null
      */
-    sprite_active_night: IMAGES | null;
+    sprite_active_night: string | null;
     /**
      * @default null
      */
-    sprite_empty_night: IMAGES | null;
+    sprite_empty_night: string | null;
 
     cost_to_build: uint;
     cost_to_destroy: uint;
-    build_thumb: IMAGES;
+    build_thumb: string;
 
     /**
      * @default 0
      */
     tier: uint;
+
+    category: RoomCategory;
 }
 
 const ROOM_DEF_DEFAULTS: Partial<RoomDefinition> = {
@@ -60,10 +61,12 @@ const ROOM_DEF_DEFAULTS: Partial<RoomDefinition> = {
     sprite_active_night: null,
     max_height: 1 as uint,
     min_height: 1 as uint,
+    category: RoomCategory.Room,
 };
 
 export const ROOM_DEFS: {
-    [p: RoomKind]: RoomDefinition } = Object.fromEntries(
+    [p: RoomKind]: RoomDefinition;
+} = Object.fromEntries(
     Object.keys(ROOM_DEFS_RAW).map((id) => [
         id,
         {

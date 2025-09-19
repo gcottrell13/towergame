@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import {
     BuildingContext,
     FloorContext,
@@ -13,6 +13,19 @@ const overlay_style = {
     top: '0',
 } as const;
 
+const popover_style = {
+    whiteSpace: 'nowrap',
+    position: 'absolute',
+    background: 'white',
+    border: '1px solid black',
+    borderRadius: '5px',
+    padding: '2px',
+    display: 'flex',
+    gap: '5px',
+    alignItems: 'center',
+    zIndex: 10001,
+} as const;
+
 export function FloorExtendOverlay() {
     const [floor, update_floor] = useContext(FloorContext);
     const [building] = useContext(BuildingContext);
@@ -20,12 +33,11 @@ export function FloorExtendOverlay() {
 
     const expand_left =
         (floor.height > 1
-            ? building.floors[building.roof_height - floor.height + 1].size_left
+            ? building.floors[building.top_floor - floor.height + 1].size_left
             : building.max_width) - floor.size_left;
     const expand_right =
         (floor.height > 1
-            ? building.floors[building.roof_height - floor.height + 1]
-                  .size_right
+            ? building.floors[building.top_floor - floor.height + 1].size_right
             : building.max_width) - floor.size_right;
 
     let right = null;
@@ -37,8 +49,8 @@ export function FloorExtendOverlay() {
         : FLOOR_DEFS.empty.cost_to_build;
 
     if (expand_right > 0) {
-        const cost_right = cost_build * expand_right;
-        const sufficient_funds = save.money >= cost_right;
+        const cost = cost_build * expand_right;
+        const sufficient_funds = save.money >= cost;
         right = (
             // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
             // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
@@ -48,10 +60,9 @@ export function FloorExtendOverlay() {
                     right: `-${(floor.size_left + floor.size_right + expand_right) * PIXELS_PER_UNIT}px`,
                     height: `${FLOOR_HEIGHT}px`,
                     width: `${expand_right * PIXELS_PER_UNIT}px`,
-                    background:
-                        save.money >= cost_right
-                            ? 'color-mix(in srgb, lawngreen 30%, transparent)'
-                            : 'color-mix(in srgb, red 30%, transparent)',
+                    background: sufficient_funds
+                        ? 'color-mix(in srgb, lawngreen 30%, transparent)'
+                        : 'color-mix(in srgb, red 30%, transparent)',
                 }}
                 className="hover-parent-display"
                 onClick={() => {
@@ -59,24 +70,15 @@ export function FloorExtendOverlay() {
                         f.size_right = (f.size_right + expand_right) as uint;
                     });
                     update_save((s) => {
-                        s.money = (s.money - cost_right) as int;
+                        s.money = (s.money - cost) as int;
                     });
                 }}
             >
                 <div className="hover-child-display">
                     <span
                         style={{
-                            whiteSpace: 'nowrap',
-                            position: 'absolute',
-                            background: 'white',
-                            border: '1px solid black',
-                            borderRadius: '5px',
-                            padding: '2px',
+                            ...popover_style,
                             right: `${expand_right * PIXELS_PER_UNIT}px`,
-                            marginTop: '3px',
-                            display: 'flex',
-                            gap: '5px',
-                            zIndex: 10001,
                         }}
                     >
                         {!sufficient_funds && (
@@ -84,15 +86,26 @@ export function FloorExtendOverlay() {
                                 Insufficient Funds
                             </span>
                         )}
-                        Extend Right for ${cost_right}
+                        Extend Right
+                        <span style={{ color: 'gray' }}>
+                            ({expand_right}m x ${cost_build}/m)
+                        </span>
+                        <span
+                            style={{
+                                fontSize: 'x-large',
+                                color: sufficient_funds ? 'green' : 'red',
+                            }}
+                        >
+                            = ${cost}
+                        </span>
                     </span>
                 </div>
             </div>
         );
     }
     if (expand_left > 0) {
-        const cost_left = cost_build * expand_left;
-        const sufficient_funds = save.money >= cost_left;
+        const cost = cost_build * expand_left;
+        const sufficient_funds = save.money >= cost;
         left = (
             // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
             // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
@@ -102,10 +115,9 @@ export function FloorExtendOverlay() {
                     left: `-${expand_left * PIXELS_PER_UNIT}px`,
                     height: `${FLOOR_HEIGHT}px`,
                     width: `${expand_left * PIXELS_PER_UNIT}px`,
-                    background:
-                        save.money >= cost_left
-                            ? 'color-mix(in srgb, lawngreen 30%, transparent)'
-                            : 'color-mix(in srgb, red 30%, transparent)',
+                    background: sufficient_funds
+                        ? 'color-mix(in srgb, lawngreen 30%, transparent)'
+                        : 'color-mix(in srgb, red 30%, transparent)',
                 }}
                 className="hover-parent-display"
                 onClick={() => {
@@ -113,24 +125,15 @@ export function FloorExtendOverlay() {
                         f.size_left = (f.size_left + expand_left) as uint;
                     });
                     update_save((s) => {
-                        s.money = (s.money - cost_left) as int;
+                        s.money = (s.money - cost) as int;
                     });
                 }}
             >
                 <div className="hover-child-display">
                     <span
                         style={{
-                            whiteSpace: 'nowrap',
+                            ...popover_style,
                             left: `${expand_left * PIXELS_PER_UNIT}px`,
-                            position: 'absolute',
-                            background: 'white',
-                            border: '1px solid black',
-                            borderRadius: '5px',
-                            padding: '2px',
-                            marginTop: '3px',
-                            display: 'flex',
-                            gap: '5px',
-                            zIndex: 10001,
                         }}
                     >
                         {!sufficient_funds && (
@@ -138,7 +141,18 @@ export function FloorExtendOverlay() {
                                 Insufficient Funds
                             </span>
                         )}
-                        Extend Left for ${cost_left}
+                        Extend Left
+                        <span style={{ color: 'gray' }}>
+                            ({expand_left}m x ${cost_build}/m)
+                        </span>
+                        <span
+                            style={{
+                                fontSize: 'x-large',
+                                color: sufficient_funds ? 'green' : 'red',
+                            }}
+                        >
+                            = ${cost}
+                        </span>
                     </span>
                 </div>
             </div>
@@ -150,5 +164,72 @@ export function FloorExtendOverlay() {
             {left}
             {right}
         </>
+    );
+}
+
+export function NewFloorOverlay() {
+    const [building, update_building] = useContext(BuildingContext);
+    const [save, update_save] = useContext(SaveFileContext);
+    const top_floor = building.floors[0];
+
+    const update = useCallback(() => {
+        update_building((b) => {
+            b.top_floor = (b.top_floor + 1) as uint;
+            const empty_floor = {
+                size_left: top_floor.size_left,
+                size_right: top_floor.size_right,
+                height: (building.top_floor + 1) as int,
+                kind: null,
+                rooms: [],
+            };
+            b.floors = b.floors.toSpliced(0, 0, empty_floor);
+        });
+    }, [building.top_floor, update_building, top_floor]);
+
+    const size = top_floor.size_left + top_floor.size_right;
+    const cost = size * FLOOR_DEFS.empty.cost_to_build;
+    const sufficient_funds = save.money >= cost;
+
+    return (
+        // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
+        // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+        <div
+            style={{
+                ...overlay_style,
+                height: `${FLOOR_HEIGHT}px`,
+                width: `${size * PIXELS_PER_UNIT}px`,
+                background: sufficient_funds
+                    ? 'color-mix(in srgb, lawngreen 30%, transparent)'
+                    : 'color-mix(in srgb, red 30%, transparent)',
+            }}
+            className="hover-parent-display"
+            onClick={() => {
+                if (!sufficient_funds) return;
+                update();
+                update_save((s) => {
+                    s.money = (s.money - cost) as int;
+                });
+            }}
+        >
+            <div className="hover-child-display">
+                <span style={popover_style}>
+                    {!sufficient_funds && (
+                        <span style={{ color: 'red' }}>Insufficient Funds</span>
+                    )}
+                    New Floor
+                    <span style={{ color: 'gray' }}>
+                        ({size}m x ${FLOOR_DEFS.empty.cost_to_build}/m)
+                    </span>
+                    <span
+                        style={{
+                            fontSize: 'x-large',
+                            color: sufficient_funds ? 'green' : 'red',
+                        }}
+                    >
+                        = ${cost}
+                    </span>
+                </span>
+            </div>
+        </div>
     );
 }

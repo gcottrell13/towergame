@@ -27,7 +27,7 @@ export function BuildingComponent({building}: Props) {
     );
 
     const ground_depth =
-        FLOOR_HEIGHT * Math.max(4, building.floors.length - building.roof_height + 4);
+        FLOOR_HEIGHT * Math.max(4, building.floors.length - building.top_floor + 4);
 
     return (
         <BuildingContext value={[building, update]}>

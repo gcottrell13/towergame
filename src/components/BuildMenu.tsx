@@ -3,6 +3,7 @@ import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { SaveFileContext } from '../context/stateContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
+import { RoomCategory } from '../content/room-defs.ts';
 
 const build_menu_style = {
     position: 'fixed',
@@ -110,6 +111,16 @@ export function BuildMenu() {
                 >
                     Floors
                 </button>
+                <button
+                    style={build_kind_select_style}
+                    type={'button'}
+                    disabled={current_menu === Menu.Transportation}
+                    onClick={() => {
+                        set_menu(Menu.Transportation);
+                    }}
+                >
+                    Transportation
+                </button>
             </div>
 
             <span hidden={current_menu !== Menu.Rooms}>
@@ -127,6 +138,9 @@ export function BuildMenu() {
                 </button>
                 <FloorSelector />
             </span>
+            <span hidden={current_menu !== Menu.Transportation}>
+                <TransportationSelector />
+            </span>
         </div>
     );
 }
@@ -138,11 +152,12 @@ function RoomSelector() {
         <div className={'overflow-y-scroll'}>
             {Object.keys(ROOM_DEFS)
                 .sort()
-                .map((id) => {
-                    const def = ROOM_DEFS[id as any];
+                .map((id) => ROOM_DEFS[id as any])
+                .filter((def) => def.category === RoomCategory.Room)
+                .map((def) => {
                     return (
                         <div
-                            key={id}
+                            key={def.id}
                             className={'first-child-grow'}
                             style={{
                                 marginTop: '10px',
@@ -223,6 +238,61 @@ function FloorSelector() {
                                 onClick={() => {
                                     set_construction({
                                         type: 'rezone',
+                                        value: def.id,
+                                    });
+                                }}
+                            >
+                                Build
+                            </button>
+                        </div>
+                    );
+                })}
+        </div>
+    );
+}
+
+function TransportationSelector() {
+    const [construction, set_construction] = useConstructionContext('room');
+    const [save] = useContext(SaveFileContext);
+    return (
+        <div className={'overflow-y-scroll'}>
+            {Object.keys(ROOM_DEFS)
+                .sort()
+                .map((id) => ROOM_DEFS[id as any])
+                .filter((def) => def.category === RoomCategory.Transportation)
+                .map((def) => {
+                    return (
+                        <div
+                            key={def.id}
+                            className={'first-child-grow'}
+                            style={{
+                                marginTop: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                            }}
+                        >
+                            <span>{def.display_name}</span>
+                            <img
+                                src={def.sprite_empty}
+                                alt={def.sprite_empty}
+                            />
+                            <span>${def.cost_to_build}</span>
+                            <button
+                                type={'button'}
+                                style={{
+                                    opacity:
+                                        construction?.value === def.id
+                                            ? 0
+                                            : 100,
+                                }}
+                                disabled={
+                                    construction?.value === def.id ||
+                                    save.money < def.cost_to_build
+                                }
+                                onClick={() => {
+                                    set_construction({
+                                        type: 'room',
                                         value: def.id,
                                     });
                                 }}

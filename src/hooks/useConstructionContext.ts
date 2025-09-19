@@ -22,6 +22,7 @@ const subscribers: {
     extend: [],
 };
 let current_state_name: keyof STATE_TYPE | null = null;
+let current_state: any = null;
 
 // the conditional is a little trick to distribute this mapped type over all the items in a union
 type map_distribute<T extends keyof STATE_TYPE> = T extends any
@@ -35,7 +36,9 @@ type map_distribute<T extends keyof STATE_TYPE> = T extends any
 export function useConstructionContext<T extends keyof STATE_TYPE>(
     ...keys: T[]
 ): C<map_distribute<T> | null> {
-    const [state, set_state] = useState<map_distribute<T> | null>(null);
+    const [state, set_state] = useState<map_distribute<T> | null>(
+        current_state,
+    );
     useEffect(() => {
         for (const key of keys) subscribers[key].push(set_state);
         return () => {
@@ -55,6 +58,7 @@ export function useConstructionContext<T extends keyof STATE_TYPE>(
             }
         }
         current_state_name = key;
+        current_state = v;
         if (key !== null) {
             for (const sub of subscribers[key]) {
                 sub(v as any);

@@ -8,7 +8,7 @@ export const TEST_SAVE: SaveFile = {
             name: 'building',
             max_width: 30 as uint,
             position: 50 as int,
-            roof_height: 3 as uint,
+            top_floor: 3 as uint,
             floors: [
                 {
                     height: 3 as int,

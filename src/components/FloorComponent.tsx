@@ -10,7 +10,7 @@ import {FLOOR_DEFS} from '../types/FloorDefinition.ts';
 import {BuildRoomOverlay} from "./BuildRoomOverlay.tsx";
 import {FloorRezoneOverlay} from "./FloorRezoneOverlay.tsx";
 import {useConstructionContext} from "../hooks/useConstructionContext.ts";
-import {FloorExtendOverlay} from "./FloorExtendOverlay.tsx";
+import {FloorExtendOverlay, NewFloorOverlay} from "./FloorExtendOverlay.tsx";
 
 interface Props {
     floor: Floor;
@@ -23,7 +23,7 @@ export function FloorComponent({floor}: Props) {
             const new_b = {...floor};
             f(new_b);
             updateBuilding((b) => {
-                b.floors[b.roof_height - floor.height] = new_b;
+                b.floors[b.top_floor - floor.height] = new_b;
             });
         },
         [floor, updateBuilding],
@@ -46,7 +46,7 @@ export function FloorComponent({floor}: Props) {
                 id={`floor-${floor.height}`}
             >
                 {floor_bg(floor)}
-                {floor.height > 1 ? roof_below(floor, building.floors[building.roof_height - floor.height + 1]) : null}
+                {floor.height > 1 ? roof_below(floor, building.floors[building.top_floor - floor.height + 1]) : null}
                 {construction?.type === 'room' && floor_def.rooms.includes(construction.value) ? (
                     <BuildRoomOverlay room_kind={construction.value}/>
                 ) : null}
@@ -108,11 +108,12 @@ function roof_below(floor: Floor, below: Floor | undefined) {
 
 export function TopRoofComponent() {
     // lots of similarities to roof_below
-    const [building] = useContext(BuildingContext);
+    const [building,] = useContext(BuildingContext);
     const floor = building.floors[0];
+    const [construction,] = useConstructionContext("extend");
     return (
         <div
-            id={`roof-${floor.height}`}
+            id={`roof-${building.id}`}
             style={{
                 position: 'absolute',
                 left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
@@ -122,10 +123,11 @@ export function TopRoofComponent() {
                 width: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT}px`,
                 height: `${ROOM_HEIGHT}px`,
                 borderBottom: `2px solid black`,
-                zIndex: -1,
             }}
         >
-
+            {construction?.type === 'extend' && (
+                <NewFloorOverlay />
+            )}
         </div>
     )
 }

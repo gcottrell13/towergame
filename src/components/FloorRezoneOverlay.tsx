@@ -64,14 +64,10 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                         marginTop: '3px',
                         display: 'flex',
                         gap: '5px',
+                        alignItems: 'center',
                     }}
                 >
-                    {!sufficient_funds && (
-                        <span style={{ color: 'red' }}>Insufficient Funds</span>
-                    )}
-                    <span>
-                        Floor {floor.height} rezone: ${cost}
-                    </span>
+                    <span>Floor {floor.height} rezone:</span>
                     <span style={{ color: 'gray' }}>
                         ($
                         {floor_def.cost_to_build}/m *{' '}
@@ -84,6 +80,17 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                             {floor.rooms.length * DESTROY_ROOM_COST})
                         </span>
                     ) : null}
+                    <span
+                        style={{
+                            fontSize: 'x-large',
+                            color: sufficient_funds ? 'green' : 'red',
+                        }}
+                    >
+                        = ${cost}
+                    </span>
+                    {!sufficient_funds && (
+                        <span style={{ color: 'red' }}>Insufficient Funds</span>
+                    )}
                 </span>
             ) : null}
             <span
