@@ -1,5 +1,10 @@
-import type { uint } from './RestrictedTypes.ts';
-import { ROOM_DEFS_RAW, RoomCategory } from '../content/room-defs.ts';
+import { as_uint_or_default, type uint } from './RestrictedTypes.ts';
+import {
+    ROOM_DEFS_RAW,
+    RoomCategory,
+    type RoomDefRaw,
+} from '../content/room-defs.ts';
+import type { ReactElement } from 'react';
 
 /**
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
@@ -43,7 +48,6 @@ export interface RoomDefinition {
     sprite_empty_night: string | null;
 
     cost_to_build: uint;
-    cost_to_destroy: uint;
     build_thumb: string;
 
     /**
@@ -52,27 +56,34 @@ export interface RoomDefinition {
     tier: uint;
 
     category: RoomCategory;
+    overlay?: () => Promise<() => ReactElement>;
 }
-
-const ROOM_DEF_DEFAULTS: Partial<RoomDefinition> = {
-    tier: 0 as uint,
-    sprite_active: null,
-    sprite_empty_night: null,
-    sprite_active_night: null,
-    max_height: 1 as uint,
-    min_height: 1 as uint,
-    category: RoomCategory.Room,
-};
 
 export const ROOM_DEFS: {
     [p: RoomKind]: RoomDefinition;
 } = Object.fromEntries(
-    Object.keys(ROOM_DEFS_RAW).map((id) => [
+    Object.entries(ROOM_DEFS_RAW).map(([id, value]) => [
         id,
-        {
-            ...ROOM_DEF_DEFAULTS,
-            ...(ROOM_DEFS_RAW[id as keyof typeof ROOM_DEFS_RAW] as any),
-            id,
-        },
+        def_from_raw(id, value),
     ]),
 );
+
+function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
+    return {
+        id: id as any,
+        category: raw.category ?? RoomCategory.Room,
+        cost_to_build: as_uint_or_default(raw.cost_to_build),
+        min_width: as_uint_or_default(raw.min_width),
+        max_width: as_uint_or_default(raw.max_width),
+        tier: as_uint_or_default(raw.tier ?? 0),
+        sprite_empty: raw.sprite_empty,
+        min_height: as_uint_or_default(raw.min_height ?? 0),
+        display_name: raw.display_name,
+        max_height: as_uint_or_default(raw.max_height ?? 0),
+        sprite_active_night: raw.sprite_active_night ?? '',
+        sprite_empty_night: raw.sprite_empty_night ?? '',
+        build_thumb: raw.build_thumb,
+        sprite_active: raw.sprite_active,
+        overlay: raw.overlay,
+    };
+}

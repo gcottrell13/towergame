@@ -4,6 +4,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { SaveFileContext } from '../context/stateContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { RoomCategory } from '../content/room-defs.ts';
+import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 
 const build_menu_style = {
     position: 'fixed',
@@ -40,6 +41,7 @@ export function BuildMenu() {
         'room',
         'rezone',
         'extend',
+        'transport',
     );
     const [save] = useContext(SaveFileContext);
 
@@ -76,6 +78,15 @@ export function BuildMenu() {
                 <div style={{ display: 'flex', gap: '5px' }}>
                     Building Floor:{' '}
                     {FLOOR_DEFS.buildables[construction.value].name}
+                    <button type="reset" onClick={() => set_construction(null)}>
+                        Cancel
+                    </button>
+                </div>
+            ) : null}
+            {construction?.type === 'transport' &&
+            TRANSPORT_DEFS[construction.value] ? (
+                <div style={{ display: 'flex', gap: '5px' }}>
+                    Building: {TRANSPORT_DEFS[construction.value].name}
                     <button type="reset" onClick={() => set_construction(null)}>
                         Cancel
                     </button>
@@ -252,14 +263,14 @@ function FloorSelector() {
 }
 
 function TransportationSelector() {
-    const [construction, set_construction] = useConstructionContext('room');
+    const [construction, set_construction] =
+        useConstructionContext('transport');
     const [save] = useContext(SaveFileContext);
     return (
         <div className={'overflow-y-scroll'}>
-            {Object.keys(ROOM_DEFS)
+            {Object.keys(TRANSPORT_DEFS)
                 .sort()
-                .map((id) => ROOM_DEFS[id as any])
-                .filter((def) => def.category === RoomCategory.Transportation)
+                .map((id) => TRANSPORT_DEFS[id as any])
                 .map((def) => {
                     return (
                         <div
@@ -272,12 +283,12 @@ function TransportationSelector() {
                                 gap: '10px',
                             }}
                         >
-                            <span>{def.display_name}</span>
+                            <span>{def.name}</span>
                             <img
                                 src={def.sprite_empty}
                                 alt={def.sprite_empty}
                             />
-                            <span>${def.cost_to_build}</span>
+                            <span>${def.cost_per_floor}</span>
                             <button
                                 type={'button'}
                                 style={{
@@ -288,11 +299,12 @@ function TransportationSelector() {
                                 }}
                                 disabled={
                                     construction?.value === def.id ||
-                                    save.money < def.cost_to_build
+                                    save.money <
+                                        def.cost_per_floor * def.min_height
                                 }
                                 onClick={() => {
                                     set_construction({
-                                        type: 'room',
+                                        type: 'transport',
                                         value: def.id,
                                     });
                                 }}

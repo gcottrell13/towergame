@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function FloorComponent({floor}: Props) {
-    const [building, updateBuilding] = useContext(BuildingContext);
+    const [, updateBuilding] = useContext(BuildingContext);
     const update = useCallback(
         (f: (b: Floor) => void) => {
             const new_b = {...floor};
@@ -45,14 +45,14 @@ export function FloorComponent({floor}: Props) {
                 style={style}
                 id={`floor-${floor.height}`}
             >
-                {floor_bg(floor)}
-                {floor.height > 1 ? roof_below(floor, building.floors[building.top_floor - floor.height + 1]) : null}
-                {construction?.type === 'room' && floor_def.rooms.includes(construction.value) ? (
+                <Background floor={floor} />
+                <Roof floor={floor} />
+                {construction?.type === 'room' && floor_def.rooms.includes(construction.value) && (
                     <BuildRoomOverlay room_kind={construction.value}/>
-                ) : null}
-                {construction?.type === 'rezone' && floor_def.id !== construction.value ? (
+                )}
+                {construction?.type === 'rezone' && floor_def.id !== construction.value && (
                     <FloorRezoneOverlay floor_kind={construction.value} />
-                ) : null}
+                )}
                 {construction?.type === 'extend' && (
                     <FloorExtendOverlay />
                 )}
@@ -66,7 +66,7 @@ export function FloorComponent({floor}: Props) {
 
 export const FloorComponentMemo = memo(FloorComponent);
 
-function floor_bg(floor: Floor) {
+function Background({floor}: {floor: Floor}) {
     const floor_def = floor.kind
         ? FLOOR_DEFS.buildables[floor.kind]
         : FLOOR_DEFS.empty;
@@ -80,22 +80,19 @@ function floor_bg(floor: Floor) {
     }}></div>;
 }
 
-function roof_below(floor: Floor, below: Floor | undefined) {
-    // lots of similarities to TopRoofComponent
-    if (!below)
+function Roof({floor}: {floor: Floor}) {
+    if (floor.height < 1)
         return null;
-    const below_size = below.size_left + below.size_right;
     const self_size = floor.size_left + floor.size_right;
-    if (below_size <= self_size)
-        return null;
     return (
         <div
-            id={`floor-${below.height}-roof`}
+            id={`floor-${floor.height}-roof`}
             style={{
-                left: `-${(below.size_left - floor.size_left) * PIXELS_PER_UNIT}px`,
+                left: `0`,
+                top: `-${FLOOR_HEIGHT}px`,
                 backgroundRepeat: 'repeat-x',
                 backgroundImage: `url(${FLOOR_DEFS.empty_roof.background})`,
-                width: `${below_size * PIXELS_PER_UNIT}px`,
+                width: `${self_size * PIXELS_PER_UNIT}px`,
                 height: `${ROOM_HEIGHT}px`,
                 borderBottom: `2px solid black`,
                 zIndex: -1,
@@ -107,7 +104,6 @@ function roof_below(floor: Floor, below: Floor | undefined) {
 
 
 export function TopRoofComponent() {
-    // lots of similarities to roof_below
     const [building,] = useContext(BuildingContext);
     const floor = building.floors[0];
     const [construction,] = useConstructionContext("extend");
@@ -118,11 +114,8 @@ export function TopRoofComponent() {
                 position: 'absolute',
                 left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
                 top: `-${(floor.height + 1) * FLOOR_HEIGHT}px`,
-                backgroundRepeat: 'repeat-x',
-                backgroundImage: `url(${FLOOR_DEFS.empty_roof.background})`,
                 width: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT}px`,
                 height: `${ROOM_HEIGHT}px`,
-                borderBottom: `2px solid black`,
             }}
         >
             {construction?.type === 'extend' && (

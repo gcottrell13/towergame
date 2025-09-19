@@ -9,7 +9,7 @@ export const FLOOR_DEFS_RAW = {
             name: 'Basic',
             background: images.BASIC_FLOOR_BG_PNG,
             cost_to_build: 10,
-            rooms: ['hotel-basic-small', 'ad-1', 'stairwell', 'elevator_small'],
+            rooms: ['hotel-basic-small', 'ad-1'],
         },
         'express-lobby': {
             name: 'Express Lobby',
@@ -22,7 +22,7 @@ export const FLOOR_DEFS_RAW = {
         name: 'Empty',
         background: images.EMPTY_FLOOR_BG_PNG,
         cost_to_build: 10,
-        rooms: ['stairwell', 'elevator_small'],
+        rooms: [],
     },
     roofs: {
         basic: {
@@ -38,6 +38,8 @@ export const FLOOR_DEFS_RAW = {
     },
     new_floor_size: [5 as uint, 5 as uint],
 } as const satisfies FloorDefsRaw;
+
+export type BUILDABLE_FLOOR_KINDS = keyof (typeof FLOOR_DEFS_RAW)['buildables'];
 
 export interface FloorDefRaw {
     name: string;

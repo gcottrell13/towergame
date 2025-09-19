@@ -213,7 +213,12 @@ export function NewFloorOverlay() {
             }}
         >
             <div className="hover-child-display no-sel">
-                <span style={popover_style}>
+                <span
+                    style={{
+                        ...popover_style,
+                        top: `-${FLOOR_HEIGHT}px`,
+                    }}
+                >
                     {!sufficient_funds && (
                         <span style={{ color: 'red' }}>Insufficient Funds</span>
                     )}

@@ -70,7 +70,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                     <span>Floor {floor.height} rezone:</span>
                     <span style={{ color: 'gray' }}>
                         ($
-                        {floor_def.cost_to_build}/m *{' '}
+                        {floor_def.cost_to_build}/m x{' '}
                         {floor.size_left + floor.size_right}m)
                     </span>
                     {floor.rooms.length > 0 ? (

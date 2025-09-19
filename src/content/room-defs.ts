@@ -4,7 +4,6 @@ import type { ReactElement } from 'react';
 
 export enum RoomCategory {
     Room,
-    Transportation,
 }
 
 export const ROOM_DEFS_RAW = {
@@ -26,41 +25,9 @@ export const ROOM_DEFS_RAW = {
         cost_to_build: 10,
         build_thumb: 'room-hotel-basic-small-empty.png',
     },
-    stairwell: {
-        min_width: 1,
-        max_width: 1,
-        min_height: 1,
-        max_height: 5,
-        display_name: 'Stairwell',
-        sprite_empty: images.STAIRWELL1_PNG,
-        sprite_active: images.STAIRWELL1_PNG,
-        cost_to_build: 10,
-        build_thumb: images.STAIRWELL1_PNG,
-        category: RoomCategory.Transportation,
-        // async overlay() {
-        //     return (await import('../components/ElevatorOverlay.tsx'))
-        //         .ElevatorOverlay;
-        // },
-    },
-    elevator_small: {
-        min_width: 1,
-        max_width: 1,
-        min_height: 1,
-        max_height: 25,
-        display_name: 'Elevator Small',
-        sprite_empty: images.STAIRWELL1_PNG,
-        sprite_active: images.STAIRWELL1_PNG,
-        cost_to_build: 10000,
-        build_thumb: images.STAIRWELL1_PNG,
-        category: RoomCategory.Transportation,
-        async overlay() {
-            return (await import('../components/ElevatorOverlay.tsx'))
-                .ElevatorOverlay;
-        },
-    },
 } as const satisfies SMap<RoomDefRaw>;
 
-interface RoomDefRaw {
+export interface RoomDefRaw {
     min_height?: number;
     max_height?: number;
     min_width: number;

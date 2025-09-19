@@ -6,7 +6,7 @@ import { FLOOR_DEFS_RAW, type FloorDefRaw } from '../content/floor-defs.ts';
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
  * @asType string
  */
-export type FloorKind = number & { readonly __type: unique symbol };
+export type FloorKind = string & { readonly __type: unique symbol };
 
 export interface FloorDefinition {
     id: FloorKind;
@@ -29,24 +29,16 @@ interface FloorDefs {
 export const FLOOR_DEFS: FloorDefs = {
     empty: def_from_raw('', FLOOR_DEFS_RAW.empty),
     buildables: Object.fromEntries(
-        Object.keys(FLOOR_DEFS_RAW.buildables).map((id) => [
+        Object.entries(FLOOR_DEFS_RAW.buildables).map(([id, value]) => [
             id,
-            def_from_raw(
-                id,
-                FLOOR_DEFS_RAW.buildables[
-                    id as keyof typeof FLOOR_DEFS_RAW.buildables
-                ],
-            ),
+            def_from_raw(id, value),
         ]),
     ),
     empty_roof: def_from_raw('', FLOOR_DEFS_RAW.empty_roof),
     roofs: Object.fromEntries(
-        Object.keys(FLOOR_DEFS_RAW.roofs).map((id) => [
+        Object.entries(FLOOR_DEFS_RAW.roofs).map(([id, value]) => [
             id,
-            def_from_raw(
-                id,
-                FLOOR_DEFS_RAW.roofs[id as keyof typeof FLOOR_DEFS_RAW.roofs],
-            ),
+            def_from_raw(id, value),
         ]),
     ),
     new_floor_size: FLOOR_DEFS_RAW.new_floor_size,

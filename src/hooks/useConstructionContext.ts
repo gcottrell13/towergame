@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { RoomKind } from '../types/RoomDefinition.ts';
 import type { FloorKind } from '../types/FloorDefinition.ts';
+import type { TransportationKind } from '../types/TransportationDefinition.ts';
 
 type C<T> = [T, (s: T) => void];
 
@@ -9,6 +10,7 @@ type STATE_TYPE = {
     rezone: { value: FloorKind };
     extend: {};
     destroy_room: {};
+    transport: { value: TransportationKind };
 };
 
 const subscribers: {
@@ -20,6 +22,7 @@ const subscribers: {
     rezone: [],
     destroy_room: [],
     extend: [],
+    transport: [],
 };
 let current_state_name: keyof STATE_TYPE | null = null;
 let current_state: any = null;
