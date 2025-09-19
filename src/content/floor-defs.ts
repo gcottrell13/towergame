@@ -1,6 +1,7 @@
 import type { SMap } from '../types/SMap.ts';
 import type { RoomIds } from './room-defs.ts';
 import images from './images.ts';
+import type { uint } from '../types/RestrictedTypes.ts';
 
 export const FLOOR_DEFS_RAW = {
     buildables: {
@@ -35,6 +36,7 @@ export const FLOOR_DEFS_RAW = {
         background: images.ROOF1_PNG,
         cost_to_build: 0,
     },
+    new_floor_size: [5 as uint, 5 as uint],
 } as const satisfies FloorDefsRaw;
 
 export interface FloorDefRaw {
@@ -55,4 +57,5 @@ export interface FloorDefsRaw {
     buildables: SMap<FloorDefRaw>;
     empty_roof: FloorDefRaw;
     empty: FloorDefRaw;
+    new_floor_size: [uint, uint];
 }

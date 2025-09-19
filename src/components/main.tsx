@@ -1,5 +1,5 @@
 import {SaveFileContext} from "../context/stateContext.ts";
-import {TEST_SAVE} from "../content/test_save.ts";
+import {TEST_SAVE} from "../content/test-save.ts";
 import {AllBuildings} from "./AllBuildings.tsx";
 import {useCallback, useState} from "react";
 import type {SaveFile} from "../types/SaveFile.ts";

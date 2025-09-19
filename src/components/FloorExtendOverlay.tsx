@@ -176,17 +176,17 @@ export function NewFloorOverlay() {
         update_building((b) => {
             b.top_floor = (b.top_floor + 1) as uint;
             const empty_floor = {
-                size_left: top_floor.size_left,
-                size_right: top_floor.size_right,
+                size_left: FLOOR_DEFS.new_floor_size[0],
+                size_right: FLOOR_DEFS.new_floor_size[1],
                 height: (building.top_floor + 1) as int,
                 kind: null,
                 rooms: [],
             };
             b.floors = b.floors.toSpliced(0, 0, empty_floor);
         });
-    }, [building.top_floor, update_building, top_floor]);
+    }, [building.top_floor, update_building]);
 
-    const size = top_floor.size_left + top_floor.size_right;
+    const size = FLOOR_DEFS.new_floor_size[0] + FLOOR_DEFS.new_floor_size[1];
     const cost = size * FLOOR_DEFS.empty.cost_to_build;
     const sufficient_funds = save.money >= cost;
 
@@ -201,6 +201,7 @@ export function NewFloorOverlay() {
                 background: sufficient_funds
                     ? 'color-mix(in srgb, lawngreen 30%, transparent)'
                     : 'color-mix(in srgb, red 30%, transparent)',
+                left: `${(top_floor.size_left - FLOOR_DEFS.new_floor_size[0]) * PIXELS_PER_UNIT}px`,
             }}
             className="hover-parent-display"
             onClick={() => {
@@ -211,7 +212,7 @@ export function NewFloorOverlay() {
                 });
             }}
         >
-            <div className="hover-child-display">
+            <div className="hover-child-display no-sel">
                 <span style={popover_style}>
                     {!sufficient_funds && (
                         <span style={{ color: 'red' }}>Insufficient Funds</span>

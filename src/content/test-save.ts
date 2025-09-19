@@ -13,25 +13,16 @@ export const TEST_SAVE: SaveFile = {
                 {
                     height: 3 as int,
                     kind: 'basic' as any,
-                    rooms: [
-                        {
-                            state: 0,
-                            kind: 'ad-1' as any,
-                            position: -4 as int,
-                            height: 1 as uint,
-                            width: 4 as uint,
-                            bottom_floor: 3 as int,
-                        },
-                    ],
-                    size_left: 13 as uint,
-                    size_right: 10 as uint,
+                    rooms: [],
+                    size_left: 8 as uint,
+                    size_right: 8 as uint,
                 },
                 {
                     height: 2 as int,
                     kind: 'basic' as any,
                     rooms: [],
-                    size_left: 18 as uint,
-                    size_right: 15 as uint,
+                    size_left: 20 as uint,
+                    size_right: 20 as uint,
                 },
                 {
                     height: 1 as int,
