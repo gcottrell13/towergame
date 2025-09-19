@@ -1,10 +1,11 @@
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { SaveFileContext } from '../context/stateContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { RoomCategory } from '../content/room-defs.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
+import { PinSide } from './PinSide.tsx';
 
 const build_menu_style = {
     position: 'fixed',
@@ -17,7 +18,6 @@ const build_menu_style = {
     gap: '10px',
     background: 'white',
     border: '1px solid black',
-    borderBottomRightRadius: '5px',
 } as const;
 
 const build_kind_select_style = {
@@ -30,12 +30,19 @@ const build_kind_select_style = {
 enum Menu {
     Rooms,
     Floors,
-    Transportation,
+    Transport,
     Power,
 }
 
 export function BuildMenu() {
+    /// ====================================================================================================
     const [current_menu, set_current_menu] = useState<Menu>(Menu.Rooms);
+
+    const [position, set_position] = useState<'left' | 'right'>('left');
+    const [pinned, set_pinned] = useState(false);
+    const [mouse_in, set_mouse_in] = useState(false);
+    const [rect, set_rect] = useState<DOMRect | null>(null);
+    const ref = useRef<HTMLDivElement>(null);
 
     const [construction, set_construction] = useConstructionContext(
         'room',
@@ -62,94 +69,75 @@ export function BuildMenu() {
         }
     }, [construction, save.money, set_construction]);
 
+    /// ====================================================================================================
+    /// ====================================================================================================
+
+    const select = { set_menu, current_menu };
+    const pin_side = { pinned, set_pinned, set_position, position };
+    let current_display = null;
+    switch (construction?.type) {
+        case 'room':
+            current_display = `Building: ${ROOM_DEFS[construction.value].display_name}`;
+            break;
+        case 'rezone':
+            current_display = `Building Floor: ${FLOOR_DEFS.buildables[construction.value].name}`;
+            break;
+        case 'transport':
+            current_display = `Building: ${TRANSPORT_DEFS[construction.value].name}`;
+            break;
+        case 'extend':
+            current_display = 'Extending floors';
+            break;
+    }
+
+    /// ====================================================================================================
+    /// ====================================================================================================
+
     return (
-        <div style={build_menu_style}>
+        // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
+        <div
+            ref={ref}
+            style={{
+                ...build_menu_style,
+                ...side_styles(mouse_in, position, pinned, rect, 30),
+            }}
+            onMouseLeave={() => {
+                set_mouse_in(false);
+                set_rect(ref.current?.getBoundingClientRect() ?? null);
+            }}
+            onMouseEnter={() => {
+                set_mouse_in(true);
+            }}
+            className={!mouse_in && !pinned ? 'hide-content' : ''}
+        >
+            <PinSide {...pin_side} />
             <div>Money: {save.money}</div>
-            {construction?.type === 'room' && ROOM_DEFS[construction.value] ? (
+            {construction && (
                 <div style={{ display: 'flex', gap: '5px' }}>
-                    Building: {ROOM_DEFS[construction.value].display_name}
+                    {current_display}
                     <button type="reset" onClick={() => set_construction(null)}>
                         Cancel
                     </button>
                 </div>
-            ) : null}
-            {construction?.type === 'rezone' &&
-            FLOOR_DEFS.buildables[construction.value] ? (
-                <div style={{ display: 'flex', gap: '5px' }}>
-                    Building Floor:{' '}
-                    {FLOOR_DEFS.buildables[construction.value].name}
-                    <button type="reset" onClick={() => set_construction(null)}>
-                        Cancel
-                    </button>
-                </div>
-            ) : null}
-            {construction?.type === 'transport' &&
-            TRANSPORT_DEFS[construction.value] ? (
-                <div style={{ display: 'flex', gap: '5px' }}>
-                    Building: {TRANSPORT_DEFS[construction.value].name}
-                    <button type="reset" onClick={() => set_construction(null)}>
-                        Cancel
-                    </button>
-                </div>
-            ) : null}
-            {construction?.type === 'extend' ? (
-                <div style={{ display: 'flex', gap: '5px' }}>
-                    <span>Extending floors</span>
-                    <button type="reset" onClick={() => set_construction(null)}>
-                        Cancel
-                    </button>
-                </div>
-            ) : null}
+            )}
 
             <div>
-                <button
-                    style={build_kind_select_style}
-                    type={'button'}
-                    disabled={current_menu === Menu.Rooms}
-                    onClick={() => {
-                        set_menu(Menu.Rooms);
-                    }}
-                >
-                    Rooms
-                </button>
-                <button
-                    style={build_kind_select_style}
-                    type={'button'}
-                    disabled={current_menu === Menu.Floors}
-                    onClick={() => {
-                        set_menu(Menu.Floors);
-                    }}
-                >
-                    Floors
-                </button>
-                <button
-                    style={build_kind_select_style}
-                    type={'button'}
-                    disabled={current_menu === Menu.Transportation}
-                    onClick={() => {
-                        set_menu(Menu.Transportation);
-                    }}
-                >
-                    Transportation
-                </button>
+                <SelectBuild which={Menu.Rooms} name={'Rooms'} {...select} />
+                <SelectBuild which={Menu.Floors} name={'Floors'} {...select} />
+                <SelectBuild
+                    which={Menu.Transport}
+                    name={'Transport'}
+                    {...select}
+                />
             </div>
 
             <span hidden={current_menu !== Menu.Rooms}>
                 <RoomSelector />
             </span>
             <span hidden={current_menu !== Menu.Floors}>
-                <button
-                    type={'button'}
-                    disabled={construction?.type === 'extend'}
-                    onClick={() => {
-                        set_construction({ type: 'extend' });
-                    }}
-                >
-                    Build More Floor
-                </button>
                 <FloorSelector />
             </span>
-            <span hidden={current_menu !== Menu.Transportation}>
+            <span hidden={current_menu !== Menu.Transport}>
                 <TransportationSelector />
             </span>
         </div>
@@ -212,10 +200,24 @@ function RoomSelector() {
 }
 
 function FloorSelector() {
-    const [construction, set_construction] = useConstructionContext('rezone');
+    const [construction, set_construction] = useConstructionContext(
+        'rezone',
+        'extend',
+    );
     const [save] = useContext(SaveFileContext);
+    const floor_kind =
+        construction?.type === 'rezone' ? construction.value : null;
     return (
         <div className={'overflow-y-scroll'}>
+            <button
+                type={'button'}
+                disabled={construction?.type === 'extend'}
+                onClick={() => {
+                    set_construction({ type: 'extend' });
+                }}
+            >
+                Build More Floor
+            </button>
             {Object.keys(FLOOR_DEFS.buildables)
                 .sort()
                 .map((id) => {
@@ -237,13 +239,10 @@ function FloorSelector() {
                             <button
                                 type={'button'}
                                 style={{
-                                    opacity:
-                                        construction?.value === def.id
-                                            ? 0
-                                            : 100,
+                                    opacity: floor_kind === def.id ? 0 : 100,
                                 }}
                                 disabled={
-                                    construction?.value === def.id ||
+                                    floor_kind === def.id ||
                                     save.money < def.cost_to_build
                                 }
                                 onClick={() => {
@@ -315,5 +314,56 @@ function TransportationSelector() {
                     );
                 })}
         </div>
+    );
+}
+
+function side_styles(
+    mouse_in: boolean,
+    position: string,
+    pinned: boolean,
+    rect: DOMRect | null,
+    visible: number,
+): React.CSSProperties {
+    return {
+        right:
+            position === 'right'
+                ? mouse_in
+                    ? '0px'
+                    : `-${pinned ? 0 : (rect?.width ?? 0) - visible}px`
+                : undefined,
+        left:
+            position === 'left'
+                ? mouse_in
+                    ? '0px'
+                    : `-${pinned ? 0 : (rect?.width ?? 0) - visible}px`
+                : undefined,
+        transition: `left 0.25s ease-out, right 0.25s ease-out`,
+        borderBottomRightRadius: position === 'right' ? '' : '5px',
+        borderBottomLeftRadius: position === 'left' ? '' : '5px',
+    };
+}
+
+function SelectBuild({
+    which,
+    name,
+    set_menu,
+    current_menu,
+}: {
+    which: Menu;
+    name: string;
+    set_menu: (f: Menu) => void;
+    current_menu: Menu;
+}) {
+    return (
+        <button
+            style={build_kind_select_style}
+            type={'button'}
+            disabled={current_menu === which}
+            onClick={() => {
+                set_menu(which);
+            }}
+        >
+            {name}
+        </button>
     );
 }

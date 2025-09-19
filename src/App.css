@@ -2,7 +2,11 @@ body,
 html {
     margin: 0;
     padding: 0;
-    overflow-y: scroll;
+    scrollbar-width: none; /* Hides the scrollbar */
+}
+
+div::-webkit-scrollbar {
+    display: none; /* Hides the scrollbar */
 }
 
 main {
@@ -50,6 +54,10 @@ button:disabled {
     height: fit-content;
 }
 
+.hide-content * {
+    opacity: 0;
+}
+
 .mover-linear {
     transition:
         left 1s linear,
@@ -73,4 +81,9 @@ button:disabled {
 }
 .hover-parent-display:hover .hover-child-display {
     display: block;
+}
+
+button.flat-button {
+    background: none;
+    border: none;
 }
