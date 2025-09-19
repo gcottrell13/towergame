@@ -50,7 +50,7 @@ export function BuildRoomOverlay({ room_kind }: Props) {
                     )
                         return;
                 }
-                // TODO: check lower floors for tall rooms
+                // note: check lower floors for tall rooms
                 set_bp_location(loc);
             }}
             onMouseLeave={() => {
@@ -58,6 +58,10 @@ export function BuildRoomOverlay({ room_kind }: Props) {
             }}
             onClick={() => {
                 if (bp_location === null) return;
+                // note: if min height/width != max height/width,
+                // then we need to go to phase 2 to select the size of the room
+                // before we save the floor to the state
+
                 update_save((s) => {
                     s.money = (s.money - room_def.cost_to_build) as int;
                 });

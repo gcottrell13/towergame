@@ -16,6 +16,32 @@ const style = {
     zIndex: 10000,
 } as const;
 
+const popover_style = {
+    whiteSpace: 'nowrap',
+    position: 'absolute',
+    background: 'white',
+    border: '1px solid black',
+    borderRadius: '5px',
+    padding: '2px',
+    display: 'flex',
+    gap: '5px',
+    alignItems: 'center',
+    zIndex: 10001,
+} as const;
+
+const tag_style = {
+    whiteSpace: 'nowrap',
+    position: 'absolute',
+    background: 'white',
+    border: '1px solid black',
+    borderRadius: '5px',
+    padding: '2px',
+    left: '2px',
+    marginTop: '3px',
+    display: 'flex',
+    gap: '5px',
+} as const;
+
 export function FloorRezoneOverlay({ floor_kind }: Props) {
     const [hovered, set_hovered] = useState(false);
     const [save, update_save] = useContext(SaveFileContext);
@@ -54,17 +80,8 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
             {hovered ? (
                 <span
                     style={{
-                        whiteSpace: 'nowrap',
-                        position: 'absolute',
-                        background: 'white',
-                        border: '1px solid black',
-                        borderRadius: '5px',
-                        padding: '2px',
+                        ...popover_style,
                         right: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT + 5}px`,
-                        marginTop: '3px',
-                        display: 'flex',
-                        gap: '5px',
-                        alignItems: 'center',
                     }}
                 >
                     <span>Floor {floor.height} rezone:</span>
@@ -93,20 +110,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                     )}
                 </span>
             ) : null}
-            <span
-                style={{
-                    whiteSpace: 'nowrap',
-                    position: 'absolute',
-                    background: 'white',
-                    border: '1px solid black',
-                    borderRadius: '5px',
-                    padding: '2px',
-                    left: '2px',
-                    marginTop: '3px',
-                    display: 'flex',
-                    gap: '5px',
-                }}
-            >
+            <span style={tag_style}>
                 {floor.kind
                     ? FLOOR_DEFS.buildables[floor.kind].name
                     : FLOOR_DEFS.empty.name}
