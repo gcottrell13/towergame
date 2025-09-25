@@ -9,7 +9,7 @@ export enum RoomCategory {
 export const ROOM_DEFS_RAW = {
     'ad-1': {
         min_width: 4,
-        max_width: 4,
+        min_height: 1,
         display_name: 'Best Viewed Ad',
         sprite_active: images.BESTVIEWEDCOMP_GIF,
         sprite_empty: images.BESTVIEWEDCOMP_GIF,
@@ -31,7 +31,7 @@ export interface RoomDefRaw {
     min_height?: number;
     max_height?: number;
     min_width: number;
-    max_width: number;
+    max_width?: number;
     display_name: string;
     sprite_active: string;
     sprite_empty: string;

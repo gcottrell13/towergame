@@ -8,24 +8,24 @@ export const TEST_SAVE: SaveFile = {
             name: 'building',
             max_width: 30 as uint,
             position: 50 as int,
-            top_floor: 3 as uint,
+            top_floor: 2 as uint,
             floors: [
                 {
-                    height: 3 as int,
+                    height: 2 as int,
                     kind: 'basic' as any,
                     rooms: [],
                     size_left: 8 as uint,
                     size_right: 8 as uint,
                 },
                 {
-                    height: 2 as int,
+                    height: 1 as int,
                     kind: 'basic' as any,
                     rooms: [],
                     size_left: 20 as uint,
                     size_right: 20 as uint,
                 },
                 {
-                    height: 1 as int,
+                    height: 0 as int,
                     kind: null,
                     rooms: [],
                     size_left: 23 as uint,

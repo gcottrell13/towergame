@@ -29,6 +29,12 @@ export interface RoomDefinition {
     min_width: uint;
     max_width: uint;
 
+    /**
+     * the width can only be multiples of this number
+     * @default min_width
+     */
+    width_multiples_of: uint;
+
     display_name: string;
 
     /**
@@ -74,12 +80,13 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         category: raw.category ?? RoomCategory.Room,
         cost_to_build: as_uint_or_default(raw.cost_to_build),
         min_width: as_uint_or_default(raw.min_width),
-        max_width: as_uint_or_default(raw.max_width),
+        width_multiples_of: as_uint_or_default(raw.min_width),
+        max_width: as_uint_or_default(raw.max_width ?? raw.min_width),
         tier: as_uint_or_default(raw.tier ?? 0),
         sprite_empty: raw.sprite_empty,
-        min_height: as_uint_or_default(raw.min_height ?? 0),
+        min_height: as_uint_or_default(raw.min_height ?? 1),
         display_name: raw.display_name,
-        max_height: as_uint_or_default(raw.max_height ?? 0),
+        max_height: as_uint_or_default(raw.max_height ?? 1),
         sprite_active_night: raw.sprite_active_night ?? '',
         sprite_empty_night: raw.sprite_empty_night ?? '',
         build_thumb: raw.build_thumb,

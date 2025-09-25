@@ -1,56 +1,51 @@
-import { memo, useCallback, useContext } from 'react';
+import { memo, useContext } from 'react';
 import { BuildingContext, FloorContext } from '../context/stateContext.ts';
 import type { Floor } from '../types/Floor.ts';
-import { FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT } from '../constants.ts';
+import {FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT} from '../constants.ts';
 import { RoomComponentMemo } from './RoomComponent.tsx';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import { BuildRoomOverlay } from './BuildRoomOverlay.tsx';
 import { FloorRezoneOverlay } from './FloorRezoneOverlay.tsx';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { FloorExtendOverlay, NewFloorOverlay } from './FloorExtendOverlay.tsx';
+import {useFloorProvider} from "../hooks/useFloorProvider.ts";
 
 interface Props {
     floor: Floor;
 }
 
 export function FloorComponent({ floor }: Props) {
-    const [, updateBuilding] = useContext(BuildingContext);
-    const update = useCallback(
-        (f: (b: Floor) => void) => {
-            const new_b = { ...floor };
-            f(new_b);
-            updateBuilding((b) => {
-                b.floors[b.top_floor - floor.height] = new_b;
-            });
-        },
-        [floor, updateBuilding],
-    );
+    const [building] = useContext(BuildingContext);
+    const floor_update = useFloorProvider(floor);
 
-    const [construction] = useConstructionContext('room', 'rezone', 'extend');
+    const [construction] = useConstructionContext(
+        'rezone',
+        'extend_floor',
+    );
     const floor_def = floor.kind
         ? FLOOR_DEFS.buildables[floor.kind]
         : FLOOR_DEFS.empty;
 
     const style = {
         height: `${ROOM_HEIGHT}px`,
-        top: `-${floor.height * FLOOR_HEIGHT}px`,
+        top: `-${(floor.height + 1) * FLOOR_HEIGHT}px`,
         position: 'absolute',
+        zIndex: 0,
     } as const;
 
+    const floor_below = building.floors[building.top_floor - floor.height + 1];
+
     return (
-        <FloorContext.Provider value={[floor, update]}>
+        <FloorContext.Provider value={[floor, floor_update]}>
             <div style={style} id={`floor-${floor.height}`}>
                 <Background floor={floor} />
-                <Roof floor={floor} />
-                {construction?.type === 'room' &&
-                    floor_def.rooms.includes(construction.value) && (
-                        <BuildRoomOverlay room_kind={construction.value} />
-                    )}
+                {floor_below && floor_below.height >= 0 && <RoofOnBelow floor={floor} below_floor={floor_below} /> }
                 {construction?.type === 'rezone' &&
                     floor_def.id !== construction.value && (
                         <FloorRezoneOverlay floor_kind={construction.value} />
                     )}
-                {construction?.type === 'extend' && <FloorExtendOverlay />}
+                {construction?.type === 'extend_floor' && (
+                    <FloorExtendOverlay />
+                )}
                 {floor.rooms.map((room) => (
                     <RoomComponentMemo key={room.position} room={room} />
                 ))}
@@ -65,39 +60,22 @@ function Background({ floor }: { floor: Floor }) {
     const floor_def = floor.kind
         ? FLOOR_DEFS.buildables[floor.kind]
         : FLOOR_DEFS.empty;
-    return (
-        <div
-            style={{
-                backgroundRepeat: 'repeat-x',
-                width: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT}px`,
-                height: `${ROOM_HEIGHT}px`,
-                left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
-                backgroundImage: `url(${floor_def.background})`,
-                borderBottom: `2px solid black`,
-                position: 'absolute',
-                transition: 'width 0.4s ease-in-out, left 0.4s ease-in-out',
-            }}
-        ></div>
-    );
+    return <div style={bg_styles(floor, floor_def.background)}></div>;
 }
 
-function Roof({ floor }: { floor: Floor }) {
+/**
+ * Roof for the floor below. Not for ourselves, just so we don't have to deal with layering display issues
+ * @param floor
+ * @constructor
+ */
+function RoofOnBelow({ floor, below_floor }: { floor: Floor, below_floor: Floor }) {
     if (floor.height < 1) return null;
-    const self_size = floor.size_left + floor.size_right;
     return (
         <div
-            id={`floor-${floor.height}-roof`}
+            id={`floor-${below_floor.height}-roof`}
             style={{
-                left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
-                top: `-${FLOOR_HEIGHT}px`,
-                backgroundRepeat: 'repeat-x',
-                backgroundImage: `url(${FLOOR_DEFS.empty_roof.background})`,
-                width: `${self_size * PIXELS_PER_UNIT}px`,
-                height: `${ROOM_HEIGHT}px`,
-                borderBottom: `2px solid black`,
-                zIndex: -1,
-                position: 'absolute',
-                transition: 'width 0.4s ease-in-out, left 0.4s ease-in-out',
+                ...bg_styles(below_floor, FLOOR_DEFS.empty_roof.background),
+                zIndex: -2,
             }}
         ></div>
     );
@@ -106,19 +84,32 @@ function Roof({ floor }: { floor: Floor }) {
 export function TopRoofComponent() {
     const [building] = useContext(BuildingContext);
     const floor = building.floors[0];
-    const [construction] = useConstructionContext('extend');
+    const [construction] = useConstructionContext('extend_floor');
     return (
         <div
             id={`roof-${building.id}`}
             style={{
                 position: 'absolute',
-                left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
-                top: `-${(floor.height + 1) * FLOOR_HEIGHT}px`,
-                width: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT}px`,
-                height: `${ROOM_HEIGHT}px`,
+                top: `-${(floor.height + 2) * FLOOR_HEIGHT}px`,
             }}
         >
-            {construction?.type === 'extend' && <NewFloorOverlay />}
+            {construction && <NewFloorOverlay />}
+            <RoofOnBelow floor={floor} below_floor={floor} />
         </div>
     );
+}
+
+function bg_styles(floor: Floor, image: string): React.CSSProperties {
+    const self_size = floor.size_left + floor.size_right;
+    return {
+        backgroundRepeat: 'repeat-x',
+        backgroundImage: `url(${image})`,
+        width: `${self_size * PIXELS_PER_UNIT}px`,
+        height: `${ROOM_HEIGHT}px`,
+        left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
+        borderBottom: `2px solid black`,
+        zIndex: -1,
+        position: 'absolute',
+        transition: 'width 0.4s ease-in-out, left 0.4s ease-in-out',
+    };
 }

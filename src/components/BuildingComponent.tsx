@@ -1,8 +1,9 @@
-import {useCallback, useContext} from 'react';
-import {BuildingContext, SaveFileContext} from '../context/stateContext.ts';
-import type {Building} from '../types/Building.ts';
-import {FLOOR_HEIGHT, PIXELS_PER_UNIT} from '../constants.ts';
-import {FloorComponentMemo, TopRoofComponent} from './FloorComponent.tsx';
+import { useCallback, useContext } from 'react';
+import { BuildingContext, SaveFileContext } from '../context/stateContext.ts';
+import type { Building } from '../types/Building.ts';
+import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
+import { FloorComponentMemo, TopRoofComponent } from './FloorComponent.tsx';
+import { RoomBuilderTotalMemo } from './BuildRoomOverlay.tsx';
 
 const ground_style = {
     background: 'saddlebrown',
@@ -13,11 +14,11 @@ interface Props {
     building: Building;
 }
 
-export function BuildingComponent({building}: Props) {
+export function BuildingComponent({ building }: Props) {
     const [_saveFile, updateSaveFile] = useContext(SaveFileContext);
     const update = useCallback(
         (f: (b: Building) => void) => {
-            const new_b = {...building};
+            const new_b = { ...building };
             f(new_b);
             updateSaveFile((save) => {
                 save.buildings[building.id] = new_b;
@@ -27,7 +28,8 @@ export function BuildingComponent({building}: Props) {
     );
 
     const ground_depth =
-        FLOOR_HEIGHT * Math.max(4, building.floors.length - building.top_floor + 4);
+        FLOOR_HEIGHT *
+        Math.max(4, building.floors.length - building.top_floor + 4);
 
     return (
         <BuildingContext value={[building, update]}>
@@ -39,9 +41,9 @@ export function BuildingComponent({building}: Props) {
                 }}
             >
                 {Object.values(building.floors).map((floor) => (
-                    <FloorComponentMemo key={floor.height} floor={floor}/>
+                    <FloorComponentMemo key={floor.height} floor={floor} />
                 ))}
-                <TopRoofComponent/>
+                <TopRoofComponent />
                 <div
                     id={`ground-${building.id}`}
                     style={{
@@ -51,6 +53,7 @@ export function BuildingComponent({building}: Props) {
                         ...ground_style,
                     }}
                 ></div>
+                <RoomBuilderTotalMemo />
             </div>
         </BuildingContext>
     );

@@ -1,5 +1,5 @@
 import type { Room } from '../types/Room.ts';
-import { PIXELS_PER_UNIT, ROOM_HEIGHT } from '../constants.ts';
+import {FLOOR_HEIGHT, PIXELS_PER_UNIT, Z_INDEX} from '../constants.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { useContext, memo } from 'react';
 import { FloorContext } from '../context/stateContext.ts';
@@ -19,12 +19,14 @@ export function RoomComponent({ room }: Props) {
             id={`${room.kind}-${room.position}`}
             style={{
                 left: `${room.position * PIXELS_PER_UNIT}px`,
-                top: '1px',
+                top: `${-(room.height - 1) * FLOOR_HEIGHT}px`,
                 backgroundRepeat: 'repeat',
                 width: `${room.width * PIXELS_PER_UNIT}px`,
-                height: `${room.height * ROOM_HEIGHT}px`,
+                height: `${room.height * FLOOR_HEIGHT}px`,
                 backgroundImage: `url(${room_def.sprite_empty})`,
                 position: 'absolute',
+                backgroundSize: `${room_def.min_width * PIXELS_PER_UNIT}px ${FLOOR_HEIGHT}px`,
+                zIndex: Z_INDEX.rooms,
             }}
         ></div>
     );

@@ -8,7 +8,7 @@ type C<T> = [T, (s: T) => void];
 type STATE_TYPE = {
     room: { value: RoomKind };
     rezone: { value: FloorKind };
-    extend: {};
+    extend_floor: {};
     destroy_room: {};
     transport: { value: TransportationKind };
 };
@@ -21,7 +21,7 @@ const subscribers: {
     room: [],
     rezone: [],
     destroy_room: [],
-    extend: [],
+    extend_floor: [],
     transport: [],
 };
 let current_state_name: keyof STATE_TYPE | null = null;
@@ -54,6 +54,9 @@ export function useConstructionContext<T extends keyof STATE_TYPE>(
         };
     }, [keys]);
     const set = useCallback((v: map_distribute<T> | null) => {
+        if (v === current_state) {
+            return;
+        }
         const key = v?.type ?? null;
         if (current_state_name !== null && current_state_name !== key) {
             for (const sub of subscribers[current_state_name]) {

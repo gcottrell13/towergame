@@ -47,7 +47,7 @@ export function BuildMenu() {
     const [construction, set_construction] = useConstructionContext(
         'room',
         'rezone',
-        'extend',
+        'extend_floor',
         'transport',
     );
     const [save] = useContext(SaveFileContext);
@@ -85,7 +85,7 @@ export function BuildMenu() {
         case 'transport':
             current_display = `Building: ${TRANSPORT_DEFS[construction.value].name}`;
             break;
-        case 'extend':
+        case 'extend_floor':
             current_display = 'Extending floors';
             break;
     }
@@ -202,7 +202,7 @@ function RoomSelector() {
 function FloorSelector() {
     const [construction, set_construction] = useConstructionContext(
         'rezone',
-        'extend',
+        'extend_floor',
     );
     const [save] = useContext(SaveFileContext);
     const floor_kind =
@@ -211,9 +211,9 @@ function FloorSelector() {
         <div className={'overflow-y-scroll'}>
             <button
                 type={'button'}
-                disabled={construction?.type === 'extend'}
+                disabled={construction?.type === 'extend_floor'}
                 onClick={() => {
-                    set_construction({ type: 'extend' });
+                    set_construction({ type: 'extend_floor' });
                 }}
             >
                 Build More Floor
