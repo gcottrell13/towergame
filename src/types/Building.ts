@@ -1,5 +1,6 @@
 import type { int, uint } from './RestrictedTypes.ts';
 import type { Floor } from './Floor.ts';
+import type { Transportation } from './Transportation.ts';
 
 export interface Building {
     name: string;
@@ -8,4 +9,5 @@ export interface Building {
     floors: Floor[];
     top_floor: uint;
     max_width: uint;
+    transports: Transportation[];
 }

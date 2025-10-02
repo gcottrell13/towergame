@@ -1,7 +1,8 @@
-import type { BUILDABLE_FLOOR_KINDS } from './floor-defs.ts';
 import type { SMap } from '../types/SMap.ts';
 import images from './images.ts';
 import type { ReactElement } from 'react';
+import type {Floor} from "../types/Floor.ts";
+import type {uint} from "../types/RestrictedTypes.ts";
 
 export enum TransportationType {
     Elevator,
@@ -34,13 +35,13 @@ export const TRANSPORT_DEFS_RAW = {
 export interface TransportationDefinitionRaw {
     name: string;
     type: TransportationType;
-    cost_per_floor: number;
+    cost_per_floor: number | ((height: uint) => uint);
     sprite_empty: string;
     sprite_occupied?: string | null;
     min_height?: number;
     max_height: number;
     width: number;
-    stops_floor_kind?: BUILDABLE_FLOOR_KINDS;
+    can_stop_at_floor?: (f: Floor) => boolean;
     tier?: number;
     overlay?: () => Promise<() => ReactElement>;
 }

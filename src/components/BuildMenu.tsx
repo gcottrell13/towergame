@@ -61,10 +61,10 @@ export function BuildMenu() {
     );
 
     useEffect(() => {
-        if (
-            construction?.type === 'room' &&
-            save.money < ROOM_DEFS[construction.value].cost_to_build
-        ) {
+        if (construction?.type !== 'room')
+            return;
+        const def = ROOM_DEFS[construction.value];
+        if (save.money < def.cost_to_build(def.min_width, def.min_height)) {
             set_construction(null);
         }
     }, [construction, save.money, set_construction]);
@@ -170,7 +170,7 @@ function RoomSelector() {
                                 src={def.sprite_empty}
                                 alt={def.sprite_empty}
                             />
-                            <span>${def.cost_to_build}</span>
+                            <span>${def.cost_to_build(def.min_width, def.min_height)}</span>
                             <button
                                 type={'button'}
                                 style={{
@@ -181,7 +181,7 @@ function RoomSelector() {
                                 }}
                                 disabled={
                                     construction?.value === def.id ||
-                                    save.money < def.cost_to_build
+                                    save.money < def.cost_to_build(def.min_width, def.min_height)
                                 }
                                 onClick={() => {
                                     set_construction({
@@ -287,7 +287,7 @@ function TransportationSelector() {
                                 src={def.sprite_empty}
                                 alt={def.sprite_empty}
                             />
-                            <span>${def.cost_per_floor}</span>
+                            <span>${def.cost_per_floor(def.min_height)}</span>
                             <button
                                 type={'button'}
                                 style={{
@@ -299,7 +299,7 @@ function TransportationSelector() {
                                 disabled={
                                     construction?.value === def.id ||
                                     save.money <
-                                        def.cost_per_floor * def.min_height
+                                        def.cost_per_floor(def.min_height)
                                 }
                                 onClick={() => {
                                     set_construction({

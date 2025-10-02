@@ -32,6 +32,7 @@ export const TEST_SAVE: SaveFile = {
                     size_right: 20 as uint,
                 },
             ],
+            transports: [],
         },
     ],
     money: 1000 as int,

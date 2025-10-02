@@ -3,8 +3,6 @@ import type { RoomKind } from '../types/RoomDefinition.ts';
 import type { FloorKind } from '../types/FloorDefinition.ts';
 import type { TransportationKind } from '../types/TransportationDefinition.ts';
 
-type C<T> = [T, (s: T) => void];
-
 type STATE_TYPE = {
     room: { value: RoomKind };
     rezone: { value: FloorKind };
@@ -38,7 +36,7 @@ type map_distribute<T extends keyof STATE_TYPE> = T extends any
  */
 export function useConstructionContext<T extends keyof STATE_TYPE>(
     ...keys: T[]
-): C<map_distribute<T> | null> {
+): [map_distribute<T> | null, (s: map_distribute<T> | null) => void] {
     const [state, set_state] = useState<map_distribute<T> | null>(
         current_state,
     );

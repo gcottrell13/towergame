@@ -1,25 +1,26 @@
-import { as_uint_or_default, type uint } from './RestrictedTypes.ts';
-import type { FloorKind } from './FloorDefinition.ts';
+import {as_uint_or_default, to_uint, type uint} from './RestrictedTypes.ts';
 import {
     TRANSPORT_DEFS_RAW,
     type TransportationDefinitionRaw,
     type TransportationType,
 } from '../content/transportation-defs.ts';
 import type { ReactElement } from 'react';
+import type {Floor} from "./Floor.ts";
 
 export type TransportationKind = string & { readonly __type: unique symbol };
 
 export interface TransportationDefinition {
+    d: 'transport',
     id: TransportationKind;
     name: string;
-    cost_per_floor: uint;
+    cost_per_floor(height: number): uint;
     type: TransportationType;
     sprite_empty: string;
     sprite_occupied: string | null;
     min_height: uint;
     max_height: uint;
-    width: uint;
-    stops_floor_kind: FloorKind | null;
+    min_width: uint;
+    can_stop_at_floor: ((f: Floor) => boolean) | null;
     tier: uint;
     overlay?: () => Promise<() => ReactElement>;
 }
@@ -37,6 +38,7 @@ function def_from_raw(
     raw: TransportationDefinitionRaw,
 ): TransportationDefinition {
     return {
+        d: 'transport',
         id: id as any,
         name: raw.name,
         type: raw.type,
@@ -44,10 +46,17 @@ function def_from_raw(
         sprite_occupied: raw.sprite_occupied ?? '',
         min_height: as_uint_or_default(raw.min_height ?? 1),
         max_height: as_uint_or_default(raw.max_height),
-        width: as_uint_or_default(raw.width),
-        stops_floor_kind: raw.stops_floor_kind as any,
+        min_width: as_uint_or_default(raw.width),
+        can_stop_at_floor: raw.can_stop_at_floor ?? null,
         tier: as_uint_or_default(raw.tier ?? 0),
         overlay: raw.overlay,
-        cost_per_floor: as_uint_or_default(raw.cost_per_floor),
+        cost_per_floor: cost_per_floor(raw),
     };
+}
+
+function cost_per_floor(raw: TransportationDefinitionRaw): TransportationDefinition['cost_per_floor'] {
+    if (raw.cost_per_floor instanceof Function)
+        return raw.cost_per_floor;
+    const c = as_uint_or_default(raw.cost_per_floor);
+    return (h) => to_uint(c * h);
 }

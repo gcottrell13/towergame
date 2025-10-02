@@ -1,35 +1,54 @@
-import {createContext, memo, useContext, useState} from 'react';
-import {BuildingContext, FloorContext, SaveFileContext} from '../context/stateContext.ts';
-import {ROOM_DEFS, type RoomKind} from '../types/RoomDefinition.ts';
-import {FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT, Z_INDEX} from '../constants.ts';
-import type {int} from '../types/RestrictedTypes.ts';
-import {RoomState} from '../types/Room.ts';
-import {clamp} from '../clamp.ts';
-import {useRoomExtender} from './RoomExtender.tsx';
-import {useConstructionContext} from '../hooks/useConstructionContext.ts';
-import {FLOOR_DEFS} from "../types/FloorDefinition.ts";
-import type {Floor} from "../types/Floor.ts";
-import {useFloorProvider} from "../hooks/useFloorProvider.ts";
+import { createContext, memo, useContext, useState } from 'react';
+import {
+    BuildingContext,
+    FloorContext,
+    SaveFileContext,
+} from '../context/stateContext.ts';
+import { ROOM_DEFS } from '../types/RoomDefinition.ts';
+import {
+    FLOOR_HEIGHT,
+    PIXELS_PER_UNIT,
+    ROOM_HEIGHT,
+    Z_INDEX,
+} from '../constants.ts';
+import type { int } from '../types/RestrictedTypes.ts';
+import { RoomState } from '../types/Room.ts';
+import { clamp } from '../clamp.ts';
+import { useRoomExtender } from './RoomExtender.tsx';
+import { useConstructionContext } from '../hooks/useConstructionContext.ts';
+import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
+import type { Floor } from '../types/Floor.ts';
+import { useFloorProvider } from '../hooks/useFloorProvider.ts';
+import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 
-
-const ResizingRoomCtx = createContext<[boolean, (x: boolean) => void]>([false, (_x: boolean) => {}]);
+const ResizingRoomCtx = createContext<[boolean, (x: boolean) => void]>([
+    false,
+    (_x: boolean) => {},
+]);
 
 // number of floors
 const extra_height = 10;
 
+type T = 'room' | 'transport';
+type V = ReturnType<typeof useConstructionContext<T>>;
+type V2 = NonNullable<V[0]>;
+
 export function RoomBuilderTotal() {
     const [building] = useContext(BuildingContext);
-    const [construction, set_construction] = useConstructionContext('room');
+    const [construction, set_construction] = useConstructionContext(
+        'room',
+        'transport',
+    );
     const [choosing_height, set_choosing_height] = useState(false);
 
     if (!construction) return null;
 
     const bottom_floor = building.floors[building.floors.length - 1];
 
-
     return (
+        // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
         <div
-            onContextMenu={ev => {
+            onContextMenu={(ev) => {
                 ev.preventDefault();
                 set_construction(null);
                 set_choosing_height(false);
@@ -46,19 +65,29 @@ export function RoomBuilderTotal() {
         >
             <ResizingRoomCtx value={[choosing_height, set_choosing_height]}>
                 {building.floors
-                    .filter((x) => {
-                        const floor_def = x.kind
-                            ? FLOOR_DEFS.buildables[x.kind]
-                            : null;
-                        return (
-                            floor_def?.rooms.includes(construction.value) ?? false
-                        );
+                    .filter((floor) => {
+                        if (construction.type === 'room') {
+                            const floor_def = floor.kind
+                                ? FLOOR_DEFS.buildables[floor.kind]
+                                : null;
+                            return (
+                                floor_def?.rooms.includes(construction.value) ??
+                                false
+                            );
+                        } else if (construction.type === 'transport') {
+                            return (
+                                TRANSPORT_DEFS[
+                                    construction.value
+                                ].can_stop_at_floor?.call(null, floor) ?? true
+                            );
+                        }
+                        return false;
                     })
                     .map((x) => (
                         <RoomBuilderFloor
                             key={x.height}
                             floor={x}
-                            room_kind={construction.value}
+                            construction={construction}
                         />
                     ))}
             </ResizingRoomCtx>
@@ -68,14 +97,13 @@ export function RoomBuilderTotal() {
 
 export const RoomBuilderTotalMemo = memo(RoomBuilderTotal);
 
-function RoomBuilderFloor(
-    {
-        floor,
-        room_kind,
-    }: {
-        floor: Floor;
-        room_kind: RoomKind;
-    }) {
+function RoomBuilderFloor({
+    floor,
+    construction,
+}: {
+    floor: Floor;
+    construction: V2;
+}) {
     const [building] = useContext(BuildingContext);
     const floor_update = useFloorProvider(floor);
     return (
@@ -87,14 +115,14 @@ function RoomBuilderFloor(
                     left: `${(building.max_width - floor.size_left) * PIXELS_PER_UNIT}px`,
                 }}
             >
-                <BuildRoomOverlay room_kind={room_kind}/>
+                <BuildRoomOverlay construction={construction} />
             </div>
         </FloorContext>
     );
 }
 
 interface BuildRoomOverlayProps {
-    room_kind: RoomKind;
+    construction: V2;
 }
 
 const style = {
@@ -105,38 +133,55 @@ const style = {
     zIndex: Z_INDEX.builder_overlay + 1,
 } as const;
 
-function BuildRoomOverlay({room_kind}: BuildRoomOverlayProps) {
+function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
     const [, update_save] = useContext(SaveFileContext);
+    const [, update_building] = useContext(BuildingContext);
     const [floor, update_floor] = useContext(FloorContext);
-    const room_def = ROOM_DEFS[room_kind];
+    const def =
+        construction.type === 'room'
+            ? ROOM_DEFS[construction.value]
+            : TRANSPORT_DEFS[construction.value];
     const [bp_location, set_bp_location] = useState<number | null>(null);
     const [choosing_height, set_choosing_height] = useContext(ResizingRoomCtx);
-    const {width, height, extension_overlay} = useRoomExtender(
-        room_def,
+    const { width, height, extension_overlay } = useRoomExtender(
+        def,
         update,
         () => {
             set_choosing_height(false);
             set_bp_location(null);
         },
     );
-    const [, set_construction] = useConstructionContext('room');
+    const [, set_construction] = useConstructionContext(construction.type);
 
     function update() {
-        set_construction({type: 'room', value: room_kind});
+        set_construction(construction);
         set_choosing_height(false);
+        set_bp_location(null);
         update_save((s) => {
-            s.money = (s.money - room_def.cost_to_build) as int;
+            let cost = 0;
+            if (def.d === 'room') {
+                cost = def.cost_to_build(width, height);
+            } else if (def.d === 'transport') {
+                cost = def.cost_per_floor(height);
+            }
+            s.money = (s.money - cost) as int;
         });
-        update_floor((f) => {
-            f.rooms = f.rooms.toSpliced(0, 0, {
-                width,
-                height,
-                kind: room_def.id,
-                position: bp_location as int,
-                state: RoomState.Unknown,
-                bottom_floor: floor.height,
+        if (def.d === 'room') {
+            update_floor((f) => {
+                f.rooms = f.rooms.toSpliced(0, 0, {
+                    width,
+                    height,
+                    kind: def.id,
+                    position: bp_location as int,
+                    state: RoomState.Unknown,
+                    bottom_floor: floor.height,
+                });
             });
-        });
+        } else if (def.d === 'transport') {
+            update_building((b) => {
+                b.transports.push({ kind: def.id });
+            });
+        }
     }
 
     return (
@@ -156,15 +201,15 @@ function BuildRoomOverlay({room_kind}: BuildRoomOverlayProps) {
                 const loc = clamp(
                     Math.floor(
                         ev.nativeEvent.offsetX / PIXELS_PER_UNIT -
-                        floor.size_left,
+                            floor.size_left,
                     ),
                     -floor.size_left,
-                    floor.size_right - room_def.min_width,
+                    floor.size_right - def.min_width,
                 );
                 // if colliding with other rooms, don't update position and just keep the last one
                 for (const other_room of floor.rooms) {
                     if (
-                        loc + room_def.min_width > other_room.position &&
+                        loc + def.min_width > other_room.position &&
                         loc < other_room.position + other_room.width
                     )
                         return;
@@ -184,8 +229,8 @@ function BuildRoomOverlay({room_kind}: BuildRoomOverlayProps) {
                 // before we save the floor to the state
 
                 if (
-                    room_def.min_height !== room_def.max_height ||
-                    room_def.min_width !== room_def.max_width
+                    def.min_height !== def.max_height ||
+                    (def.d === 'room' && def.min_width !== def.max_width)
                 ) {
                     set_choosing_height(true);
                 } else {
@@ -203,9 +248,9 @@ function BuildRoomOverlay({room_kind}: BuildRoomOverlayProps) {
                         height: `${(height - 1) * FLOOR_HEIGHT + ROOM_HEIGHT}px`,
                         top: `-${(height - 1) * FLOOR_HEIGHT}px`,
                         position: 'absolute',
-                        backgroundImage: `url(${room_def.sprite_empty})`,
+                        backgroundImage: `url(${def.sprite_empty})`,
                         backgroundRepeat: 'repeat',
-                        backgroundSize: `${room_def.min_width * PIXELS_PER_UNIT}px ${FLOOR_HEIGHT}px`,
+                        backgroundSize: `${def.min_width * PIXELS_PER_UNIT}px ${FLOOR_HEIGHT}px`,
                     }}
                 />
             )}

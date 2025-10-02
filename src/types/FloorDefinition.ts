@@ -9,6 +9,8 @@ import { FLOOR_DEFS_RAW, type FloorDefRaw } from '../content/floor-defs.ts';
 export type FloorKind = string & { readonly __type: unique symbol };
 
 export interface FloorDefinition {
+    d: 'floor';
+
     id: FloorKind;
     name: string;
     background: string;
@@ -46,6 +48,7 @@ export const FLOOR_DEFS: FloorDefs = {
 
 function def_from_raw(id: string, item: FloorDefRaw): FloorDefinition {
     return {
+        d: 'floor',
         id: id as any,
         tier: as_uint_or_default(item.tier ?? 0),
         background: item.background,

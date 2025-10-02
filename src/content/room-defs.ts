@@ -1,6 +1,7 @@
 import type { SMap } from '../types/SMap.ts';
 import images from './images.ts';
 import type { ReactElement } from 'react';
+import type { uint } from '../types/RestrictedTypes.ts';
 
 export enum RoomCategory {
     Room,
@@ -37,10 +38,11 @@ export interface RoomDefRaw {
     sprite_empty: string;
     sprite_active_night?: string;
     sprite_empty_night?: string;
-    cost_to_build: number;
     build_thumb: string;
     tier?: number;
     category?: RoomCategory;
     overlay?: () => Promise<() => ReactElement>;
+
+    cost_to_build: number | ((width: uint, height: uint) => uint);
 }
 export type RoomIds = keyof typeof ROOM_DEFS_RAW;

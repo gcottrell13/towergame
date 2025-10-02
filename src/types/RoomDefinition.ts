@@ -1,4 +1,4 @@
-import { as_uint_or_default, type uint } from './RestrictedTypes.ts';
+import {as_uint_or_default, to_uint, type uint} from './RestrictedTypes.ts';
 import {
     ROOM_DEFS_RAW,
     RoomCategory,
@@ -13,6 +13,8 @@ import type { ReactElement } from 'react';
 export type RoomKind = number & { readonly __type: unique symbol };
 
 export interface RoomDefinition {
+    d: 'room';
+
     id: RoomKind;
 
     /**
@@ -53,7 +55,8 @@ export interface RoomDefinition {
      */
     sprite_empty_night: string | null;
 
-    cost_to_build: uint;
+    cost_to_build(width: number, height: number): uint;
+
     build_thumb: string;
 
     /**
@@ -76,9 +79,10 @@ export const ROOM_DEFS: {
 
 function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
     return {
+        d: 'room',
         id: id as any,
         category: raw.category ?? RoomCategory.Room,
-        cost_to_build: as_uint_or_default(raw.cost_to_build),
+        cost_to_build: process_cost_to_build(raw),
         min_width: as_uint_or_default(raw.min_width),
         width_multiples_of: as_uint_or_default(raw.min_width),
         max_width: as_uint_or_default(raw.max_width ?? raw.min_width),
@@ -93,4 +97,12 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         sprite_active: raw.sprite_active,
         overlay: raw.overlay,
     };
+}
+
+function process_cost_to_build(t: RoomDefRaw): RoomDefinition['cost_to_build'] {
+    if (t.cost_to_build instanceof Function) {
+        return t.cost_to_build;
+    }
+    const a = as_uint_or_default(t.cost_to_build);
+    return (w, h) => {return as_uint_or_default(a * to_uint(w * h / t.min_width));};
 }
