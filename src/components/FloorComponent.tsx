@@ -1,26 +1,22 @@
 import { memo, useContext } from 'react';
-import { BuildingContext, FloorContext } from '../context/stateContext.ts';
 import type { Floor } from '../types/Floor.ts';
-import {FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT} from '../constants.ts';
+import { FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT } from '../constants.ts';
 import { RoomComponentMemo } from './RoomComponent.tsx';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { FloorRezoneOverlay } from './FloorRezoneOverlay.tsx';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { FloorExtendOverlay, NewFloorOverlay } from './FloorExtendOverlay.tsx';
-import {useFloorProvider} from "../hooks/useFloorProvider.ts";
+import { BuildingContext } from '../context/BuildingContext.ts';
+import { FloorContext } from '../context/FloorContext.ts';
 
 interface Props {
     floor: Floor;
 }
 
 export function FloorComponent({ floor }: Props) {
-    const [building] = useContext(BuildingContext);
-    const floor_update = useFloorProvider(floor);
+    const building = useContext(BuildingContext);
 
-    const [construction] = useConstructionContext(
-        'rezone',
-        'extend_floor',
-    );
+    const [construction] = useConstructionContext('rezone', 'extend_floor');
     const floor_def = floor.kind
         ? FLOOR_DEFS.buildables[floor.kind]
         : FLOOR_DEFS.empty;
@@ -35,10 +31,12 @@ export function FloorComponent({ floor }: Props) {
     const floor_below = building.floors[building.top_floor - floor.height + 1];
 
     return (
-        <FloorContext.Provider value={[floor, floor_update]}>
+        <FloorContext.Provider value={floor}>
             <div style={style} id={`floor-${floor.height}`}>
                 <Background floor={floor} />
-                {floor_below && floor_below.height >= 0 && <RoofOnBelow floor={floor} below_floor={floor_below} /> }
+                {floor_below && floor_below.height >= 0 && (
+                    <RoofOnBelow floor={floor} below_floor={floor_below} />
+                )}
                 {construction?.type === 'rezone' &&
                     floor_def.id !== construction.value && (
                         <FloorRezoneOverlay floor_kind={construction.value} />
@@ -65,10 +63,14 @@ function Background({ floor }: { floor: Floor }) {
 
 /**
  * Roof for the floor below. Not for ourselves, just so we don't have to deal with layering display issues
- * @param floor
- * @constructor
  */
-function RoofOnBelow({ floor, below_floor }: { floor: Floor, below_floor: Floor }) {
+function RoofOnBelow({
+    floor,
+    below_floor,
+}: {
+    floor: Floor;
+    below_floor: Floor;
+}) {
     if (floor.height < 1) return null;
     return (
         <div
@@ -82,7 +84,7 @@ function RoofOnBelow({ floor, below_floor }: { floor: Floor, below_floor: Floor 
 }
 
 export function TopRoofComponent() {
-    const [building] = useContext(BuildingContext);
+    const building = useContext(BuildingContext);
     const floor = building.floors[0];
     const [construction] = useConstructionContext('extend_floor');
     return (

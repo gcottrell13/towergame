@@ -1,12 +1,10 @@
 import { useCallback, useContext } from 'react';
-import {
-    BuildingContext,
-    FloorContext,
-    SaveFileContext,
-} from '../context/stateContext.ts';
+import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import type { int, uint } from '../types/RestrictedTypes.ts';
+import type { uint } from '../types/RestrictedTypes.ts';
+import { FloorContext } from '../context/FloorContext.ts';
+import { BuildingContext } from '../context/BuildingContext.ts';
 
 const overlay_style = {
     position: 'absolute',
@@ -27,8 +25,8 @@ const popover_style = {
 } as const;
 
 export function FloorExtendOverlay() {
-    const [floor, update_floor] = useContext(FloorContext);
-    const [building] = useContext(BuildingContext);
+    const floor = useContext(FloorContext);
+    const building = useContext(BuildingContext);
     const [save, update_save] = useContext(SaveFileContext);
 
     const expand_left =
@@ -66,11 +64,11 @@ export function FloorExtendOverlay() {
                 }}
                 className="hover-parent-display"
                 onClick={() => {
-                    update_floor((f) => {
-                        f.size_right = (f.size_right + expand_right) as uint;
-                    });
-                    update_save((s) => {
-                        s.money = (s.money - cost) as int;
+                    update_save({
+                        type: 'extend-floor',
+                        building,
+                        floor,
+                        size_right: (floor.size_right + expand_right) as uint,
                     });
                 }}
             >
@@ -121,11 +119,11 @@ export function FloorExtendOverlay() {
                 }}
                 className="hover-parent-display"
                 onClick={() => {
-                    update_floor((f) => {
-                        f.size_left = (f.size_left + expand_left) as uint;
-                    });
-                    update_save((s) => {
-                        s.money = (s.money - cost) as int;
+                    update_save({
+                        type: 'extend-floor',
+                        building,
+                        floor,
+                        size_right: (floor.size_left + expand_left) as uint,
                     });
                 }}
             >
@@ -168,23 +166,17 @@ export function FloorExtendOverlay() {
 }
 
 export function NewFloorOverlay() {
-    const [building, update_building] = useContext(BuildingContext);
+    const building = useContext(BuildingContext);
     const [save, update_save] = useContext(SaveFileContext);
     const top_floor = building.floors[0];
 
     const update = useCallback(() => {
-        update_building((b) => {
-            b.top_floor = (b.top_floor + 1) as uint;
-            const empty_floor = {
-                size_left: FLOOR_DEFS.new_floor_size[0],
-                size_right: FLOOR_DEFS.new_floor_size[1],
-                height: (building.top_floor + 1) as int,
-                kind: null,
-                rooms: [],
-            };
-            b.floors = b.floors.toSpliced(0, 0, empty_floor);
+        update_save({
+            type: 'add-floor',
+            building,
+            position: 'top',
         });
-    }, [building.top_floor, update_building]);
+    }, [update_save, building]);
 
     const size = FLOOR_DEFS.new_floor_size[0] + FLOOR_DEFS.new_floor_size[1];
     const cost = size * FLOOR_DEFS.empty.cost_to_build;
@@ -207,9 +199,6 @@ export function NewFloorOverlay() {
             onClick={() => {
                 if (!sufficient_funds) return;
                 update();
-                update_save((s) => {
-                    s.money = (s.money - cost) as int;
-                });
             }}
         >
             <div className="hover-child-display no-sel">

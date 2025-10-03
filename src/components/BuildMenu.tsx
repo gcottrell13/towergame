@@ -1,7 +1,7 @@
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { SaveFileContext } from '../context/stateContext.ts';
+import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { RoomCategory } from '../content/room-defs.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
@@ -61,8 +61,7 @@ export function BuildMenu() {
     );
 
     useEffect(() => {
-        if (construction?.type !== 'room')
-            return;
+        if (construction?.type !== 'room') return;
         const def = ROOM_DEFS[construction.value];
         if (save.money < def.cost_to_build(def.min_width, def.min_height)) {
             set_construction(null);
@@ -170,7 +169,13 @@ function RoomSelector() {
                                 src={def.sprite_empty}
                                 alt={def.sprite_empty}
                             />
-                            <span>${def.cost_to_build(def.min_width, def.min_height)}</span>
+                            <span>
+                                $
+                                {def.cost_to_build(
+                                    def.min_width,
+                                    def.min_height,
+                                )}
+                            </span>
                             <button
                                 type={'button'}
                                 style={{
@@ -181,7 +186,11 @@ function RoomSelector() {
                                 }}
                                 disabled={
                                     construction?.value === def.id ||
-                                    save.money < def.cost_to_build(def.min_width, def.min_height)
+                                    save.money <
+                                        def.cost_to_build(
+                                            def.min_width,
+                                            def.min_height,
+                                        )
                                 }
                                 onClick={() => {
                                     set_construction({

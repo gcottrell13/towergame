@@ -1,8 +1,10 @@
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 import { useContext, useState } from 'react';
-import { FloorContext, SaveFileContext } from '../context/stateContext.ts';
+import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { DESTROY_ROOM_COST, PIXELS_PER_UNIT } from '../constants.ts';
-import type { int } from '../types/RestrictedTypes.ts';
+import { FloorContext } from '../context/FloorContext.ts';
+import { BuildingContext } from '../context/BuildingContext.ts';
+import { cost_to_rezone_floor } from '../logicFunctions.ts';
 
 interface Props {
     floor_kind: FloorKind;
@@ -45,11 +47,10 @@ const tag_style = {
 export function FloorRezoneOverlay({ floor_kind }: Props) {
     const [hovered, set_hovered] = useState(false);
     const [save, update_save] = useContext(SaveFileContext);
-    const [floor, update_floor] = useContext(FloorContext);
+    const building = useContext(BuildingContext);
+    const floor = useContext(FloorContext);
     const floor_def = FLOOR_DEFS.buildables[floor_kind];
-    const cost =
-        (floor.size_left + floor.size_right) * floor_def.cost_to_build +
-        floor.rooms.length * DESTROY_ROOM_COST;
+    const cost = cost_to_rezone_floor(floor);
     const sufficient_funds = cost <= save.money;
     return (
         // biome-ignore lint/a11y/noStaticElementInteractions: clicky
@@ -67,12 +68,11 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
             }}
             onClick={() => {
                 if (!sufficient_funds) return;
-                update_floor((f) => {
-                    f.kind = floor_kind;
-                    f.rooms = [];
-                });
-                update_save((s) => {
-                    s.money = (s.money - cost) as int;
+                update_save({
+                    type: 'rezone-floor',
+                    building,
+                    floor,
+                    kind: floor_kind,
                 });
             }}
             onMouseEnter={() => set_hovered(true)}

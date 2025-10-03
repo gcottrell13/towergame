@@ -1,29 +1,29 @@
-import { createContext, memo, useContext, useState } from 'react';
+import {createContext, memo, useContext, useState} from 'react';
 import {
-    BuildingContext,
-    FloorContext,
     SaveFileContext,
-} from '../context/stateContext.ts';
-import { ROOM_DEFS } from '../types/RoomDefinition.ts';
+} from '../context/SaveFileContext.ts';
+import {ROOM_DEFS} from '../types/RoomDefinition.ts';
 import {
     FLOOR_HEIGHT,
     PIXELS_PER_UNIT,
     ROOM_HEIGHT,
     Z_INDEX,
 } from '../constants.ts';
-import type { int } from '../types/RestrictedTypes.ts';
-import { RoomState } from '../types/Room.ts';
-import { clamp } from '../clamp.ts';
-import { useRoomExtender } from './RoomExtender.tsx';
-import { useConstructionContext } from '../hooks/useConstructionContext.ts';
-import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import type { Floor } from '../types/Floor.ts';
-import { useFloorProvider } from '../hooks/useFloorProvider.ts';
-import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
+import type {int, uint} from '../types/RestrictedTypes.ts';
+import {RoomState} from '../types/Room.ts';
+import {clamp} from '../clamp.ts';
+import {useRoomExtender} from './RoomExtender.tsx';
+import {useConstructionContext} from '../hooks/useConstructionContext.ts';
+import {FLOOR_DEFS} from '../types/FloorDefinition.ts';
+import type {Floor} from '../types/Floor.ts';
+import {TRANSPORT_DEFS} from '../types/TransportationDefinition.ts';
+import {BuildingContext} from "../context/BuildingContext.ts";
+import {FloorContext} from "../context/FloorContext.ts";
 
 const ResizingRoomCtx = createContext<[boolean, (x: boolean) => void]>([
     false,
-    (_x: boolean) => {},
+    (_x: boolean) => {
+    },
 ]);
 
 // number of floors
@@ -34,7 +34,7 @@ type V = ReturnType<typeof useConstructionContext<T>>;
 type V2 = NonNullable<V[0]>;
 
 export function RoomBuilderTotal() {
-    const [building] = useContext(BuildingContext);
+    const building = useContext(BuildingContext);
     const [construction, set_construction] = useConstructionContext(
         'room',
         'transport',
@@ -78,7 +78,7 @@ export function RoomBuilderTotal() {
                             return (
                                 TRANSPORT_DEFS[
                                     construction.value
-                                ].can_stop_at_floor?.call(null, floor) ?? true
+                                    ].can_stop_at_floor?.call(null, floor) ?? true
                             );
                         }
                         return false;
@@ -97,17 +97,17 @@ export function RoomBuilderTotal() {
 
 export const RoomBuilderTotalMemo = memo(RoomBuilderTotal);
 
-function RoomBuilderFloor({
-    floor,
-    construction,
-}: {
-    floor: Floor;
-    construction: V2;
-}) {
-    const [building] = useContext(BuildingContext);
-    const floor_update = useFloorProvider(floor);
+function RoomBuilderFloor(
+    {
+        floor,
+        construction,
+    }: {
+        floor: Floor;
+        construction: V2;
+    }) {
+    const building = useContext(BuildingContext);
     return (
-        <FloorContext value={[floor, floor_update]}>
+        <FloorContext value={floor}>
             <div
                 style={{
                     position: 'absolute',
@@ -115,7 +115,7 @@ function RoomBuilderFloor({
                     left: `${(building.max_width - floor.size_left) * PIXELS_PER_UNIT}px`,
                 }}
             >
-                <BuildRoomOverlay construction={construction} />
+                <BuildRoomOverlay construction={construction}/>
             </div>
         </FloorContext>
     );
@@ -133,17 +133,17 @@ const style = {
     zIndex: Z_INDEX.builder_overlay + 1,
 } as const;
 
-function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
+function BuildRoomOverlay({construction}: BuildRoomOverlayProps) {
     const [, update_save] = useContext(SaveFileContext);
-    const [, update_building] = useContext(BuildingContext);
-    const [floor, update_floor] = useContext(FloorContext);
+    const building = useContext(BuildingContext);
+    const floor = useContext(FloorContext);
     const def =
         construction.type === 'room'
             ? ROOM_DEFS[construction.value]
             : TRANSPORT_DEFS[construction.value];
     const [bp_location, set_bp_location] = useState<number | null>(null);
     const [choosing_height, set_choosing_height] = useContext(ResizingRoomCtx);
-    const { width, height, extension_overlay } = useRoomExtender(
+    const {width, height, extension_overlay} = useRoomExtender(
         def,
         update,
         () => {
@@ -157,29 +157,25 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
         set_construction(construction);
         set_choosing_height(false);
         set_bp_location(null);
-        update_save((s) => {
-            let cost = 0;
-            if (def.d === 'room') {
-                cost = def.cost_to_build(width, height);
-            } else if (def.d === 'transport') {
-                cost = def.cost_per_floor(height);
-            }
-            s.money = (s.money - cost) as int;
-        });
         if (def.d === 'room') {
-            update_floor((f) => {
-                f.rooms = f.rooms.toSpliced(0, 0, {
+            update_save({
+                type: 'buy-room',
+                building,
+                floor,
+                room: {
                     width,
                     height,
                     kind: def.id,
                     position: bp_location as int,
                     state: RoomState.Unknown,
                     bottom_floor: floor.height,
-                });
+                },
             });
         } else if (def.d === 'transport') {
-            update_building((b) => {
-                b.transports.push({ kind: def.id });
+            update_save({
+                type: 'buy-transport',
+                building,
+                transport: {kind: def.id, position: bp_location as int, height, occupancy: 0 as uint},
             });
         }
     }
@@ -201,7 +197,7 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
                 const loc = clamp(
                     Math.floor(
                         ev.nativeEvent.offsetX / PIXELS_PER_UNIT -
-                            floor.size_left,
+                        floor.size_left,
                     ),
                     -floor.size_left,
                     floor.size_right - def.min_width,

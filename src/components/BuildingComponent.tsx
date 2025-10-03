@@ -1,9 +1,9 @@
-import { useCallback, useContext } from 'react';
-import { BuildingContext, SaveFileContext } from '../context/stateContext.ts';
 import type { Building } from '../types/Building.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
 import { FloorComponentMemo, TopRoofComponent } from './FloorComponent.tsx';
 import { RoomBuilderTotalMemo } from './BuildRoomOverlay.tsx';
+import { TransportationComponentMemo } from './TransportationComponent.tsx';
+import { BuildingContext } from '../context/BuildingContext.ts';
 
 const ground_style = {
     background: 'saddlebrown',
@@ -15,24 +15,12 @@ interface Props {
 }
 
 export function BuildingComponent({ building }: Props) {
-    const [_saveFile, updateSaveFile] = useContext(SaveFileContext);
-    const update = useCallback(
-        (f: (b: Building) => void) => {
-            const new_b = { ...building };
-            f(new_b);
-            updateSaveFile((save) => {
-                save.buildings[building.id] = new_b;
-            });
-        },
-        [building, updateSaveFile],
-    );
-
     const ground_depth =
         FLOOR_HEIGHT *
         Math.max(4, building.floors.length - building.top_floor + 4);
 
     return (
-        <BuildingContext value={[building, update]}>
+        <BuildingContext value={building}>
             <div
                 id={`building-${building.id}`}
                 style={{
@@ -54,6 +42,12 @@ export function BuildingComponent({ building }: Props) {
                     }}
                 ></div>
                 <RoomBuilderTotalMemo />
+                {building.transports.map((t) => (
+                    <TransportationComponentMemo
+                        key={`${t.height}-${t.position}`}
+                        transport={t}
+                    />
+                ))}
             </div>
         </BuildingContext>
     );

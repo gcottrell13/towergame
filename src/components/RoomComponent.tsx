@@ -1,9 +1,7 @@
 import type { Room } from '../types/Room.ts';
 import {FLOOR_HEIGHT, PIXELS_PER_UNIT, Z_INDEX} from '../constants.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
-import { useContext, memo } from 'react';
-import { FloorContext } from '../context/stateContext.ts';
-import { useConstructionContext } from '../hooks/useConstructionContext.ts';
+import { memo } from 'react';
 
 interface Props {
     room: Room;
@@ -11,8 +9,8 @@ interface Props {
 
 export function RoomComponent({ room }: Props) {
     const room_def = ROOM_DEFS[room.kind];
-    const [_floor] = useContext(FloorContext);
-    const [_construction] = useConstructionContext('destroy_room');
+    // const [_floor] = useContext(FloorContext);
+    // const [_construction] = useConstructionContext('destroy_room');
     return (
         <div
             className="fit-content no-sel"
