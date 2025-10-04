@@ -11,7 +11,6 @@ import type { int, uint } from '../types/RestrictedTypes.ts';
 import { RoomState } from '../types/Room.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
-import { MouseableDiv } from './MouseableDiv.tsx';
 import { useRoomExtender } from './RoomExtender.tsx';
 
 const ResizingRoomCtx = createContext<[boolean, (x: boolean) => void]>([false, () => {}]);
@@ -33,7 +32,7 @@ export function RoomBuilderTotal() {
     const bottom_floor = building.floors[building.floors.length - 1];
 
     return (
-        <MouseableDiv
+        <div
             onContextMenu={(ev) => {
                 ev.preventDefault();
                 set_construction(null);
@@ -64,7 +63,7 @@ export function RoomBuilderTotal() {
                         <RoomBuilderFloor key={x.height} floor={x} construction={construction} />
                     ))}
             </ResizingRoomCtx>
-        </MouseableDiv>
+        </div>
     );
 }
 
@@ -137,7 +136,7 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
     }
 
     return (
-        <MouseableDiv
+        <div
             className={'no-sel'}
             style={{
                 ...style,
@@ -203,6 +202,6 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
                     {extension_overlay}
                 </div>
             )}
-        </MouseableDiv>
+        </div>
     );
 }

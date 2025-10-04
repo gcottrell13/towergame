@@ -36,6 +36,10 @@
             "recommended": true,
             "nursery": {
                 "useExhaustiveSwitchCases": "error"
+            },
+            "a11y": {
+                "useKeyWithClickEvents": "off",
+                "noStaticElementInteractions": "off"
             }
         }
     }

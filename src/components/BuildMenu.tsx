@@ -5,7 +5,6 @@ import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 import { ROOM_DEFS, type RoomKind } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS, type TransportationKind } from '../types/TransportationDefinition.ts';
-import { MouseableDiv } from './MouseableDiv.tsx';
 import { PinSide } from './PinSide.tsx';
 
 const build_menu_style = {
@@ -89,7 +88,7 @@ export function BuildMenu() {
     /// ====================================================================================================
 
     return (
-        <MouseableDiv
+        <div
             ref={ref}
             style={{
                 ...build_menu_style,
@@ -130,7 +129,7 @@ export function BuildMenu() {
             <span hidden={current_menu !== Menu.Transport}>
                 <TransportationSelector />
             </span>
-        </MouseableDiv>
+        </div>
     );
 }
 

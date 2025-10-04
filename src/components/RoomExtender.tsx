@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { clamp } from '../clamp.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
 import { as_uint_or_default, type uint } from '../types/RestrictedTypes.ts';
-import { MouseableDiv } from './MouseableDiv.tsx';
 
 interface HasWidth {
     min_width: uint;
@@ -22,7 +21,7 @@ export function useRoomExtender(has_width: HasWidth, on_click?: () => void, on_c
     }, [has_width]);
 
     const jsx = (
-        <MouseableDiv
+        <div
             onMouseMove={(event) => {
                 const w_units = Math.ceil(event.nativeEvent.offsetX / PIXELS_PER_UNIT);
                 set_width(
@@ -65,7 +64,7 @@ export function useRoomExtender(has_width: HasWidth, on_click?: () => void, on_c
                 top: `-${(has_width.max_height - 1) * FLOOR_HEIGHT}px`,
                 background: 'color-mix(in srgb, lawngreen 30%, transparent)',
             }}
-        ></MouseableDiv>
+        ></div>
     );
 
     return {

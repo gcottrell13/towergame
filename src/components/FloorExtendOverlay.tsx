@@ -5,7 +5,6 @@ import { FloorContext } from '../context/FloorContext.ts';
 import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
-import { MouseableDiv } from './MouseableDiv.tsx';
 
 const overlay_style = {
     position: 'absolute',
@@ -45,7 +44,7 @@ export function FloorExtendOverlay() {
         const cost = cost_build * expand_right;
         const sufficient_funds = save.money >= cost;
         right = (
-            <MouseableDiv
+            <div
                 style={{
                     ...overlay_style,
                     right: `-${(floor.size_right + expand_right) * PIXELS_PER_UNIT}px`,
@@ -85,14 +84,14 @@ export function FloorExtendOverlay() {
                         </span>
                     </span>
                 </div>
-            </MouseableDiv>
+            </div>
         );
     }
     if (expand_left > 0) {
         const cost = cost_build * expand_left;
         const sufficient_funds = save.money >= cost;
         left = (
-            <MouseableDiv
+            <div
                 style={{
                     ...overlay_style,
                     left: `-${(expand_left + floor.size_left) * PIXELS_PER_UNIT}px`,
@@ -132,7 +131,7 @@ export function FloorExtendOverlay() {
                         </span>
                     </span>
                 </div>
-            </MouseableDiv>
+            </div>
         );
     }
 
@@ -161,7 +160,7 @@ export function NewFloorOverlay() {
     const sufficient_funds = save.money >= cost;
 
     return (
-        <MouseableDiv
+        <div
             style={{
                 ...overlay_style,
                 height: `${FLOOR_HEIGHT}px`,
@@ -199,6 +198,6 @@ export function NewFloorOverlay() {
                     </span>
                 </span>
             </div>
-        </MouseableDiv>
+        </div>
     );
 }
