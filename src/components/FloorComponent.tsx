@@ -1,25 +1,25 @@
 import { memo, useContext } from 'react';
-import type { Floor } from '../types/Floor.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT } from '../constants.ts';
-import { RoomComponentMemo } from './RoomComponent.tsx';
-import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import { FloorRezoneOverlay } from './FloorRezoneOverlay.tsx';
-import { useConstructionContext } from '../hooks/useConstructionContext.ts';
-import { FloorExtendOverlay, NewFloorOverlay } from './FloorExtendOverlay.tsx';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
+import { useConstructionContext } from '../hooks/useConstructionContext.ts';
+import { useFloorActions } from '../hooks/useFloorActions.ts';
+import type { Floor } from '../types/Floor.ts';
+import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
+import { FloorExtendOverlay, NewFloorOverlay } from './FloorExtendOverlay.tsx';
+import { FloorRezoneOverlay } from './FloorRezoneOverlay.tsx';
+import { RoomComponentMemo } from './RoomComponent.tsx';
 
 interface Props {
     floor: Floor;
 }
 
 export function FloorComponent({ floor }: Props) {
-    const building = useContext(BuildingContext);
+    const [building] = useContext(BuildingContext);
+    const update_floor = useFloorActions(floor);
 
     const [construction] = useConstructionContext('rezone', 'extend_floor');
-    const floor_def = floor.kind
-        ? FLOOR_DEFS.buildables[floor.kind]
-        : FLOOR_DEFS.empty;
+    const floor_def = floor.kind ? FLOOR_DEFS.buildables[floor.kind] : FLOOR_DEFS.empty;
 
     const style = {
         height: `${ROOM_HEIGHT}px`,
@@ -31,19 +31,14 @@ export function FloorComponent({ floor }: Props) {
     const floor_below = building.floors[building.top_floor - floor.height + 1];
 
     return (
-        <FloorContext.Provider value={floor}>
+        <FloorContext.Provider value={[floor, update_floor]}>
             <div style={style} id={`floor-${floor.height}`}>
                 <Background floor={floor} />
-                {floor_below && floor_below.height >= 0 && (
-                    <RoofOnBelow floor={floor} below_floor={floor_below} />
+                {floor_below && floor_below.height >= 0 && <RoofOnBelow floor={floor} below_floor={floor_below} />}
+                {construction?.type === 'rezone' && floor_def.id !== construction.value && (
+                    <FloorRezoneOverlay floor_kind={construction.value} />
                 )}
-                {construction?.type === 'rezone' &&
-                    floor_def.id !== construction.value && (
-                        <FloorRezoneOverlay floor_kind={construction.value} />
-                    )}
-                {construction?.type === 'extend_floor' && (
-                    <FloorExtendOverlay />
-                )}
+                {construction?.type === 'extend_floor' && <FloorExtendOverlay />}
                 {floor.rooms.map((room) => (
                     <RoomComponentMemo key={room.position} room={room} />
                 ))}
@@ -55,22 +50,14 @@ export function FloorComponent({ floor }: Props) {
 export const FloorComponentMemo = memo(FloorComponent);
 
 function Background({ floor }: { floor: Floor }) {
-    const floor_def = floor.kind
-        ? FLOOR_DEFS.buildables[floor.kind]
-        : FLOOR_DEFS.empty;
+    const floor_def = floor.kind ? FLOOR_DEFS.buildables[floor.kind] : FLOOR_DEFS.empty;
     return <div style={bg_styles(floor, floor_def.background)}></div>;
 }
 
 /**
  * Roof for the floor below. Not for ourselves, just so we don't have to deal with layering display issues
  */
-function RoofOnBelow({
-    floor,
-    below_floor,
-}: {
-    floor: Floor;
-    below_floor: Floor;
-}) {
+function RoofOnBelow({ floor, below_floor }: { floor: Floor; below_floor: Floor }) {
     if (floor.height < 1) return null;
     return (
         <div
@@ -84,7 +71,7 @@ function RoofOnBelow({
 }
 
 export function TopRoofComponent() {
-    const building = useContext(BuildingContext);
+    const [building] = useContext(BuildingContext);
     const floor = building.floors[0];
     const [construction] = useConstructionContext('extend_floor');
     return (

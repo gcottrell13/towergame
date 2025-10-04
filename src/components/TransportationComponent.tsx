@@ -1,7 +1,7 @@
-import type { Transportation } from '../types/Transportation.ts';
 import { memo } from 'react';
-import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT, Z_INDEX } from '../constants.ts';
+import type { Transportation } from '../types/Transportation.ts';
+import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 
 interface Props {
     transport: Transportation;

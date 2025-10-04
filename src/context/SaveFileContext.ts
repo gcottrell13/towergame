@@ -1,57 +1,54 @@
 import { createContext } from 'react';
-import type { SaveFile } from '../types/SaveFile.ts';
-import type { int, uint } from '../types/RestrictedTypes.ts';
 import type { Dispatch } from '../types/dispatch.ts';
-import type { Building } from '../types/Building.ts';
-import type { Room } from '../types/Room.ts';
-import type { Floor } from '../types/Floor.ts';
-import type { Transportation } from '../types/Transportation.ts';
+import type { ExtendsOmit } from '../types/extendsOmit.ts';
 import type { FloorKind } from '../types/FloorDefinition.ts';
+import type { int, uint } from '../types/RestrictedTypes.ts';
+import type { Room } from '../types/Room.ts';
+import type { SaveFile } from '../types/SaveFile.ts';
+import type { Transportation } from '../types/Transportation.ts';
 
 interface BuyRoom {
-    type: 'buy-room';
-    building: Building;
-    floor: Floor;
+    action: 'buy-room';
+    building_id: number;
+    floor_id: number;
     room: Room;
 }
 
 interface BuyTransport {
-    type: 'buy-transport';
-    building: Building;
+    action: 'buy-transport';
+    building_id: number;
     transport: Transportation;
 }
 
 interface AddFloor {
-    type: 'add-floor';
-    building: Building;
+    action: 'add-floor';
+    building_id: number;
     position: 'top' | 'underground';
 }
 
 interface RezoneFloor {
-    type: 'rezone-floor';
-    building: Building;
-    floor: Floor;
+    action: 'rezone-floor';
+    building_id: number;
+    floor_id: number;
     kind: FloorKind;
 }
 
 interface ExtendFloor {
-    type: 'extend-floor';
-    building: Building;
-    floor: Floor;
+    action: 'extend-floor';
+    building_id: number;
+    floor_id: number;
     size_left?: uint;
     size_right?: uint;
 }
 
-export type SaveFileActions =
-    | BuyRoom
-    | BuyTransport
-    | AddFloor
-    | RezoneFloor
-    | ExtendFloor;
+export type SaveFileActions = BuyRoom | BuyTransport | AddFloor | RezoneFloor | ExtendFloor;
 
-export const SaveFileContext = createContext<
-    [SaveFile, Dispatch<SaveFileActions>]
->([
+export type BuildingActions = ExtendsOmit<SaveFileActions, 'building_id'>;
+export type TransportActions = ExtendsOmit<BuildingActions, 'transport_id'>;
+export type FloorActions = ExtendsOmit<BuildingActions, 'floor_id'>;
+export type RoomActions = ExtendsOmit<FloorActions, 'room_id'>;
+
+export const SaveFileContext = createContext<[SaveFile, Dispatch<SaveFileActions>]>([
     {
         buildings: [],
         money: 0 as int,

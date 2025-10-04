@@ -1,10 +1,10 @@
 import { useCallback, useContext } from 'react';
-import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
+import { BuildingContext } from '../context/BuildingContext.ts';
+import { FloorContext } from '../context/FloorContext.ts';
+import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
-import { FloorContext } from '../context/FloorContext.ts';
-import { BuildingContext } from '../context/BuildingContext.ts';
 
 const overlay_style = {
     position: 'absolute',
@@ -25,25 +25,22 @@ const popover_style = {
 } as const;
 
 export function FloorExtendOverlay() {
-    const floor = useContext(FloorContext);
-    const building = useContext(BuildingContext);
-    const [save, update_save] = useContext(SaveFileContext);
+    const [floor, update_floor] = useContext(FloorContext);
+    const [building] = useContext(BuildingContext);
+    const [save] = useContext(SaveFileContext);
 
     const expand_left =
-        (floor.height > 1
-            ? building.floors[building.top_floor - floor.height + 1].size_left
-            : building.max_width) - floor.size_left;
+        (floor.height > 1 ? building.floors[building.top_floor - floor.height + 1].size_left : building.max_width) -
+        floor.size_left;
     const expand_right =
-        (floor.height > 1
-            ? building.floors[building.top_floor - floor.height + 1].size_right
-            : building.max_width) - floor.size_right;
+        (floor.height > 1 ? building.floors[building.top_floor - floor.height + 1].size_right : building.max_width) -
+        floor.size_right;
 
     let right = null;
     let left = null;
 
     const cost_build = floor.kind
-        ? FLOOR_DEFS.buildables[floor.kind].cost_to_build +
-          FLOOR_DEFS.empty.cost_to_build
+        ? FLOOR_DEFS.buildables[floor.kind].cost_to_build + FLOOR_DEFS.empty.cost_to_build
         : FLOOR_DEFS.empty.cost_to_build;
 
     if (expand_right > 0) {
@@ -64,10 +61,8 @@ export function FloorExtendOverlay() {
                 }}
                 className="hover-parent-display"
                 onClick={() => {
-                    update_save({
-                        type: 'extend-floor',
-                        building,
-                        floor,
+                    update_floor({
+                        action: 'extend-floor',
                         size_right: (floor.size_right + expand_right) as uint,
                     });
                 }}
@@ -79,11 +74,7 @@ export function FloorExtendOverlay() {
                             right: `${expand_right * PIXELS_PER_UNIT}px`,
                         }}
                     >
-                        {!sufficient_funds && (
-                            <span style={{ color: 'red' }}>
-                                Insufficient Funds
-                            </span>
-                        )}
+                        {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
                         Extend Right
                         <span style={{ color: 'gray' }}>
                             ({expand_right}m x ${cost_build}/m)
@@ -119,10 +110,8 @@ export function FloorExtendOverlay() {
                 }}
                 className="hover-parent-display"
                 onClick={() => {
-                    update_save({
-                        type: 'extend-floor',
-                        building,
-                        floor,
+                    update_floor({
+                        action: 'extend-floor',
                         size_right: (floor.size_left + expand_left) as uint,
                     });
                 }}
@@ -134,11 +123,7 @@ export function FloorExtendOverlay() {
                             left: `${expand_left * PIXELS_PER_UNIT}px`,
                         }}
                     >
-                        {!sufficient_funds && (
-                            <span style={{ color: 'red' }}>
-                                Insufficient Funds
-                            </span>
-                        )}
+                        {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
                         Extend Left
                         <span style={{ color: 'gray' }}>
                             ({expand_left}m x ${cost_build}/m)
@@ -166,17 +151,16 @@ export function FloorExtendOverlay() {
 }
 
 export function NewFloorOverlay() {
-    const building = useContext(BuildingContext);
-    const [save, update_save] = useContext(SaveFileContext);
+    const [building, update_building] = useContext(BuildingContext);
+    const [save] = useContext(SaveFileContext);
     const top_floor = building.floors[0];
 
     const update = useCallback(() => {
-        update_save({
-            type: 'add-floor',
-            building,
+        update_building({
+            action: 'add-floor',
             position: 'top',
         });
-    }, [update_save, building]);
+    }, [update_building]);
 
     const size = FLOOR_DEFS.new_floor_size[0] + FLOOR_DEFS.new_floor_size[1];
     const cost = size * FLOOR_DEFS.empty.cost_to_build;
@@ -208,9 +192,7 @@ export function NewFloorOverlay() {
                         top: `-${FLOOR_HEIGHT}px`,
                     }}
                 >
-                    {!sufficient_funds && (
-                        <span style={{ color: 'red' }}>Insufficient Funds</span>
-                    )}
+                    {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
                     New Floor
                     <span style={{ color: 'gray' }}>
                         ({size}m x ${FLOOR_DEFS.empty.cost_to_build}/m)

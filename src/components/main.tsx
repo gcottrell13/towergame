@@ -1,12 +1,9 @@
-import {
-    type SaveFileActions,
-    SaveFileContext,
-} from '../context/SaveFileContext.ts';
-import { TEST_SAVE } from '../content/test-save.ts';
-import { AllBuildings } from './AllBuildings.tsx';
 import { useCallback, useState } from 'react';
-import { BuildMenu } from './BuildMenu.tsx';
+import { TEST_SAVE } from '../content/test-save.ts';
+import { type SaveFileActions, SaveFileContext } from '../context/SaveFileContext.ts';
 import { SaveFileReducer } from '../reducers/SaveFileReducer.ts';
+import { AllBuildings } from './AllBuildings.tsx';
+import { BuildMenu } from './BuildMenu.tsx';
 
 export function Main() {
     const [state, setState] = useState(TEST_SAVE);

@@ -1,16 +1,16 @@
-import {as_uint_or_default, to_uint, type uint} from './RestrictedTypes.ts';
+import type { ReactElement } from 'react';
 import {
     TRANSPORT_DEFS_RAW,
     type TransportationDefinitionRaw,
     type TransportationType,
 } from '../content/transportation-defs.ts';
-import type { ReactElement } from 'react';
-import type {Floor} from "./Floor.ts";
+import type { Floor } from './Floor.ts';
+import { as_uint_or_default, to_uint, type uint } from './RestrictedTypes.ts';
 
 export type TransportationKind = string & { readonly __type: unique symbol };
 
 export interface TransportationDefinition {
-    d: 'transport',
+    d: 'transport';
     id: TransportationKind;
     name: string;
     cost_per_floor(height: number): uint;
@@ -33,10 +33,7 @@ export const TRANSPORT_DEFS: {
     }),
 );
 
-function def_from_raw(
-    id: string,
-    raw: TransportationDefinitionRaw,
-): TransportationDefinition {
+function def_from_raw(id: string, raw: TransportationDefinitionRaw): TransportationDefinition {
     return {
         d: 'transport',
         id: id as any,
@@ -55,8 +52,7 @@ function def_from_raw(
 }
 
 function cost_per_floor(raw: TransportationDefinitionRaw): TransportationDefinition['cost_per_floor'] {
-    if (raw.cost_per_floor instanceof Function)
-        return raw.cost_per_floor;
+    if (raw.cost_per_floor instanceof Function) return raw.cost_per_floor;
     const c = as_uint_or_default(raw.cost_per_floor);
     return (h) => to_uint(c * h);
 }

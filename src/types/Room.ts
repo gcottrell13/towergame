@@ -1,6 +1,5 @@
-import type {int, uint} from "./RestrictedTypes.ts";
-import type {RoomKind} from "./RoomDefinition.ts";
-
+import type { int, uint } from './RestrictedTypes.ts';
+import type { RoomKind } from './RoomDefinition.ts';
 
 export enum RoomState {
     Unknown,

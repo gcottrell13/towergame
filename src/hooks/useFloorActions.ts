@@ -1,0 +1,21 @@
+import { useCallback, useContext } from 'react';
+import { BuildingContext } from '../context/BuildingContext.ts';
+import type { FloorActions } from '../context/SaveFileContext.ts';
+import type { Floor } from '../types/Floor.ts';
+
+/**
+ * provides a shorthand version of using actions that require a building id and floor id
+ * @param floor
+ */
+export function useFloorActions(floor: Floor) {
+    const [, update] = useContext(BuildingContext);
+    return useCallback(
+        (action: FloorActions) => {
+            update({
+                ...action,
+                floor_id: floor.height,
+            });
+        },
+        [update, floor],
+    );
+}

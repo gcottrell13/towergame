@@ -1,7 +1,6 @@
-import type {int, uint} from "./RestrictedTypes.ts";
-import type {Room} from "./Room.ts";
-import type {FloorKind} from "./FloorDefinition.ts";
-
+import type { FloorKind } from './FloorDefinition.ts';
+import type { int, uint } from './RestrictedTypes.ts';
+import type { Room } from './Room.ts';
 
 export interface Floor {
     height: int;

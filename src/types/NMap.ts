@@ -1,1 +1,1 @@
-export type NMap<T> = {[p: number] : T};
+export type NMap<T> = { [p: number]: T };

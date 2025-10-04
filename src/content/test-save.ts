@@ -1,5 +1,5 @@
-import type { SaveFile } from '../types/SaveFile.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
+import type { SaveFile } from '../types/SaveFile.ts';
 
 export const TEST_SAVE: SaveFile = {
     buildings: [

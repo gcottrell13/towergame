@@ -1,6 +1,6 @@
+import { FLOOR_DEFS_RAW, type FloorDefRaw } from '../content/floor-defs.ts';
 import { as_uint_or_default, type uint } from './RestrictedTypes.ts';
 import type { RoomKind } from './RoomDefinition.ts';
-import { FLOOR_DEFS_RAW, type FloorDefRaw } from '../content/floor-defs.ts';
 
 /**
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
@@ -31,18 +31,10 @@ interface FloorDefs {
 export const FLOOR_DEFS: FloorDefs = {
     empty: def_from_raw('', FLOOR_DEFS_RAW.empty),
     buildables: Object.fromEntries(
-        Object.entries(FLOOR_DEFS_RAW.buildables).map(([id, value]) => [
-            id,
-            def_from_raw(id, value),
-        ]),
+        Object.entries(FLOOR_DEFS_RAW.buildables).map(([id, value]) => [id, def_from_raw(id, value)]),
     ),
     empty_roof: def_from_raw('', FLOOR_DEFS_RAW.empty_roof),
-    roofs: Object.fromEntries(
-        Object.entries(FLOOR_DEFS_RAW.roofs).map(([id, value]) => [
-            id,
-            def_from_raw(id, value),
-        ]),
-    ),
+    roofs: Object.fromEntries(Object.entries(FLOOR_DEFS_RAW.roofs).map(([id, value]) => [id, def_from_raw(id, value)])),
     new_floor_size: FLOOR_DEFS_RAW.new_floor_size,
 };
 

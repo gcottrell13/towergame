@@ -1,7 +1,7 @@
-import type { Room } from '../types/Room.ts';
-import {FLOOR_HEIGHT, PIXELS_PER_UNIT, Z_INDEX} from '../constants.ts';
-import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { memo } from 'react';
+import { FLOOR_HEIGHT, PIXELS_PER_UNIT, Z_INDEX } from '../constants.ts';
+import type { Room } from '../types/Room.ts';
+import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 
 interface Props {
     room: Room;

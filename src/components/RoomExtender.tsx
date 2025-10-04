@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
 import { clamp } from '../clamp.ts';
-import {as_uint_or_default, type uint} from '../types/RestrictedTypes.ts';
+import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
+import { as_uint_or_default, type uint } from '../types/RestrictedTypes.ts';
 
 interface HasWidth {
     min_width: uint;
@@ -11,11 +11,7 @@ interface HasWidth {
     width_multiples_of?: uint;
 }
 
-export function useRoomExtender(
-    has_width: HasWidth,
-    on_click?: () => void,
-    on_cancel?: () => void,
-) {
+export function useRoomExtender(has_width: HasWidth, on_click?: () => void, on_cancel?: () => void) {
     const [width, set_width] = useState(has_width.min_width);
     const [height, set_height] = useState(has_width.min_height);
 
@@ -29,14 +25,13 @@ export function useRoomExtender(
         // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
         <div
             onMouseMove={(event) => {
-                const w_units = Math.ceil(
-                    event.nativeEvent.offsetX / PIXELS_PER_UNIT,
-                );
+                const w_units = Math.ceil(event.nativeEvent.offsetX / PIXELS_PER_UNIT);
                 set_width(
                     as_uint_or_default(
                         clamp(
-                            has_width.width_multiples_of ? Math.ceil(w_units / has_width.width_multiples_of) *
-                                has_width.width_multiples_of : w_units,
+                            has_width.width_multiples_of
+                                ? Math.ceil(w_units / has_width.width_multiples_of) * has_width.width_multiples_of
+                                : w_units,
                             has_width.min_width,
                             has_width.max_width ?? has_width.min_width,
                         ),
@@ -45,10 +40,7 @@ export function useRoomExtender(
                 set_height(
                     as_uint_or_default(
                         clamp(
-                            has_width.max_height -
-                                Math.floor(
-                                    event.nativeEvent.offsetY / FLOOR_HEIGHT
-                                ),
+                            has_width.max_height - Math.floor(event.nativeEvent.offsetY / FLOOR_HEIGHT),
                             has_width.min_height,
                             has_width.max_height,
                         ),

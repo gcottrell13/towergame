@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { RoomKind } from '../types/RoomDefinition.ts';
 import type { FloorKind } from '../types/FloorDefinition.ts';
+import type { RoomKind } from '../types/RoomDefinition.ts';
 import type { TransportationKind } from '../types/TransportationDefinition.ts';
 
 type STATE_TYPE = {
@@ -12,9 +12,7 @@ type STATE_TYPE = {
 };
 
 const subscribers: {
-    [p in keyof STATE_TYPE]: React.Dispatch<
-        React.SetStateAction<map_distribute<p> | null>
-    >[];
+    [p in keyof STATE_TYPE]: React.Dispatch<React.SetStateAction<map_distribute<p> | null>>[];
 } = {
     room: [],
     rezone: [],
@@ -26,9 +24,7 @@ let current_state_name: keyof STATE_TYPE | null = null;
 let current_state: any = null;
 
 // the conditional is a little trick to distribute this mapped type over all the items in a union
-type map_distribute<T extends keyof STATE_TYPE> = T extends any
-    ? { type: T } & STATE_TYPE[T]
-    : never;
+type map_distribute<T extends keyof STATE_TYPE> = T extends any ? { type: T } & STATE_TYPE[T] : never;
 
 /**
  * subscribe to just the construction contexts that you need
@@ -37,9 +33,7 @@ type map_distribute<T extends keyof STATE_TYPE> = T extends any
 export function useConstructionContext<T extends keyof STATE_TYPE>(
     ...keys: T[]
 ): [map_distribute<T> | null, (s: map_distribute<T> | null) => void] {
-    const [state, set_state] = useState<map_distribute<T> | null>(
-        current_state,
-    );
+    const [state, set_state] = useState<map_distribute<T> | null>(current_state);
     useEffect(() => {
         for (const key of keys) subscribers[key].push(set_state);
         return () => {

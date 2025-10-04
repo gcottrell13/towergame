@@ -1,8 +1,8 @@
+import type { ReactElement } from 'react';
+import type { Floor } from '../types/Floor.ts';
+import type { uint } from '../types/RestrictedTypes.ts';
 import type { SMap } from '../types/SMap.ts';
 import images from './images.ts';
-import type { ReactElement } from 'react';
-import type {Floor} from "../types/Floor.ts";
-import type {uint} from "../types/RestrictedTypes.ts";
 
 export enum TransportationType {
     Elevator,
@@ -26,8 +26,7 @@ export const TRANSPORT_DEFS_RAW = {
         width: 2,
         cost_per_floor: 20,
         async overlay() {
-            return (await import('../components/ElevatorOverlay.tsx'))
-                .ElevatorOverlay;
+            return (await import('../components/ElevatorOverlay.tsx')).ElevatorOverlay;
         },
     },
 } as const satisfies SMap<TransportationDefinitionRaw>;

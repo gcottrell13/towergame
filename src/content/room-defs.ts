@@ -1,7 +1,7 @@
-import type { SMap } from '../types/SMap.ts';
-import images from './images.ts';
 import type { ReactElement } from 'react';
 import type { uint } from '../types/RestrictedTypes.ts';
+import type { SMap } from '../types/SMap.ts';
+import images from './images.ts';
 
 export enum RoomCategory {
     Room,

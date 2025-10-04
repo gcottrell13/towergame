@@ -1,9 +1,9 @@
-import { ROOM_DEFS } from '../types/RoomDefinition.ts';
-import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { RoomCategory } from '../content/room-defs.ts';
 import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
-import { RoomCategory } from '../content/room-defs.ts';
+import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
+import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 import { PinSide } from './PinSide.tsx';
 
@@ -44,12 +44,7 @@ export function BuildMenu() {
     const [rect, set_rect] = useState<DOMRect | null>(null);
     const ref = useRef<HTMLDivElement>(null);
 
-    const [construction, set_construction] = useConstructionContext(
-        'room',
-        'rezone',
-        'extend_floor',
-        'transport',
-    );
+    const [construction, set_construction] = useConstructionContext('room', 'rezone', 'extend_floor', 'transport');
     const [save] = useContext(SaveFileContext);
 
     const set_menu = useCallback(
@@ -123,11 +118,7 @@ export function BuildMenu() {
             <div>
                 <SelectBuild which={Menu.Rooms} name={'Rooms'} {...select} />
                 <SelectBuild which={Menu.Floors} name={'Floors'} {...select} />
-                <SelectBuild
-                    which={Menu.Transport}
-                    name={'Transport'}
-                    {...select}
-                />
+                <SelectBuild which={Menu.Transport} name={'Transport'} {...select} />
             </div>
 
             <span hidden={current_menu !== Menu.Rooms}>
@@ -165,32 +156,16 @@ function RoomSelector() {
                             }}
                         >
                             <span>{def.display_name}</span>
-                            <img
-                                src={def.sprite_empty}
-                                alt={def.sprite_empty}
-                            />
-                            <span>
-                                $
-                                {def.cost_to_build(
-                                    def.min_width,
-                                    def.min_height,
-                                )}
-                            </span>
+                            <img src={def.sprite_empty} alt={def.sprite_empty} />
+                            <span>${def.cost_to_build(def.min_width, def.min_height)}</span>
                             <button
                                 type={'button'}
                                 style={{
-                                    opacity:
-                                        construction?.value === def.id
-                                            ? 0
-                                            : 100,
+                                    opacity: construction?.value === def.id ? 0 : 100,
                                 }}
                                 disabled={
                                     construction?.value === def.id ||
-                                    save.money <
-                                        def.cost_to_build(
-                                            def.min_width,
-                                            def.min_height,
-                                        )
+                                    save.money < def.cost_to_build(def.min_width, def.min_height)
                                 }
                                 onClick={() => {
                                     set_construction({
@@ -209,13 +184,9 @@ function RoomSelector() {
 }
 
 function FloorSelector() {
-    const [construction, set_construction] = useConstructionContext(
-        'rezone',
-        'extend_floor',
-    );
+    const [construction, set_construction] = useConstructionContext('rezone', 'extend_floor');
     const [save] = useContext(SaveFileContext);
-    const floor_kind =
-        construction?.type === 'rezone' ? construction.value : null;
+    const floor_kind = construction?.type === 'rezone' ? construction.value : null;
     return (
         <div className={'overflow-y-scroll'}>
             <button
@@ -250,10 +221,7 @@ function FloorSelector() {
                                 style={{
                                     opacity: floor_kind === def.id ? 0 : 100,
                                 }}
-                                disabled={
-                                    floor_kind === def.id ||
-                                    save.money < def.cost_to_build
-                                }
+                                disabled={floor_kind === def.id || save.money < def.cost_to_build}
                                 onClick={() => {
                                     set_construction({
                                         type: 'rezone',
@@ -271,8 +239,7 @@ function FloorSelector() {
 }
 
 function TransportationSelector() {
-    const [construction, set_construction] =
-        useConstructionContext('transport');
+    const [construction, set_construction] = useConstructionContext('transport');
     const [save] = useContext(SaveFileContext);
     return (
         <div className={'overflow-y-scroll'}>
@@ -292,23 +259,15 @@ function TransportationSelector() {
                             }}
                         >
                             <span>{def.name}</span>
-                            <img
-                                src={def.sprite_empty}
-                                alt={def.sprite_empty}
-                            />
+                            <img src={def.sprite_empty} alt={def.sprite_empty} />
                             <span>${def.cost_per_floor(def.min_height)}</span>
                             <button
                                 type={'button'}
                                 style={{
-                                    opacity:
-                                        construction?.value === def.id
-                                            ? 0
-                                            : 100,
+                                    opacity: construction?.value === def.id ? 0 : 100,
                                 }}
                                 disabled={
-                                    construction?.value === def.id ||
-                                    save.money <
-                                        def.cost_per_floor(def.min_height)
+                                    construction?.value === def.id || save.money < def.cost_per_floor(def.min_height)
                                 }
                                 onClick={() => {
                                     set_construction({
@@ -335,17 +294,8 @@ function side_styles(
 ): React.CSSProperties {
     return {
         right:
-            position === 'right'
-                ? mouse_in
-                    ? '0px'
-                    : `-${pinned ? 0 : (rect?.width ?? 0) - visible}px`
-                : undefined,
-        left:
-            position === 'left'
-                ? mouse_in
-                    ? '0px'
-                    : `-${pinned ? 0 : (rect?.width ?? 0) - visible}px`
-                : undefined,
+            position === 'right' ? (mouse_in ? '0px' : `-${pinned ? 0 : (rect?.width ?? 0) - visible}px`) : undefined,
+        left: position === 'left' ? (mouse_in ? '0px' : `-${pinned ? 0 : (rect?.width ?? 0) - visible}px`) : undefined,
         transition: `left 0.25s ease-out, right 0.25s ease-out`,
         borderBottomRightRadius: position === 'right' ? '' : '5px',
         borderBottomLeftRadius: position === 'left' ? '' : '5px',

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
+import { FLOOR_HEIGHT } from '../constants.ts';
 import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { BuildingComponent } from './BuildingComponent.tsx';
-import { FLOOR_HEIGHT } from '../constants.ts';
 
 export function AllBuildings() {
     const [state, _setState] = useContext(SaveFileContext);

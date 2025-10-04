@@ -18,7 +18,7 @@ export function as_uint_or_default(n: number): uint {
 }
 
 export function to_uint(n: number): uint {
-    return n > 0 ? Math.floor(n) as uint : 0 as uint;
+    return n > 0 ? (Math.floor(n) as uint) : (0 as uint);
 }
 
 /**

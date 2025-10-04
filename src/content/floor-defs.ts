@@ -1,7 +1,7 @@
-import type { SMap } from '../types/SMap.ts';
-import type { RoomIds } from './room-defs.ts';
-import images from './images.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
+import type { SMap } from '../types/SMap.ts';
+import images from './images.ts';
+import type { RoomIds } from './room-defs.ts';
 
 export const FLOOR_DEFS_RAW = {
     buildables: {

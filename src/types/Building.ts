@@ -1,5 +1,5 @@
-import type { int, uint } from './RestrictedTypes.ts';
 import type { Floor } from './Floor.ts';
+import type { int, uint } from './RestrictedTypes.ts';
 import type { Transportation } from './Transportation.ts';
 
 export interface Building {

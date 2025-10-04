@@ -1,10 +1,6 @@
-import {as_uint_or_default, to_uint, type uint} from './RestrictedTypes.ts';
-import {
-    ROOM_DEFS_RAW,
-    RoomCategory,
-    type RoomDefRaw,
-} from '../content/room-defs.ts';
 import type { ReactElement } from 'react';
+import { ROOM_DEFS_RAW, RoomCategory, type RoomDefRaw } from '../content/room-defs.ts';
+import { as_uint_or_default, to_uint, type uint } from './RestrictedTypes.ts';
 
 /**
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
@@ -70,12 +66,7 @@ export interface RoomDefinition {
 
 export const ROOM_DEFS: {
     [p: RoomKind]: RoomDefinition;
-} = Object.fromEntries(
-    Object.entries(ROOM_DEFS_RAW).map(([id, value]) => [
-        id,
-        def_from_raw(id, value),
-    ]),
-);
+} = Object.fromEntries(Object.entries(ROOM_DEFS_RAW).map(([id, value]) => [id, def_from_raw(id, value)]));
 
 function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
     return {
@@ -104,5 +95,7 @@ function process_cost_to_build(t: RoomDefRaw): RoomDefinition['cost_to_build'] {
         return t.cost_to_build;
     }
     const a = as_uint_or_default(t.cost_to_build);
-    return (w, h) => {return as_uint_or_default(a * to_uint(w * h / t.min_width));};
+    return (w, h) => {
+        return as_uint_or_default(a * to_uint((w * h) / t.min_width));
+    };
 }
