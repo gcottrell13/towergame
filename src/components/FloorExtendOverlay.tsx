@@ -5,6 +5,7 @@ import { FloorContext } from '../context/FloorContext.ts';
 import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
+import { MouseableDiv } from './MouseableDiv.tsx';
 
 const overlay_style = {
     position: 'absolute',
@@ -29,12 +30,9 @@ export function FloorExtendOverlay() {
     const [building] = useContext(BuildingContext);
     const [save] = useContext(SaveFileContext);
 
-    const expand_left =
-        (floor.height > 1 ? building.floors[building.top_floor - floor.height + 1].size_left : building.max_width) -
-        floor.size_left;
-    const expand_right =
-        (floor.height > 1 ? building.floors[building.top_floor - floor.height + 1].size_right : building.max_width) -
-        floor.size_right;
+    const below = building.floors[building.top_floor - floor.height + 1];
+    const expand_left = (floor.height > 1 && below ? below.size_left : building.max_width) - floor.size_left;
+    const expand_right = (floor.height > 1 && below ? below.size_right : building.max_width) - floor.size_right;
 
     let right = null;
     let left = null;
@@ -47,9 +45,7 @@ export function FloorExtendOverlay() {
         const cost = cost_build * expand_right;
         const sufficient_funds = save.money >= cost;
         right = (
-            // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
-            // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-            <div
+            <MouseableDiv
                 style={{
                     ...overlay_style,
                     right: `-${(floor.size_right + expand_right) * PIXELS_PER_UNIT}px`,
@@ -89,16 +85,14 @@ export function FloorExtendOverlay() {
                         </span>
                     </span>
                 </div>
-            </div>
+            </MouseableDiv>
         );
     }
     if (expand_left > 0) {
         const cost = cost_build * expand_left;
         const sufficient_funds = save.money >= cost;
         left = (
-            // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
-            // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-            <div
+            <MouseableDiv
                 style={{
                     ...overlay_style,
                     left: `-${(expand_left + floor.size_left) * PIXELS_PER_UNIT}px`,
@@ -138,7 +132,7 @@ export function FloorExtendOverlay() {
                         </span>
                     </span>
                 </div>
-            </div>
+            </MouseableDiv>
         );
     }
 
@@ -167,9 +161,7 @@ export function NewFloorOverlay() {
     const sufficient_funds = save.money >= cost;
 
     return (
-        // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
-        // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-        <div
+        <MouseableDiv
             style={{
                 ...overlay_style,
                 height: `${FLOOR_HEIGHT}px`,
@@ -207,6 +199,6 @@ export function NewFloorOverlay() {
                     </span>
                 </span>
             </div>
-        </div>
+        </MouseableDiv>
     );
 }

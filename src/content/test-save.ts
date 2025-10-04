@@ -1,3 +1,4 @@
+import type { FloorKind } from '../types/FloorDefinition.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
 import type { SaveFile } from '../types/SaveFile.ts';
 
@@ -12,14 +13,14 @@ export const TEST_SAVE: SaveFile = {
             floors: [
                 {
                     height: 2 as int,
-                    kind: 'basic' as any,
+                    kind: 'basic' as FloorKind,
                     rooms: [],
                     size_left: 8 as uint,
                     size_right: 8 as uint,
                 },
                 {
                     height: 1 as int,
-                    kind: 'basic' as any,
+                    kind: 'basic' as FloorKind,
                     rooms: [],
                     size_left: 20 as uint,
                     size_right: 20 as uint,

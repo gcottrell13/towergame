@@ -11,9 +11,10 @@ import type { int, uint } from '../types/RestrictedTypes.ts';
 import { RoomState } from '../types/Room.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
+import { MouseableDiv } from './MouseableDiv.tsx';
 import { useRoomExtender } from './RoomExtender.tsx';
 
-const ResizingRoomCtx = createContext<[boolean, (x: boolean) => void]>([] as any);
+const ResizingRoomCtx = createContext<[boolean, (x: boolean) => void]>([false, () => {}]);
 
 // number of floors
 const extra_height = 10;
@@ -32,8 +33,7 @@ export function RoomBuilderTotal() {
     const bottom_floor = building.floors[building.floors.length - 1];
 
     return (
-        // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
-        <div
+        <MouseableDiv
             onContextMenu={(ev) => {
                 ev.preventDefault();
                 set_construction(null);
@@ -64,7 +64,7 @@ export function RoomBuilderTotal() {
                         <RoomBuilderFloor key={x.height} floor={x} construction={construction} />
                     ))}
             </ResizingRoomCtx>
-        </div>
+        </MouseableDiv>
     );
 }
 
@@ -137,9 +137,7 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
     }
 
     return (
-        // biome-ignore lint/a11y/noStaticElementInteractions: mouseMove
-        // biome-ignore lint/a11y/useKeyWithClickEvents: no keys
-        <div
+        <MouseableDiv
             className={'no-sel'}
             style={{
                 ...style,
@@ -205,6 +203,6 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
                     {extension_overlay}
                 </div>
             )}
-        </div>
+        </MouseableDiv>
     );
 }

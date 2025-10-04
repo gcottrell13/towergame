@@ -36,7 +36,7 @@ export const TRANSPORT_DEFS: {
 function def_from_raw(id: string, raw: TransportationDefinitionRaw): TransportationDefinition {
     return {
         d: 'transport',
-        id: id as any,
+        id: id as TransportationKind,
         name: raw.name,
         type: raw.type,
         sprite_empty: raw.sprite_empty,

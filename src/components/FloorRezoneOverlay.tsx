@@ -4,6 +4,7 @@ import { FloorContext } from '../context/FloorContext.ts';
 import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { cost_to_rezone_floor } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
+import { MouseableDiv } from './MouseableDiv.tsx';
 
 interface Props {
     floor_kind: FloorKind;
@@ -51,9 +52,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
     const cost = cost_to_rezone_floor(floor);
     const sufficient_funds = cost <= save.money;
     return (
-        // biome-ignore lint/a11y/noStaticElementInteractions: clicky
-        // biome-ignore lint/a11y/useKeyWithClickEvents: no keys
-        <div
+        <MouseableDiv
             id={`rezone-${floor.height}`}
             className="no-sel"
             style={{
@@ -105,6 +104,6 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                 </span>
             ) : null}
             <span style={tag_style}>{floor.kind ? FLOOR_DEFS.buildables[floor.kind].name : FLOOR_DEFS.empty.name}</span>
-        </div>
+        </MouseableDiv>
     );
 }

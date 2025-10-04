@@ -41,11 +41,13 @@ export const FLOOR_DEFS: FloorDefs = {
 function def_from_raw(id: string, item: FloorDefRaw): FloorDefinition {
     return {
         d: 'floor',
-        id: id as any,
+        // @ts-expect-error
+        id,
         tier: as_uint_or_default(item.tier ?? 0),
         background: item.background,
         name: item.name,
         cost_to_build: as_uint_or_default(item.cost_to_build),
-        rooms: (item.rooms as any) ?? [],
+        // @ts-expect-error
+        rooms: item.rooms ?? [],
     };
 }

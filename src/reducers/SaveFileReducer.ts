@@ -41,6 +41,12 @@ export function SaveFileReducer(save_file: SaveFile, action: SaveFileActions): S
             updated.money = as_int_or_default(updated.money - cost);
             break;
         }
+        case 'rezone-floor': {
+            break;
+        }
+        case 'extend-floor': {
+            break;
+        }
     }
     return updated;
 }

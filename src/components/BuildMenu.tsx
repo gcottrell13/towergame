@@ -2,9 +2,10 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { RoomCategory } from '../content/room-defs.ts';
 import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
-import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import { ROOM_DEFS } from '../types/RoomDefinition.ts';
-import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
+import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
+import { ROOM_DEFS, type RoomKind } from '../types/RoomDefinition.ts';
+import { TRANSPORT_DEFS, type TransportationKind } from '../types/TransportationDefinition.ts';
+import { MouseableDiv } from './MouseableDiv.tsx';
 import { PinSide } from './PinSide.tsx';
 
 const build_menu_style = {
@@ -88,8 +89,7 @@ export function BuildMenu() {
     /// ====================================================================================================
 
     return (
-        // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
-        <div
+        <MouseableDiv
             ref={ref}
             style={{
                 ...build_menu_style,
@@ -130,7 +130,7 @@ export function BuildMenu() {
             <span hidden={current_menu !== Menu.Transport}>
                 <TransportationSelector />
             </span>
-        </div>
+        </MouseableDiv>
     );
 }
 
@@ -141,7 +141,7 @@ function RoomSelector() {
         <div className={'overflow-y-scroll'}>
             {Object.keys(ROOM_DEFS)
                 .sort()
-                .map((id) => ROOM_DEFS[id as any])
+                .map((id) => ROOM_DEFS[id as RoomKind])
                 .filter((def) => def.category === RoomCategory.Room)
                 .map((def) => {
                     return (
@@ -201,7 +201,7 @@ function FloorSelector() {
             {Object.keys(FLOOR_DEFS.buildables)
                 .sort()
                 .map((id) => {
-                    const def = FLOOR_DEFS.buildables[id as any];
+                    const def = FLOOR_DEFS.buildables[id as FloorKind];
                     return (
                         <div
                             key={id}
@@ -245,7 +245,7 @@ function TransportationSelector() {
         <div className={'overflow-y-scroll'}>
             {Object.keys(TRANSPORT_DEFS)
                 .sort()
-                .map((id) => TRANSPORT_DEFS[id as any])
+                .map((id) => TRANSPORT_DEFS[id as TransportationKind])
                 .map((def) => {
                     return (
                         <div

@@ -6,7 +6,7 @@ import { as_uint_or_default, to_uint, type uint } from './RestrictedTypes.ts';
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
  * @asType string
  */
-export type RoomKind = number & { readonly __type: unique symbol };
+export type RoomKind = string & { readonly __type: unique symbol };
 
 export interface RoomDefinition {
     d: 'room';
@@ -71,7 +71,8 @@ export const ROOM_DEFS: {
 function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
     return {
         d: 'room',
-        id: id as any,
+        // @ts-expect-error
+        id,
         category: raw.category ?? RoomCategory.Room,
         cost_to_build: process_cost_to_build(raw),
         min_width: as_uint_or_default(raw.min_width),
