@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { RoomCategory } from '../content/room-defs.ts';
-import { SaveFileContext } from '../context/SaveFileContext.ts';
+import { BuildingContext } from '../context/BuildingContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 import { ROOM_DEFS, type RoomKind } from '../types/RoomDefinition.ts';
@@ -45,7 +45,7 @@ export function BuildMenu() {
     const ref = useRef<HTMLDivElement>(null);
 
     const [construction, set_construction] = useConstructionContext('room', 'rezone', 'extend_floor', 'transport');
-    const [save] = useContext(SaveFileContext);
+    const [building] = useContext(BuildingContext);
 
     const set_menu = useCallback(
         (m: Menu) => {
@@ -58,10 +58,10 @@ export function BuildMenu() {
     useEffect(() => {
         if (construction?.type !== 'room') return;
         const def = ROOM_DEFS[construction.value];
-        if (save.money < def.cost_to_build(def.min_width, def.min_height)) {
+        if (building.money < def.cost_to_build(def.min_width, def.min_height)) {
             set_construction(null);
         }
-    }, [construction, save.money, set_construction]);
+    }, [construction, building.money, set_construction]);
 
     /// ====================================================================================================
     /// ====================================================================================================
@@ -104,7 +104,7 @@ export function BuildMenu() {
             className={!mouse_in && !pinned ? 'hide-content' : ''}
         >
             <PinSide {...pin_side} />
-            <div>Money: {save.money}</div>
+            <div>Money: {building.money}</div>
             {construction && (
                 <div style={{ display: 'flex', gap: '5px' }}>
                     {current_display}
@@ -135,7 +135,7 @@ export function BuildMenu() {
 
 function RoomSelector() {
     const [construction, set_construction] = useConstructionContext('room');
-    const [save] = useContext(SaveFileContext);
+    const [building] = useContext(BuildingContext);
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(ROOM_DEFS)
@@ -143,6 +143,7 @@ function RoomSelector() {
                 .map((id) => ROOM_DEFS[id as RoomKind])
                 .filter((def) => def.category === RoomCategory.Room)
                 .map((def) => {
+                    const min_cost = def.cost_to_build(def.min_width, def.min_height);
                     return (
                         <div
                             key={def.id}
@@ -156,16 +157,13 @@ function RoomSelector() {
                         >
                             <span>{def.display_name}</span>
                             <img src={def.sprite_empty} alt={def.sprite_empty} />
-                            <span>${def.cost_to_build(def.min_width, def.min_height)}</span>
+                            <span>${min_cost}</span>
                             <button
                                 type={'button'}
                                 style={{
                                     opacity: construction?.value === def.id ? 0 : 100,
                                 }}
-                                disabled={
-                                    construction?.value === def.id ||
-                                    save.money < def.cost_to_build(def.min_width, def.min_height)
-                                }
+                                disabled={construction?.value === def.id || building.money < min_cost}
                                 onClick={() => {
                                     set_construction({
                                         type: 'room',
@@ -184,7 +182,7 @@ function RoomSelector() {
 
 function FloorSelector() {
     const [construction, set_construction] = useConstructionContext('rezone', 'extend_floor');
-    const [save] = useContext(SaveFileContext);
+    const [building] = useContext(BuildingContext);
     const floor_kind = construction?.type === 'rezone' ? construction.value : null;
     return (
         <div className={'overflow-y-scroll'}>
@@ -220,7 +218,7 @@ function FloorSelector() {
                                 style={{
                                     opacity: floor_kind === def.id ? 0 : 100,
                                 }}
-                                disabled={floor_kind === def.id || save.money < def.cost_to_build}
+                                disabled={floor_kind === def.id || building.money < def.cost_to_build}
                                 onClick={() => {
                                     set_construction({
                                         type: 'rezone',
@@ -239,7 +237,7 @@ function FloorSelector() {
 
 function TransportationSelector() {
     const [construction, set_construction] = useConstructionContext('transport');
-    const [save] = useContext(SaveFileContext);
+    const [building] = useContext(BuildingContext);
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(TRANSPORT_DEFS)
@@ -259,14 +257,14 @@ function TransportationSelector() {
                         >
                             <span>{def.name}</span>
                             <img src={def.sprite_empty} alt={def.sprite_empty} />
-                            <span>${def.cost_per_floor(def.min_height)}</span>
+                            <span>${def.cost_to_build(def.min_height)}</span>
                             <button
                                 type={'button'}
                                 style={{
                                     opacity: construction?.value === def.id ? 0 : 100,
                                 }}
                                 disabled={
-                                    construction?.value === def.id || save.money < def.cost_per_floor(def.min_height)
+                                    construction?.value === def.id || building.money < def.cost_to_build(def.min_height)
                                 }
                                 onClick={() => {
                                     set_construction({

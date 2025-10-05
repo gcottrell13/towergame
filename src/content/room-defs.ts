@@ -19,7 +19,6 @@ export const ROOM_DEFS_RAW = {
     },
     'hotel-basic-small': {
         min_width: 2,
-        max_width: 2,
         display_name: 'Hotel Room',
         sprite_active: images.ROOM_HOTEL_BASIC_SMALL_OCCUPIED_PNG,
         sprite_empty: images.ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG,

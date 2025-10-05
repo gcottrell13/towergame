@@ -35,6 +35,12 @@ export function FloorComponent({ floor }: Props) {
             <div style={style} id={`floor-${floor.height}`}>
                 <Background floor={floor} />
                 {floor_below && floor_below.height >= 0 && <RoofOnBelow floor={floor} below_floor={floor_below} />}
+                {building.top_floor === floor.height && (
+                    // give us our own roof if we are on the top of the building
+                    <div style={{ position: 'absolute', top: `-${FLOOR_HEIGHT}px` }}>
+                        <RoofOnBelow floor={floor} below_floor={floor} />
+                    </div>
+                )}
                 {construction?.type === 'rezone' && floor_def.id !== construction.value && (
                     <FloorRezoneOverlay floor_kind={construction.value} />
                 )}
@@ -71,6 +77,7 @@ function RoofOnBelow({ floor, below_floor }: { floor: Floor; below_floor: Floor 
 }
 
 export function TopRoofComponent() {
+    // doesn't actually show the roof because the animations weren't lining up properly with the top floor being expanded.
     const [building] = useContext(BuildingContext);
     const floor = building.floors[0];
     const [construction] = useConstructionContext('extend_floor');
@@ -82,8 +89,7 @@ export function TopRoofComponent() {
                 top: `-${(floor.height + 2) * FLOOR_HEIGHT}px`,
             }}
         >
-            {construction && <NewFloorOverlay />}
-            <RoofOnBelow floor={floor} below_floor={floor} />
+            {construction && building.top_floor < building.max_height && <NewFloorOverlay />}
         </div>
     );
 }

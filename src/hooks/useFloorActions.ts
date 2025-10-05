@@ -1,6 +1,6 @@
 import { useCallback, useContext } from 'react';
 import { BuildingContext } from '../context/BuildingContext.ts';
-import type { FloorActions } from '../context/SaveFileContext.ts';
+import type { FloorActions } from '../events/SaveFileActions.ts';
 import type { Floor } from '../types/Floor.ts';
 
 /**

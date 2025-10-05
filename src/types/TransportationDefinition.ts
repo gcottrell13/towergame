@@ -13,7 +13,7 @@ export interface TransportationDefinition {
     d: 'transport';
     id: TransportationKind;
     name: string;
-    cost_per_floor(height: number): uint;
+    cost_to_build(height: number): uint;
     type: TransportationType;
     sprite_empty: string;
     sprite_occupied: string | null;
@@ -47,11 +47,11 @@ function def_from_raw(id: string, raw: TransportationDefinitionRaw): Transportat
         can_stop_at_floor: raw.can_stop_at_floor ?? null,
         tier: as_uint_or_default(raw.tier ?? 0),
         overlay: raw.overlay,
-        cost_per_floor: cost_per_floor(raw),
+        cost_to_build: cost_to_build(raw),
     };
 }
 
-function cost_per_floor(raw: TransportationDefinitionRaw): TransportationDefinition['cost_per_floor'] {
+function cost_to_build(raw: TransportationDefinitionRaw): TransportationDefinition['cost_to_build'] {
     if (raw.cost_per_floor instanceof Function) return raw.cost_per_floor;
     const c = as_uint_or_default(raw.cost_per_floor);
     return (h) => to_uint(c * h);

@@ -9,3 +9,7 @@ export interface Floor {
     size_right: uint;
     rooms: Room[];
 }
+
+export function Default(): Floor {
+    return { height: 0 as int, size_right: 0 as uint, size_left: 0 as uint, rooms: [], kind: '' as FloorKind };
+}

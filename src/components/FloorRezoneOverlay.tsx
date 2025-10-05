@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { DESTROY_ROOM_COST, PIXELS_PER_UNIT } from '../constants.ts';
+import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { cost_to_rezone_floor } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 
@@ -45,11 +45,11 @@ const tag_style = {
 
 export function FloorRezoneOverlay({ floor_kind }: Props) {
     const [hovered, set_hovered] = useState(false);
-    const [save] = useContext(SaveFileContext);
+    const [building] = useContext(BuildingContext);
     const [floor, update_floor] = useContext(FloorContext);
     const floor_def = FLOOR_DEFS.buildables[floor_kind];
     const cost = cost_to_rezone_floor(floor);
-    const sufficient_funds = cost <= save.money;
+    const sufficient_funds = cost <= building.money;
     return (
         <div
             id={`rezone-${floor.height}`}

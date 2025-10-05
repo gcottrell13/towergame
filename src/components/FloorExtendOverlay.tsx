@@ -2,7 +2,6 @@ import { useCallback, useContext } from 'react';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import { SaveFileContext } from '../context/SaveFileContext.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
 
@@ -27,11 +26,10 @@ const popover_style = {
 export function FloorExtendOverlay() {
     const [floor, update_floor] = useContext(FloorContext);
     const [building] = useContext(BuildingContext);
-    const [save] = useContext(SaveFileContext);
 
     const below = building.floors[building.top_floor - floor.height + 1];
-    const expand_left = (floor.height > 1 && below ? below.size_left : building.max_width) - floor.size_left;
-    const expand_right = (floor.height > 1 && below ? below.size_right : building.max_width) - floor.size_right;
+    const expand_left = (floor.height > 0 && below ? below.size_left : building.max_width) - floor.size_left;
+    const expand_right = (floor.height > 0 && below ? below.size_right : building.max_width) - floor.size_right;
 
     let right = null;
     let left = null;
@@ -42,7 +40,7 @@ export function FloorExtendOverlay() {
 
     if (expand_right > 0) {
         const cost = cost_build * expand_right;
-        const sufficient_funds = save.money >= cost;
+        const sufficient_funds = building.money >= cost;
         right = (
             <div
                 style={{
@@ -56,10 +54,11 @@ export function FloorExtendOverlay() {
                 }}
                 className="hover-parent-display"
                 onClick={() => {
-                    update_floor({
-                        action: 'extend-floor',
-                        size_right: (floor.size_right + expand_right) as uint,
-                    });
+                    if (sufficient_funds)
+                        update_floor({
+                            action: 'extend-floor',
+                            size_right: expand_right as uint,
+                        });
                 }}
             >
                 <div className="hover-child-display">
@@ -89,7 +88,7 @@ export function FloorExtendOverlay() {
     }
     if (expand_left > 0) {
         const cost = cost_build * expand_left;
-        const sufficient_funds = save.money >= cost;
+        const sufficient_funds = building.money >= cost;
         left = (
             <div
                 style={{
@@ -103,10 +102,11 @@ export function FloorExtendOverlay() {
                 }}
                 className="hover-parent-display"
                 onClick={() => {
-                    update_floor({
-                        action: 'extend-floor',
-                        size_right: (floor.size_left + expand_left) as uint,
-                    });
+                    if (sufficient_funds)
+                        update_floor({
+                            action: 'extend-floor',
+                            size_left: expand_left as uint,
+                        });
                 }}
             >
                 <div className="hover-child-display">
@@ -145,8 +145,6 @@ export function FloorExtendOverlay() {
 
 export function NewFloorOverlay() {
     const [building, update_building] = useContext(BuildingContext);
-    const [save] = useContext(SaveFileContext);
-    const top_floor = building.floors[0];
 
     const update = useCallback(() => {
         update_building({
@@ -157,7 +155,7 @@ export function NewFloorOverlay() {
 
     const size = FLOOR_DEFS.new_floor_size[0] + FLOOR_DEFS.new_floor_size[1];
     const cost = size * FLOOR_DEFS.empty.cost_to_build;
-    const sufficient_funds = save.money >= cost;
+    const sufficient_funds = building.money >= cost;
 
     return (
         <div
@@ -168,7 +166,7 @@ export function NewFloorOverlay() {
                 background: sufficient_funds
                     ? 'color-mix(in srgb, lawngreen 30%, transparent)'
                     : 'color-mix(in srgb, red 30%, transparent)',
-                left: `${(top_floor.size_left - FLOOR_DEFS.new_floor_size[0]) * PIXELS_PER_UNIT}px`,
+                left: `${-FLOOR_DEFS.new_floor_size[0] * PIXELS_PER_UNIT}px`,
             }}
             className="hover-parent-display"
             onClick={() => {
