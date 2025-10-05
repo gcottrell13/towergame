@@ -5,6 +5,7 @@ import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { useFloorActions } from '../hooks/useFloorActions.ts';
+import { hori, verti } from '../logicFunctions.ts';
 import type { Floor } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
@@ -42,10 +43,10 @@ export function RoomBuilderTotal() {
             style={{
                 zIndex: Z_INDEX.builder_overlay,
                 position: 'absolute',
-                left: `-${building.max_width * PIXELS_PER_UNIT}px`,
-                top: `${-(building.top_floor + extra_height) * FLOOR_HEIGHT}px`,
-                width: `${building.max_width * 2 * PIXELS_PER_UNIT}px`,
-                height: `${(building.top_floor - bottom_floor.height + extra_height) * FLOOR_HEIGHT}px`,
+                left: hori(-building.max_width),
+                top: verti(-(building.top_floor + extra_height)),
+                width: hori(building.max_width * 2),
+                height: verti(building.top_floor - bottom_floor.height + extra_height),
             }}
         >
             <ResizingRoomCtx value={[choosing_height, set_choosing_height]}>
@@ -77,8 +78,8 @@ function RoomBuilderFloor({ floor, construction }: { floor: Floor; construction:
             <div
                 style={{
                     position: 'absolute',
-                    top: `${-(floor.height - 1 - extra_height) * FLOOR_HEIGHT}px`,
-                    left: `${(building.max_width - floor.size_left) * PIXELS_PER_UNIT}px`,
+                    top: verti(-(floor.height - 1 - extra_height)),
+                    left: hori(building.max_width - floor.size_left),
                 }}
             >
                 <BuildRoomOverlay construction={construction} />
@@ -130,7 +131,13 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
         } else if (def.d === 'transport') {
             update_building({
                 action: 'buy-transport',
-                transport: { kind: def.id, position: bp_location as int, height, occupancy: 0 as uint },
+                transport: {
+                    kind: def.id,
+                    position: bp_location as int,
+                    height,
+                    occupancy: 0 as uint,
+                    bottom_floor: floor.height,
+                },
             });
         }
     }
@@ -140,7 +147,7 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
             className={'no-sel'}
             style={{
                 ...style,
-                width: `${(floor.size_right + floor.size_left) * PIXELS_PER_UNIT}px`,
+                width: hori(floor.size_right + floor.size_left),
                 background: choosing_height ? '' : 'color-mix(in srgb, lawngreen 30%, transparent)',
             }}
             onMouseMove={(ev) => {
@@ -181,14 +188,14 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
                     className={'no-pointer'}
                     style={{
                         opacity: '50%',
-                        left: `${(bp_location + floor.size_left) * PIXELS_PER_UNIT}px`,
-                        width: `${width * PIXELS_PER_UNIT}px`,
-                        height: `${(height - 1) * FLOOR_HEIGHT + ROOM_HEIGHT}px`,
-                        top: `-${(height - 1) * FLOOR_HEIGHT}px`,
+                        left: hori(bp_location + floor.size_left),
+                        width: hori(width),
+                        height: verti(height - 1, ROOM_HEIGHT),
+                        top: verti(-height + 1),
                         position: 'absolute',
                         backgroundImage: `url(${def.sprite_empty})`,
                         backgroundRepeat: 'repeat',
-                        backgroundSize: `${def.min_width * PIXELS_PER_UNIT}px ${FLOOR_HEIGHT}px`,
+                        backgroundSize: `${hori(def.min_width)} ${FLOOR_HEIGHT}px`,
                     }}
                 />
             )}
@@ -196,7 +203,7 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
                 <div
                     style={{
                         position: 'absolute',
-                        left: `${(bp_location + floor.size_left) * PIXELS_PER_UNIT}px`,
+                        left: hori(bp_location + floor.size_left),
                     }}
                 >
                     {extension_overlay}

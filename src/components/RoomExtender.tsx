@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { clamp } from '../clamp.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
+import { hori, verti } from '../logicFunctions.ts';
 import { as_uint_or_default, type uint } from '../types/RestrictedTypes.ts';
 
 interface HasWidth {
@@ -58,10 +59,10 @@ export function useRoomExtender(has_width: HasWidth, on_click?: () => void, on_c
                 set_width(has_width.min_width);
             }}
             style={{
-                width: `${(has_width.max_width ?? has_width.min_width) * PIXELS_PER_UNIT}px`,
-                height: `${has_width.max_height * FLOOR_HEIGHT}px`,
+                width: hori(has_width.max_width ?? has_width.min_width),
+                height: verti(has_width.max_height),
                 position: 'absolute',
-                top: `-${(has_width.max_height - 1) * FLOOR_HEIGHT}px`,
+                top: verti(-has_width.max_height + 1),
                 background: 'color-mix(in srgb, lawngreen 30%, transparent)',
             }}
         ></div>

@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { FLOOR_HEIGHT, PIXELS_PER_UNIT, Z_INDEX } from '../constants.ts';
+import { Z_INDEX } from '../constants.ts';
+import { hori, verti } from '../logicFunctions.ts';
 import type { Room } from '../types/Room.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 
@@ -16,14 +17,14 @@ export function RoomComponent({ room }: Props) {
             className="fit-content no-sel"
             id={`${room.kind}-${room.position}`}
             style={{
-                left: `${room.position * PIXELS_PER_UNIT}px`,
-                top: `${-(room.height - 1) * FLOOR_HEIGHT}px`,
+                left: hori(room.position),
+                top: verti(-room.height + 1),
                 backgroundRepeat: 'repeat',
-                width: `${room.width * PIXELS_PER_UNIT}px`,
-                height: `${room.height * FLOOR_HEIGHT}px`,
+                width: hori(room.width),
+                height: verti(room.height),
                 backgroundImage: `url(${room_def.sprite_empty})`,
                 position: 'absolute',
-                backgroundSize: `${room_def.min_width * PIXELS_PER_UNIT}px ${FLOOR_HEIGHT}px`,
+                backgroundSize: `${hori(room_def.min_width)} ${verti(1)}px`,
                 zIndex: Z_INDEX.rooms,
             }}
         ></div>

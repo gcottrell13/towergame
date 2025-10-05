@@ -5,5 +5,6 @@ export interface Transportation {
     kind: TransportationKind;
     position: int;
     height: uint;
+    bottom_floor: int;
     occupancy: uint;
 }

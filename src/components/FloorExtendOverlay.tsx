@@ -1,7 +1,7 @@
 import { useCallback, useContext } from 'react';
-import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
+import { hori, verti } from '../logicFunctions.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
 
@@ -45,9 +45,9 @@ export function FloorExtendOverlay() {
             <div
                 style={{
                     ...overlay_style,
-                    right: `-${(floor.size_right + expand_right) * PIXELS_PER_UNIT}px`,
-                    height: `${FLOOR_HEIGHT}px`,
-                    width: `${expand_right * PIXELS_PER_UNIT}px`,
+                    right: hori(-(floor.size_right + expand_right)),
+                    height: verti(1),
+                    width: hori(expand_right),
                     background: sufficient_funds
                         ? 'color-mix(in srgb, lawngreen 30%, transparent)'
                         : 'color-mix(in srgb, red 30%, transparent)',
@@ -65,7 +65,7 @@ export function FloorExtendOverlay() {
                     <span
                         style={{
                             ...popover_style,
-                            right: `${expand_right * PIXELS_PER_UNIT}px`,
+                            right: hori(expand_right),
                         }}
                     >
                         {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
@@ -93,9 +93,9 @@ export function FloorExtendOverlay() {
             <div
                 style={{
                     ...overlay_style,
-                    left: `-${(expand_left + floor.size_left) * PIXELS_PER_UNIT}px`,
-                    height: `${FLOOR_HEIGHT}px`,
-                    width: `${expand_left * PIXELS_PER_UNIT}px`,
+                    left: hori(-(expand_left + floor.size_left)),
+                    height: verti(1),
+                    width: hori(expand_left),
                     background: sufficient_funds
                         ? 'color-mix(in srgb, lawngreen 30%, transparent)'
                         : 'color-mix(in srgb, red 30%, transparent)',
@@ -113,7 +113,7 @@ export function FloorExtendOverlay() {
                     <span
                         style={{
                             ...popover_style,
-                            left: `${expand_left * PIXELS_PER_UNIT}px`,
+                            left: hori(expand_left),
                         }}
                     >
                         {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
@@ -161,12 +161,12 @@ export function NewFloorOverlay() {
         <div
             style={{
                 ...overlay_style,
-                height: `${FLOOR_HEIGHT}px`,
-                width: `${size * PIXELS_PER_UNIT}px`,
+                height: verti(1),
+                width: hori(size),
                 background: sufficient_funds
                     ? 'color-mix(in srgb, lawngreen 30%, transparent)'
                     : 'color-mix(in srgb, red 30%, transparent)',
-                left: `${-FLOOR_DEFS.new_floor_size[0] * PIXELS_PER_UNIT}px`,
+                left: hori(-FLOOR_DEFS.new_floor_size[0]),
             }}
             className="hover-parent-display"
             onClick={() => {
@@ -178,7 +178,7 @@ export function NewFloorOverlay() {
                 <span
                     style={{
                         ...popover_style,
-                        top: `-${FLOOR_HEIGHT}px`,
+                        top: verti(-1),
                     }}
                 >
                     {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}

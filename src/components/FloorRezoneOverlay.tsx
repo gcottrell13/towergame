@@ -1,8 +1,8 @@
 import { useContext, useState } from 'react';
-import { DESTROY_ROOM_COST, PIXELS_PER_UNIT } from '../constants.ts';
+import { DESTROY_ROOM_COST } from '../constants.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import { cost_to_rezone_floor } from '../logicFunctions.ts';
+import { cost_to_rezone_floor, hori } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 
 interface Props {
@@ -56,8 +56,8 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
             className="no-sel"
             style={{
                 ...style,
-                width: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT}px`,
-                left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
+                width: hori(floor.size_left + floor.size_right),
+                left: hori(-floor.size_left),
                 background: sufficient_funds
                     ? 'color-mix(in srgb, lawngreen 30%, transparent)'
                     : 'color-mix(in srgb, red 30%, transparent)',
@@ -76,7 +76,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                 <span
                     style={{
                         ...popover_style,
-                        right: `${(floor.size_left + floor.size_right) * PIXELS_PER_UNIT + 5}px`,
+                        right: hori(floor.size_left + floor.size_right, 5),
                     }}
                 >
                     <span>Floor {floor.height} rezone:</span>

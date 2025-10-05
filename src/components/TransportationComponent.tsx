@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { FLOOR_HEIGHT, PIXELS_PER_UNIT, Z_INDEX } from '../constants.ts';
+import { Z_INDEX } from '../constants.ts';
+import { hori, verti } from '../logicFunctions.ts';
 import type { Transportation } from '../types/Transportation.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 
@@ -15,17 +16,17 @@ export function TransportationComponent({ transport }: Props) {
             className="fit-content no-sel"
             id={`${transport.kind}-${transport.position}`}
             style={{
-                left: `${transport.position * PIXELS_PER_UNIT}px`,
-                top: `${-(transport.height - 1) * FLOOR_HEIGHT}px`,
+                left: hori(transport.position),
+                top: verti(-(transport.bottom_floor + transport.height)),
                 backgroundRepeat: 'repeat',
-                width: `${t_def.min_width * PIXELS_PER_UNIT}px`,
-                height: `${transport.height * FLOOR_HEIGHT}px`,
+                width: hori(t_def.min_width),
+                height: verti(transport.height),
                 backgroundImage: `url(${t_def.sprite_empty})`,
                 position: 'absolute',
-                backgroundSize: `${t_def.min_width * PIXELS_PER_UNIT}px ${FLOOR_HEIGHT}px`,
+                backgroundSize: `${hori(t_def.min_width)} ${verti(1)}`,
                 zIndex: Z_INDEX.rooms,
             }}
-        ></div>
+        />
     );
 }
 
