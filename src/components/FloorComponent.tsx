@@ -1,5 +1,5 @@
 import { memo, useContext } from 'react';
-import { FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT } from '../constants.ts';
+import { ROOM_HEIGHT } from '../constants.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
@@ -9,6 +9,7 @@ import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { FloorExtendOverlay, NewFloorOverlay } from './FloorExtendOverlay.tsx';
 import { FloorRezoneOverlay } from './FloorRezoneOverlay.tsx';
 import { RoomComponentMemo } from './RoomComponent.tsx';
+import {hori, verti} from "../logicFunctions.ts";
 
 interface Props {
     floor: Floor;
@@ -23,7 +24,7 @@ export function FloorComponent({ floor }: Props) {
 
     const style = {
         height: `${ROOM_HEIGHT}px`,
-        top: `-${(floor.height + 1) * FLOOR_HEIGHT}px`,
+        top: verti(-floor.height - 1),
         position: 'absolute',
         zIndex: 0,
     } as const;
@@ -31,13 +32,13 @@ export function FloorComponent({ floor }: Props) {
     const floor_below = building.floors[building.top_floor - floor.height + 1];
 
     return (
-        <FloorContext.Provider value={[floor, update_floor]}>
+        <FloorContext value={[floor, update_floor]}>
             <div style={style} id={`floor-${floor.height}`}>
                 <Background floor={floor} />
                 {floor_below && floor_below.height >= 0 && <RoofOnBelow floor={floor} below_floor={floor_below} />}
                 {building.top_floor === floor.height && (
                     // give us our own roof if we are on the top of the building
-                    <div style={{ position: 'absolute', top: `-${FLOOR_HEIGHT}px` }}>
+                    <div style={{ position: 'absolute', top: verti(-1)}}>
                         <RoofOnBelow floor={floor} below_floor={floor} />
                     </div>
                 )}
@@ -49,7 +50,7 @@ export function FloorComponent({ floor }: Props) {
                     <RoomComponentMemo key={room.position} room={room} />
                 ))}
             </div>
-        </FloorContext.Provider>
+        </FloorContext>
     );
 }
 
@@ -86,7 +87,7 @@ export function TopRoofComponent() {
             id={`roof-${building.id}`}
             style={{
                 position: 'absolute',
-                top: `-${(floor.height + 2) * FLOOR_HEIGHT}px`,
+                top: verti(-floor.height - 2),
             }}
         >
             {construction && building.top_floor < building.max_height && <NewFloorOverlay />}
@@ -95,13 +96,12 @@ export function TopRoofComponent() {
 }
 
 function bg_styles(floor: Floor, image: string): React.CSSProperties {
-    const self_size = floor.size_left + floor.size_right;
     return {
         backgroundRepeat: 'repeat-x',
         backgroundImage: `url(${image})`,
-        width: `${self_size * PIXELS_PER_UNIT}px`,
+        width: hori(floor.size_left + floor.size_right),
         height: `${ROOM_HEIGHT}px`,
-        left: `-${floor.size_left * PIXELS_PER_UNIT}px`,
+        left: hori(-floor.size_left),
         borderBottom: `2px solid black`,
         zIndex: -1,
         position: 'absolute',

@@ -9,7 +9,6 @@ import { hori, verti } from '../logicFunctions.ts';
 import type { Floor } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
-import { RoomState } from '../types/Room.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 import { useRoomExtender } from './RoomExtender.tsx';
@@ -124,7 +123,6 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
                     height,
                     kind: def.id,
                     position: bp_location as int,
-                    state: RoomState.Unknown,
                     bottom_floor: floor.height,
                 },
             });
@@ -153,7 +151,7 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
             onMouseMove={(ev) => {
                 if (choosing_height) return;
                 const loc = clamp(
-                    Math.floor(ev.nativeEvent.offsetX / PIXELS_PER_UNIT - floor.size_left),
+                    Math.round(ev.nativeEvent.offsetX / PIXELS_PER_UNIT - floor.size_left - def.min_width / 2),
                     -floor.size_left,
                     floor.size_right - def.min_width,
                 );

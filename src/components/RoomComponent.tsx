@@ -24,7 +24,7 @@ export function RoomComponent({ room }: Props) {
                 height: verti(room.height),
                 backgroundImage: `url(${room_def.sprite_empty})`,
                 position: 'absolute',
-                backgroundSize: `${hori(room_def.min_width)} ${verti(1)}px`,
+                backgroundSize: `${hori(room_def.min_width)} ${verti(1)}`,
                 zIndex: Z_INDEX.rooms,
             }}
         ></div>

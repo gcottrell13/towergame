@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { ROOM_DEFS_RAW, RoomCategory, type RoomDefRaw } from '../content/room-defs.ts';
+import type { ResourceKind } from './ResourceDefinition.ts';
 import { as_uint_or_default, to_uint, type uint } from './RestrictedTypes.ts';
 
 /**
@@ -62,6 +63,12 @@ export interface RoomDefinition {
 
     category: RoomCategory;
     overlay?: () => Promise<() => ReactElement>;
+
+    /**
+     * If empty, production happens only once per day
+     */
+    resource_requirements?: [ResourceKind, number][];
+    production?: [ResourceKind, number][];
 }
 
 export const ROOM_DEFS: {
@@ -88,6 +95,10 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         build_thumb: raw.build_thumb,
         sprite_active: raw.sprite_active,
         overlay: raw.overlay,
+        // @ts-expect-error
+        resource_requirements: raw.resource_requirements,
+        // @ts-expect-error
+        production: raw.production,
     };
 }
 

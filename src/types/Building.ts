@@ -1,3 +1,5 @@
+import { PriorityQueue } from '@datastructures-js/priority-queue';
+import type { SaveFileActions } from '../events/SaveFileActions.ts';
 import type { Floor } from './Floor.ts';
 import type { int, uint } from './RestrictedTypes.ts';
 import type { SMap } from './SMap.ts';
@@ -18,7 +20,15 @@ export interface Building {
     money: int;
     rating: uint;
     new_things_acked: SMap<string>;
-    day_number: uint;
+
+    action_queue: PriorityQueue<[number, SaveFileActions]> | null;
+
+    /**
+     * milliseconds since the building was created
+     */
+    time_ms: number;
+    time_per_day_ms: number;
+    day_started: boolean;
 
     max_height: uint;
     max_depth: uint;
@@ -35,8 +45,11 @@ export function Default(): Building {
         money: 0 as int,
         rating: 0 as uint,
         new_things_acked: {},
-        day_number: 0 as uint,
+        time_ms: 0,
+        time_per_day_ms: 5 * 60 * 1000,
+        day_started: false,
         max_height: 0 as uint,
         max_depth: 0 as uint,
+        action_queue: new PriorityQueue(([t]) => t),
     };
 }

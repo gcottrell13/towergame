@@ -7,17 +7,17 @@ import { AllBuildings } from './AllBuildings.tsx';
 
 export function Main() {
     const [state, setState] = useState(TEST_SAVE);
-    const setStateUpdate = useCallback((action: SaveFileActions) => {
+    const setStateUpdate = useCallback((action: SaveFileActions, delay_ms: number = 0) => {
         setState((current) => {
-            return SaveFileReducer(current, action);
+            return SaveFileReducer(current, action, delay_ms);
         });
     }, []);
 
     return (
-        <SaveFileContext.Provider value={[state, setStateUpdate]}>
+        <SaveFileContext value={[state, setStateUpdate]}>
             <main>
                 <AllBuildings />
             </main>
-        </SaveFileContext.Provider>
+        </SaveFileContext>
     );
 }

@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { uint } from '../types/RestrictedTypes.ts';
 import type { SMap } from '../types/SMap.ts';
+import type { ResourceIds } from "./resource-defs.ts";
 import images from './images.ts';
 
 export enum RoomCategory {
@@ -16,14 +17,20 @@ export const ROOM_DEFS_RAW = {
         sprite_empty: images.BESTVIEWEDCOMP_GIF,
         cost_to_build: 10,
         build_thumb: images.BESTVIEWEDCOMP_GIF,
+        production: [
+            ['coin', 1],
+        ],
     },
     'hotel-basic-small': {
         min_width: 2,
         display_name: 'Hotel Room',
         sprite_active: images.ROOM_HOTEL_BASIC_SMALL_OCCUPIED_PNG,
         sprite_empty: images.ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG,
-        cost_to_build: 10,
+        cost_to_build: 50,
         build_thumb: 'room-hotel-basic-small-empty.png',
+        production: [
+            ['coin', 20],
+        ],
     },
 } as const satisfies SMap<RoomDefRaw>;
 
@@ -43,5 +50,11 @@ export interface RoomDefRaw {
     overlay?: () => Promise<() => ReactElement>;
 
     cost_to_build: number | ((width: uint, height: uint) => uint);
+
+    /**
+     * If empty, production happens only once per day
+     */
+    resource_requirements?: [ResourceIds, number][];
+    production?: [ResourceIds, number][];
 }
 export type RoomIds = keyof typeof ROOM_DEFS_RAW;

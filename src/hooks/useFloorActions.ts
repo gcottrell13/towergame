@@ -10,11 +10,14 @@ import type { Floor } from '../types/Floor.ts';
 export function useFloorActions(floor: Floor) {
     const [, update] = useContext(BuildingContext);
     return useCallback(
-        (action: FloorActions) => {
-            update({
-                ...action,
-                floor_id: floor.height,
-            });
+        (action: FloorActions, delay_ms: number = 0) => {
+            update(
+                {
+                    ...action,
+                    floor_id: floor.height,
+                },
+                delay_ms,
+            );
         },
         [update, floor],
     );
