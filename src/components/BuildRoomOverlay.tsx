@@ -8,7 +8,7 @@ import { useFloorActions } from '../hooks/useFloorActions.ts';
 import { hori, verti } from '../logicFunctions.ts';
 import type { Floor } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import type { int, uint } from '../types/RestrictedTypes.ts';
+import type { int } from '../types/RestrictedTypes.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 import { useRoomExtender } from './RoomExtender.tsx';
@@ -129,13 +129,10 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
         } else if (def.d === 'transport') {
             update_building({
                 action: 'buy-transport',
-                transport: {
-                    kind: def.id,
-                    position: bp_location as int,
-                    height,
-                    occupancy: 0 as uint,
-                    bottom_floor: floor.height,
-                },
+                kind: def.id,
+                position: bp_location as int,
+                height,
+                bottom_floor: floor.height,
             });
         }
     }

@@ -9,7 +9,7 @@ import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { FloorExtendOverlay, NewFloorOverlay } from './FloorExtendOverlay.tsx';
 import { FloorRezoneOverlay } from './FloorRezoneOverlay.tsx';
 import { RoomComponentMemo } from './RoomComponent.tsx';
-import {hori, verti} from "../logicFunctions.ts";
+import { hori, verti } from '../logicFunctions.ts';
 
 interface Props {
     floor: Floor;
@@ -38,7 +38,7 @@ export function FloorComponent({ floor }: Props) {
                 {floor_below && floor_below.height >= 0 && <RoofOnBelow floor={floor} below_floor={floor_below} />}
                 {building.top_floor === floor.height && (
                     // give us our own roof if we are on the top of the building
-                    <div style={{ position: 'absolute', top: verti(-1)}}>
+                    <div style={{ position: 'absolute', top: verti(-1) }}>
                         <RoofOnBelow floor={floor} below_floor={floor} />
                     </div>
                 )}

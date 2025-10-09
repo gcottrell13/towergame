@@ -2,6 +2,7 @@ import type { DiscriminatedUnion } from './DiscriminatedUnion.ts';
 import type { ResourceKind } from './ResourceDefinition.ts';
 import type { int, uint } from './RestrictedTypes.ts';
 import type { RoomKind } from './RoomDefinition.ts';
+import type {TowerWorker} from "./TowerWorker.ts";
 
 export type RoomState = DiscriminatedUnion<
     'type',
@@ -24,6 +25,7 @@ export interface Room {
     total_resources_produced: {
         [p: ResourceKind]: uint;
     };
+    workers: TowerWorker[];
 }
 
 export function Default(): Room {
@@ -35,5 +37,6 @@ export function Default(): Room {
         width: 0 as uint,
         height: 0 as uint,
         bottom_floor: 0 as int,
+        workers: [],
     };
 }

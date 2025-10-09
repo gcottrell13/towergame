@@ -18,7 +18,10 @@ export type SaveFileActions = DiscriminatedUnion<
         };
         'buy-transport': {
             building_id: number;
-            transport: Transportation;
+            kind: Transportation['kind'];
+            position: Transportation['position'];
+            height: Transportation['height'];
+            bottom_floor: Transportation['bottom_floor'];
         };
         'add-floor': {
             building_id: number;

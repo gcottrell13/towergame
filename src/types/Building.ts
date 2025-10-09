@@ -4,6 +4,7 @@ import type { Floor } from './Floor.ts';
 import type { int, uint } from './RestrictedTypes.ts';
 import type { SMap } from './SMap.ts';
 import type { Transportation } from './Transportation.ts';
+import type {TowerWorker} from "./TowerWorker.ts";
 
 /**
  * A single building representing one "franchise" or "run"
@@ -15,7 +16,7 @@ export interface Building {
     floors: Floor[];
     top_floor: int;
     max_width: uint;
-    transports: Transportation[];
+    transports: SMap<Transportation>;
 
     money: int;
     rating: uint;
@@ -30,6 +31,8 @@ export interface Building {
     time_per_day_ms: number;
     day_started: boolean;
 
+    workers: TowerWorker[];
+
     max_height: uint;
     max_depth: uint;
 }
@@ -38,7 +41,7 @@ export function Default(): Building {
     return {
         top_floor: 0 as int,
         floors: [],
-        transports: [],
+        transports: {},
         max_width: 0 as uint,
         name: '',
         id: 0 as uint,
@@ -50,6 +53,7 @@ export function Default(): Building {
         day_started: false,
         max_height: 0 as uint,
         max_depth: 0 as uint,
+        workers: [],
         action_queue: new PriorityQueue(([t]) => t),
     };
 }

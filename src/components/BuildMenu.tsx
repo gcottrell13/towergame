@@ -27,7 +27,7 @@ const build_kind_select_style = {
     borderTopRightRadius: '5px',
 } as React.CSSProperties;
 
-const itemPadding = {paddingInline: '10px'} as React.CSSProperties;
+const itemPadding = { paddingInline: '10px' } as React.CSSProperties;
 
 enum Menu {
     Rooms,

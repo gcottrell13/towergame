@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { ROOM_DEFS_RAW, RoomCategory, type RoomDefRaw } from '../content/room-defs.ts';
+import type { TOWER_WORKER_KINDS } from '../content/tower-worker-defs.ts';
 import type { ResourceKind } from './ResourceDefinition.ts';
 import { as_uint_or_default, to_uint, type uint } from './RestrictedTypes.ts';
 
@@ -69,6 +70,7 @@ export interface RoomDefinition {
      */
     resource_requirements?: [ResourceKind, number][];
     production?: [ResourceKind, number][];
+    workers?: TOWER_WORKER_KINDS[];
 }
 
 export const ROOM_DEFS: {
@@ -99,6 +101,7 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         resource_requirements: raw.resource_requirements,
         // @ts-expect-error
         production: raw.production,
+        workers: raw.workers,
     };
 }
 
