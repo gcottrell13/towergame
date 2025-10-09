@@ -6,6 +6,10 @@ export default defineConfig({
     output: {
         assetPrefix: '/towergame/',
     },
+    html: {
+        title: 'Wizard Tower Game+',
+        favicon: './favicon.ico',
+    },
     source: {
         define: {
             BUILD_NUM: JSON.stringify(process.env.BUILD_NUM),

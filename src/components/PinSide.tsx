@@ -5,6 +5,11 @@ interface Props {
     set_pinned: (pinned: boolean) => void;
 }
 
+const style: React.CSSProperties = {
+    flexGrow: 1,
+    transition: 'background-color 0.1s linear',
+};
+
 export function PinSide({ position, set_position, pinned, set_pinned }: Props) {
     return (
         <div
@@ -14,13 +19,17 @@ export function PinSide({ position, set_position, pinned, set_pinned }: Props) {
                 gap: '10px',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                fontSize: '14px',
             }}
         >
             <button
-                className={'flat-button'}
+                className={'flat-button hover-color'}
                 type={'button'}
-                disabled={position === 'left'}
+                title={'Move Left'}
+                style={{
+                    ...style,
+                    textAlign: 'start',
+                }}
+                hidden={position === 'left'}
                 onClick={() => {
                     set_position('left');
                 }}
@@ -29,22 +38,32 @@ export function PinSide({ position, set_position, pinned, set_pinned }: Props) {
             </button>
             <button
                 type={'button'}
-                className={'flat-button'}
+                className={'flat-button hover-color'}
+                title={pinned ? 'Hide' : 'Pin'}
+                style={{
+                    ...style,
+                    flexGrow: 2,
+                }}
                 onClick={() => {
                     set_pinned(!pinned);
                 }}
             >
                 <Tack
                     style={{
-                        width: '14px',
+                        width: '9px',
                         transform: pinned ? '' : 'rotate3d(0, 0, 1, -45deg)',
                     }}
                 />
             </button>
             <button
-                className={'flat-button'}
+                className={'flat-button hover-color'}
                 type={'button'}
-                disabled={position === 'right'}
+                title={'Move Right'}
+                style={{
+                    ...style,
+                    textAlign: 'end',
+                }}
+                hidden={position === 'right'}
                 onClick={() => {
                     set_position('right');
                 }}

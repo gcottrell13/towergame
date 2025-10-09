@@ -29,8 +29,8 @@ export function BuildingComponent({ building, show_build_menu = true }: Props) {
     return (
         <BuildingContext value={[building, update]}>
             <Ground building={building} />
-            {show_build_menu && <BuildMenu />}
             <TimerDisplay />
+            {show_build_menu && <BuildMenu />}
             <div
                 ref={ref}
                 id={`building-${building.id}`}

@@ -14,18 +14,20 @@ const build_menu_style = {
     alignContent: 'space-around',
     overflowY: 'scroll',
     height: '50vh',
-    padding: '10px',
+    paddingBottom: '10px',
     gap: '10px',
     background: 'white',
     border: '1px solid black',
-} as const;
+} as React.CSSProperties;
 
 const build_kind_select_style = {
     padding: '10px',
     borderBottom: 0,
     borderTopLeftRadius: '5px',
     borderTopRightRadius: '5px',
-} as const;
+} as React.CSSProperties;
+
+const itemPadding = {paddingInline: '10px'} as React.CSSProperties;
 
 enum Menu {
     Rooms,
@@ -104,7 +106,7 @@ export function BuildMenu() {
             className={!mouse_in && !pinned ? 'hide-content' : ''}
         >
             <PinSide {...pin_side} />
-            <div>Money: {building.money}</div>
+            <div style={itemPadding}>Money: {building.money}</div>
             {construction && (
                 <div style={{ display: 'flex', gap: '5px' }}>
                     {current_display}
@@ -114,19 +116,19 @@ export function BuildMenu() {
                 </div>
             )}
 
-            <div>
+            <div style={itemPadding}>
                 <SelectBuild which={Menu.Rooms} name={'Rooms'} {...select} />
                 <SelectBuild which={Menu.Floors} name={'Floors'} {...select} />
                 <SelectBuild which={Menu.Transport} name={'Transport'} {...select} />
             </div>
 
-            <span hidden={current_menu !== Menu.Rooms}>
+            <span style={itemPadding} hidden={current_menu !== Menu.Rooms}>
                 <RoomSelector />
             </span>
-            <span hidden={current_menu !== Menu.Floors}>
+            <span style={itemPadding} hidden={current_menu !== Menu.Floors}>
                 <FloorSelector />
             </span>
-            <span hidden={current_menu !== Menu.Transport}>
+            <span style={itemPadding} hidden={current_menu !== Menu.Transport}>
                 <TransportationSelector />
             </span>
         </div>

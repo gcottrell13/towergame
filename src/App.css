@@ -5,6 +5,10 @@ html {
     scrollbar-width: none; /* Hides the scrollbar */
 }
 
+* {
+    font-size: inherit;
+}
+
 div::-webkit-scrollbar {
     display: none; /* Hides the scrollbar */
 }
@@ -40,9 +44,15 @@ Utils
 
 button {
     cursor: pointer;
+    font-size: 0.8em;
 }
+
 button:disabled {
     cursor: not-allowed;
+}
+
+button.hover-color:hover {
+    background-color: color-mix(in srgb, gray, transparent);
 }
 
 .no-sel {
@@ -86,4 +96,8 @@ button:disabled {
 button.flat-button {
     background: none;
     border: none;
+}
+
+.blur-behind {
+    backdrop-filter: blur(5px); /* https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter */
 }

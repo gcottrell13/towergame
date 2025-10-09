@@ -180,5 +180,4 @@ function insert_future_action(updated: SaveFile, building_id: number, action: Sa
     const time = building.time_ms + delay_ms;
     building.action_queue = PriorityQueue.fromArray(building.action_queue.toArray(), ([x]) => x); // clone it
     building.action_queue.enqueue([time, action]); // ok to mutate as it's already a cloned array
-    console.log(building.action_queue);
 }
