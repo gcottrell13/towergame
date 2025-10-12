@@ -1,6 +1,7 @@
 import { Default as building } from '../types/Building.ts';
 import { Default as floor } from '../types/Floor.ts';
 import type { FloorKind } from '../types/FloorDefinition.ts';
+import type { ResourceMap } from '../types/ResourceDefinition.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
 import type { SaveFile } from '../types/SaveFile.ts';
 
@@ -13,7 +14,7 @@ export const TEST_SAVE: SaveFile = {
             position: 50 as int,
             top_floor: 2 as int,
             max_height: 10 as uint,
-            money: 1000 as int,
+            bank: { coin: 1000 } as ResourceMap<uint>,
             new_things_acked: {},
             floors: [
                 {

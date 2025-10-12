@@ -6,6 +6,10 @@ import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 import { ROOM_DEFS, type RoomKind } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS, type TransportationKind } from '../types/TransportationDefinition.ts';
 import { PinSide } from './PinSide.tsx';
+import { resource_sufficient } from '../logicFunctions.ts';
+import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
+import type { ResourceMap } from '../types/ResourceDefinition.ts';
+import type { uint } from '../types/RestrictedTypes.ts';
 
 const build_menu_style = {
     position: 'fixed',
@@ -60,10 +64,10 @@ export function BuildMenu() {
     useEffect(() => {
         if (construction?.type !== 'room') return;
         const def = ROOM_DEFS[construction.value];
-        if (building.money < def.cost_to_build(def.min_width, def.min_height)) {
+        if (!resource_sufficient(building.bank, def.cost_to_build(def.min_width, def.min_height))) {
             set_construction(null);
         }
-    }, [construction, building.money, set_construction]);
+    }, [construction, building.bank, set_construction]);
 
     /// ====================================================================================================
     /// ====================================================================================================
@@ -106,9 +110,18 @@ export function BuildMenu() {
             className={!mouse_in && !pinned ? 'hide-content' : ''}
         >
             <PinSide {...pin_side} />
-            <div style={itemPadding}>Money: {building.money}</div>
+            <div
+                style={{
+                    ...itemPadding,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                }}
+            >
+                Resources: <ResourceMapDisplay resources={building.bank} />
+            </div>
             {construction && (
-                <div style={{ display: 'flex', gap: '5px' }}>
+                <div style={{...itemPadding, display: 'flex', gap: '5px' }}>
                     {current_display}
                     <button type="reset" onClick={() => set_construction(null)}>
                         Cancel
@@ -137,7 +150,6 @@ export function BuildMenu() {
 
 function RoomSelector() {
     const [construction, set_construction] = useConstructionContext('room');
-    const [building] = useContext(BuildingContext);
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(ROOM_DEFS)
@@ -159,22 +171,16 @@ function RoomSelector() {
                         >
                             <span>{def.display_name}</span>
                             <img src={def.sprite_empty} alt={def.sprite_empty} />
-                            <span>${min_cost}</span>
-                            <button
-                                type={'button'}
-                                style={{
-                                    opacity: construction?.value === def.id ? 0 : 100,
-                                }}
-                                disabled={construction?.value === def.id || building.money < min_cost}
-                                onClick={() => {
+                            <BuildButton
+                                selected={construction?.value === def.id}
+                                cost={min_cost}
+                                set={() => {
                                     set_construction({
                                         type: 'room',
                                         value: def.id,
                                     });
                                 }}
-                            >
-                                Build
-                            </button>
+                            />
                         </div>
                     );
                 })}
@@ -184,7 +190,6 @@ function RoomSelector() {
 
 function FloorSelector() {
     const [construction, set_construction] = useConstructionContext('rezone', 'extend_floor');
-    const [building] = useContext(BuildingContext);
     const floor_kind = construction?.type === 'rezone' ? construction.value : null;
     return (
         <div className={'overflow-y-scroll'}>
@@ -214,22 +219,17 @@ function FloorSelector() {
                         >
                             <span>{def.name}</span>
                             <img src={def.background} alt={def.background} />
-                            <span>${def.cost_to_build}/m</span>
-                            <button
-                                type={'button'}
-                                style={{
-                                    opacity: floor_kind === def.id ? 0 : 100,
-                                }}
-                                disabled={floor_kind === def.id || building.money < def.cost_to_build}
-                                onClick={() => {
+                            {/*<span>${def.cost_to_build}/m</span>*/}
+                            <BuildButton
+                                selected={floor_kind === def.id}
+                                cost={def.cost_to_build}
+                                set={() => {
                                     set_construction({
                                         type: 'rezone',
                                         value: def.id,
                                     });
                                 }}
-                            >
-                                Build
-                            </button>
+                            />
                         </div>
                     );
                 })}
@@ -239,7 +239,6 @@ function FloorSelector() {
 
 function TransportationSelector() {
     const [construction, set_construction] = useConstructionContext('transport');
-    const [building] = useContext(BuildingContext);
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(TRANSPORT_DEFS)
@@ -259,24 +258,17 @@ function TransportationSelector() {
                         >
                             <span>{def.name}</span>
                             <img src={def.sprite_empty} alt={def.sprite_empty} />
-                            <span>${def.cost_to_build(def.min_height)}</span>
-                            <button
-                                type={'button'}
-                                style={{
-                                    opacity: construction?.value === def.id ? 0 : 100,
-                                }}
-                                disabled={
-                                    construction?.value === def.id || building.money < def.cost_to_build(def.min_height)
-                                }
-                                onClick={() => {
+                            {/*<span>${def.cost_to_build(def.min_height)}</span>*/}
+                            <BuildButton
+                                selected={construction?.value === def.id}
+                                cost={def.cost_to_build(def.min_height)}
+                                set={() => {
                                     set_construction({
                                         type: 'transport',
                                         value: def.id,
                                     });
                                 }}
-                            >
-                                Build
-                            </button>
+                            />
                         </div>
                     );
                 })}
@@ -322,6 +314,26 @@ function SelectBuild({
             }}
         >
             {name}
+        </button>
+    );
+}
+
+function BuildButton({ selected, cost, set }: { selected: boolean; cost: ResourceMap<uint>; set: () => void }) {
+    const [building] = useContext(BuildingContext);
+    return (
+        <button
+            type={'button'}
+            style={{
+                opacity: selected ? 0 : 100,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+            }}
+            disabled={selected || !resource_sufficient(building.bank, cost)}
+            onClick={set}
+        >
+            Build
+            <ResourceMapDisplay resources={cost} />
         </button>
     );
 }

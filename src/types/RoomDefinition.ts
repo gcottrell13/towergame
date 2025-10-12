@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import { ROOM_DEFS_RAW, RoomCategory, type RoomDefRaw } from '../content/room-defs.ts';
-import type { TOWER_WORKER_KINDS } from '../content/tower-worker-defs.ts';
-import type { ResourceKind } from './ResourceDefinition.ts';
+import type { ResourceMap } from './ResourceDefinition.ts';
 import { as_uint_or_default, to_uint, type uint } from './RestrictedTypes.ts';
+import type { TowerWorkerKind } from './TowerWorkerDefinition.ts';
 
 /**
  * technically a number or string, but you should not inspect it at all, nor use it with any other types
@@ -53,11 +53,12 @@ export interface RoomDefinition {
      */
     sprite_empty_night: string | null;
 
-    cost_to_build(width: number, height: number): uint;
+    cost_to_build(width: number, height: number): ResourceMap<uint>;
 
     build_thumb: string;
 
     /**
+     * what tier will unlock this room
      * @default 0
      */
     tier: uint;
@@ -68,9 +69,16 @@ export interface RoomDefinition {
     /**
      * If empty, production happens only once per day
      */
-    resource_requirements?: [ResourceKind, number][];
-    production?: [ResourceKind, number][];
-    workers?: TOWER_WORKER_KINDS[];
+    resource_requirements?: ResourceMap<uint>;
+    production?: ResourceMap<uint>;
+    workers?: { [p in TowerWorkerKind]: number };
+
+    // if zero or empty, production takes no time, but partially-staffed rooms only have a % chance equal to staffing to produce (per production tick).
+    // if greater than zero, partially-staffed rooms produce with % speed, taking longer.
+    production_time: uint;
+
+    // if true, then all outputs will be added to the building bank instead of being used for further production
+    produce_to_bank: boolean;
 }
 
 export const ROOM_DEFS: {
@@ -97,11 +105,11 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         build_thumb: raw.build_thumb,
         sprite_active: raw.sprite_active,
         overlay: raw.overlay,
-        // @ts-expect-error
         resource_requirements: raw.resource_requirements,
-        // @ts-expect-error
         production: raw.production,
         workers: raw.workers,
+        production_time: as_uint_or_default(raw.production_time ?? 0),
+        produce_to_bank: raw.produce_to_bank ?? false,
     };
 }
 
@@ -109,8 +117,12 @@ function process_cost_to_build(t: RoomDefRaw): RoomDefinition['cost_to_build'] {
     if (t.cost_to_build instanceof Function) {
         return t.cost_to_build;
     }
-    const a = as_uint_or_default(t.cost_to_build);
+    const a = Object.fromEntries(
+        Object.entries(t.cost_to_build).map(([key, value]) => [key, as_uint_or_default(value)]),
+    );
     return (w, h) => {
-        return as_uint_or_default(a * to_uint((w * h) / t.min_width));
+        return Object.fromEntries(
+            Object.entries(a).map(([key, a]) => [key, as_uint_or_default(a * to_uint((w * h) / t.min_width))]),
+        );
     };
 }

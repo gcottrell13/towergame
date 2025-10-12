@@ -4,7 +4,8 @@ import type { Floor } from './Floor.ts';
 import type { int, uint } from './RestrictedTypes.ts';
 import type { SMap } from './SMap.ts';
 import type { Transportation } from './Transportation.ts';
-import type {TowerWorker} from "./TowerWorker.ts";
+import type { TowerWorker } from './TowerWorker.ts';
+import type { ResourceMap } from './ResourceDefinition.ts';
 
 /**
  * A single building representing one "franchise" or "run"
@@ -18,7 +19,6 @@ export interface Building {
     max_width: uint;
     transports: SMap<Transportation>;
 
-    money: int;
     rating: uint;
     new_things_acked: SMap<string>;
 
@@ -31,10 +31,16 @@ export interface Building {
     time_per_day_ms: number;
     day_started: boolean;
 
+    /**
+     * The workers that are actively moving about the building. does not include any that are inside rooms.
+     */
     workers: TowerWorker[];
 
     max_height: uint;
     max_depth: uint;
+
+    bank: ResourceMap<uint>;
+    room_id_counter: number;
 }
 
 export function Default(): Building {
@@ -45,7 +51,6 @@ export function Default(): Building {
         max_width: 0 as uint,
         name: '',
         id: 0 as uint,
-        money: 0 as int,
         rating: 0 as uint,
         new_things_acked: {},
         time_ms: 0,
@@ -55,5 +60,7 @@ export function Default(): Building {
         max_depth: 0 as uint,
         workers: [],
         action_queue: new PriorityQueue(([t]) => t),
+        bank: {},
+        room_id_counter: 0,
     };
 }

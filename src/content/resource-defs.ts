@@ -3,7 +3,7 @@ import images from './images.ts';
 
 export const RESOURCE_DEFS_RAW = {
     coin: {
-        sprite: images.STAIRWELL1_PNG,
+        sprite: images.COIN_PNG,
     },
 } satisfies SMap<ResourceDefRaw>;
 
@@ -12,3 +12,4 @@ export interface ResourceDefRaw {
 }
 
 export type ResourceIds = keyof typeof RESOURCE_DEFS_RAW;
+export type ResourceMapRaw<T> = Partial<{ [p in ResourceIds]: T }>;

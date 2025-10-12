@@ -1,14 +1,16 @@
-import { useCallback, useContext } from 'react';
-import { BuildingContext } from '../context/BuildingContext.ts';
-import { FloorContext } from '../context/FloorContext.ts';
-import { hori, verti } from '../logicFunctions.ts';
-import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
-import type { uint } from '../types/RestrictedTypes.ts';
+import {useCallback, useContext} from 'react';
+import {BuildingContext} from '../context/BuildingContext.ts';
+import {FloorContext} from '../context/FloorContext.ts';
+import {hori, resource_sufficient, resources_add, resources_mul, verti} from '../logicFunctions.ts';
+import {FLOOR_DEFS} from '../types/FloorDefinition.ts';
+import type {uint} from '../types/RestrictedTypes.ts';
+import {ResourceMapDisplay} from './ResourceMapDisplay.tsx';
+import {InlineSpans} from './InlineSpans.tsx';
 
 const overlay_style = {
     position: 'absolute',
     top: '0',
-} as const;
+} satisfies React.CSSProperties;
 
 const popover_style = {
     whiteSpace: 'nowrap',
@@ -21,7 +23,7 @@ const popover_style = {
     gap: '5px',
     alignItems: 'center',
     zIndex: 10001,
-} as const;
+} satisfies React.CSSProperties;
 
 export function FloorExtendOverlay() {
     const [floor, update_floor] = useContext(FloorContext);
@@ -35,12 +37,12 @@ export function FloorExtendOverlay() {
     let left = null;
 
     const cost_build = floor.kind
-        ? FLOOR_DEFS.buildables[floor.kind].cost_to_build + FLOOR_DEFS.empty.cost_to_build
+        ? resources_add(FLOOR_DEFS.buildables[floor.kind].cost_to_build, FLOOR_DEFS.empty.cost_to_build)
         : FLOOR_DEFS.empty.cost_to_build;
 
     if (expand_right > 0) {
-        const cost = cost_build * expand_right;
-        const sufficient_funds = building.money >= cost;
+        const cost = resources_mul(cost_build, expand_right);
+        const sufficient_funds = resource_sufficient(building.bank, cost);
         right = (
             <div
                 style={{
@@ -68,27 +70,23 @@ export function FloorExtendOverlay() {
                             right: hori(expand_right),
                         }}
                     >
-                        {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
+                        {!sufficient_funds && <span style={{color: 'red'}}>Insufficient Funds</span>}
                         Extend Right
-                        <span style={{ color: 'gray' }}>
-                            ({expand_right}m x ${cost_build}/m)
-                        </span>
-                        <span
-                            style={{
-                                fontSize: 'x-large',
-                                color: sufficient_funds ? 'green' : 'red',
-                            }}
-                        >
-                            = ${cost}
-                        </span>
+                        ({expand_right}m x (<ResourceMapDisplay resources={cost_build}/>
+                            )/m)
+                         =
+                        <ResourceMapDisplay style={{
+                            fontSize: 'x-large',
+                            color: sufficient_funds ? 'green' : 'red',
+                        }} resources={cost}/>
                     </span>
                 </div>
             </div>
         );
     }
     if (expand_left > 0) {
-        const cost = cost_build * expand_left;
-        const sufficient_funds = building.money >= cost;
+        const cost = resources_mul(cost_build, expand_left);
+        const sufficient_funds = resource_sufficient(building.bank, cost);
         left = (
             <div
                 style={{
@@ -116,19 +114,16 @@ export function FloorExtendOverlay() {
                             left: hori(expand_left),
                         }}
                     >
-                        {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
-                        Extend Left
-                        <span style={{ color: 'gray' }}>
-                            ({expand_left}m x ${cost_build}/m)
-                        </span>
-                        <span
-                            style={{
+                        <InlineSpans>
+                            {!sufficient_funds && <span style={{color: 'red'}}>Insufficient Funds</span>}
+                                Extend Left
+                            ({expand_left}m x (<ResourceMapDisplay resources={cost_build}/>)/m)
+                            =
+                            <ResourceMapDisplay  style={{
                                 fontSize: 'x-large',
                                 color: sufficient_funds ? 'green' : 'red',
-                            }}
-                        >
-                            = ${cost}
-                        </span>
+                            }} resources={cost}/>
+                        </InlineSpans>
                     </span>
                 </div>
             </div>
@@ -154,8 +149,13 @@ export function NewFloorOverlay() {
     }, [update_building]);
 
     const size = FLOOR_DEFS.new_floor_size[0] + FLOOR_DEFS.new_floor_size[1];
-    const cost = size * FLOOR_DEFS.empty.cost_to_build;
-    const sufficient_funds = building.money >= cost;
+    const cost = resources_mul(FLOOR_DEFS.empty.cost_to_build, size);
+    const sufficient_funds = resource_sufficient(building.bank, cost);
+
+    const big_green: React.CSSProperties = {
+        fontSize: 'x-large',
+        color: sufficient_funds ? 'green' : 'red',
+    };
 
     return (
         <div
@@ -181,19 +181,14 @@ export function NewFloorOverlay() {
                         top: verti(-1),
                     }}
                 >
-                    {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
-                    New Floor
-                    <span style={{ color: 'gray' }}>
-                        ({size}m x ${FLOOR_DEFS.empty.cost_to_build}/m)
-                    </span>
-                    <span
-                        style={{
-                            fontSize: 'x-large',
-                            color: sufficient_funds ? 'green' : 'red',
-                        }}
-                    >
-                        = ${cost}
-                    </span>
+                    <InlineSpans>
+                        {!sufficient_funds && <span style={{color: 'red'}}>Insufficient Funds</span>}
+                        New Floor
+                        ({size}m x (
+                        <ResourceMapDisplay resources={FLOOR_DEFS.empty.cost_to_build}/>
+                        )/m) =
+                        <ResourceMapDisplay resources={cost} style={big_green}/>
+                    </InlineSpans>
                 </span>
             </div>
         </div>

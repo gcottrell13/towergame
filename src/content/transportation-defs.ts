@@ -3,6 +3,7 @@ import type { Floor } from '../types/Floor.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
 import type { SMap } from '../types/SMap.ts';
 import images from './images.ts';
+import type { ResourceMapRaw } from './resource-defs.ts';
 
 export enum TransportationType {
     Elevator,
@@ -16,7 +17,7 @@ export const TRANSPORT_DEFS_RAW = {
         sprite_empty: images.STAIRWELL1_PNG,
         max_height: 5,
         width: 1,
-        cost_per_floor: 10,
+        cost_per_floor: { coin: 10 },
     },
     'elevator-small': {
         name: 'Small Elevator',
@@ -24,7 +25,7 @@ export const TRANSPORT_DEFS_RAW = {
         sprite_empty: images.STAIRWELL1_PNG,
         max_height: 15,
         width: 2,
-        cost_per_floor: 20,
+        cost_per_floor: { coin: 20 },
         async overlay() {
             return (await import('../components/ElevatorOverlay.tsx')).ElevatorOverlay;
         },
@@ -34,7 +35,7 @@ export const TRANSPORT_DEFS_RAW = {
 export interface TransportationDefinitionRaw {
     name: string;
     type: TransportationType;
-    cost_per_floor: number | ((height: uint) => uint);
+    cost_per_floor: ResourceMapRaw<number> | ((height: uint) => ResourceMapRaw<uint>);
     sprite_empty: string;
     sprite_occupied?: string | null;
     min_height?: number;

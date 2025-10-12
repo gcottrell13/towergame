@@ -1,4 +1,5 @@
 import { FLOOR_DEFS_RAW, type FloorDefRaw } from '../content/floor-defs.ts';
+import type { ResourceMap } from './ResourceDefinition.ts';
 import { as_uint_or_default, type uint } from './RestrictedTypes.ts';
 import type { RoomKind } from './RoomDefinition.ts';
 
@@ -14,7 +15,7 @@ export interface FloorDefinition {
     id: FloorKind;
     name: string;
     background: string;
-    cost_to_build: uint;
+    cost_to_build: ResourceMap<uint>;
     tier: uint;
 
     rooms: RoomKind[];
@@ -46,7 +47,9 @@ function def_from_raw(id: string, item: FloorDefRaw): FloorDefinition {
         tier: as_uint_or_default(item.tier ?? 0),
         background: item.background,
         name: item.name,
-        cost_to_build: as_uint_or_default(item.cost_to_build),
+        cost_to_build: Object.fromEntries(
+            Object.entries(item.cost_to_build).map(([key, value]) => [key, as_uint_or_default(value)]),
+        ),
         // @ts-expect-error
         rooms: item.rooms ?? [],
     };

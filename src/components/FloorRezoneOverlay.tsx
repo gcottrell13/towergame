@@ -1,9 +1,9 @@
 import { useContext, useState } from 'react';
-import { DESTROY_ROOM_COST } from '../constants.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import { cost_to_rezone_floor, hori } from '../logicFunctions.ts';
+import { cost_to_rezone_floor, hori, resource_sufficient } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
+import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
 
 interface Props {
     floor_kind: FloorKind;
@@ -49,7 +49,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
     const [floor, update_floor] = useContext(FloorContext);
     const floor_def = FLOOR_DEFS.buildables[floor_kind];
     const cost = cost_to_rezone_floor(floor);
-    const sufficient_funds = cost <= building.money;
+    const sufficient_funds = resource_sufficient(building.bank, cost);
     return (
         <div
             id={`rezone-${floor.height}`}
@@ -81,14 +81,13 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                 >
                     <span>Floor {floor.height} rezone:</span>
                     <span style={{ color: 'gray' }}>
-                        ($
-                        {floor_def.cost_to_build}/m x {floor.size_left + floor.size_right}m)
+                        ($ (<ResourceMapDisplay resources={floor_def.cost_to_build} />
+                        )/m x {floor.size_left + floor.size_right}m)
                     </span>
                     {floor.rooms.length > 0 ? (
                         <span style={{ color: 'red' }}>
                             Destroy {floor.rooms.length} room
-                            {floor.rooms.length === 1 ? '' : 's'} (+$
-                            {floor.rooms.length * DESTROY_ROOM_COST})
+                            {floor.rooms.length === 1 ? '' : 's'}
                         </span>
                     ) : null}
                     <span
@@ -97,7 +96,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                             color: sufficient_funds ? 'green' : 'red',
                         }}
                     >
-                        = ${cost}
+                        = <ResourceMapDisplay resources={cost} />
                     </span>
                     {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
                 </span>

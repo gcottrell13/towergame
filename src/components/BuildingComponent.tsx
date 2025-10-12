@@ -46,7 +46,7 @@ export function BuildingComponent({ building, show_build_menu = true }: Props) {
                 ))}
                 <TopRoofComponent />
                 <RoomBuilderTotalMemo />
-                {building.transports.map((t) => (
+                {Object.entries(building.transports).map(([_id, t]) => (
                     <TransportationComponentMemo key={`${t.height}-${t.position}`} transport={t} />
                 ))}
             </div>
