@@ -9,7 +9,7 @@ export interface Transportation {
     position: int;
     bottom_floor: int;
     height: uint;
-    occupancy: TowerWorker[];
+    occupancy: ReadonlyArray<TowerWorker>;
 }
 
 export function Default(): Transportation {

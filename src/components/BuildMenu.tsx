@@ -121,7 +121,7 @@ export function BuildMenu() {
                 Resources: <ResourceMapDisplay resources={building.bank} />
             </div>
             {construction && (
-                <div style={{...itemPadding, display: 'flex', gap: '5px' }}>
+                <div style={{ ...itemPadding, display: 'flex', gap: '5px' }}>
                     {current_display}
                     <button type="reset" onClick={() => set_construction(null)}>
                         Cancel
@@ -219,7 +219,6 @@ function FloorSelector() {
                         >
                             <span>{def.name}</span>
                             <img src={def.background} alt={def.background} />
-                            {/*<span>${def.cost_to_build}/m</span>*/}
                             <BuildButton
                                 selected={floor_kind === def.id}
                                 cost={def.cost_to_build}
@@ -258,7 +257,6 @@ function TransportationSelector() {
                         >
                             <span>{def.name}</span>
                             <img src={def.sprite_empty} alt={def.sprite_empty} />
-                            {/*<span>${def.cost_to_build(def.min_height)}</span>*/}
                             <BuildButton
                                 selected={construction?.value === def.id}
                                 cost={def.cost_to_build(def.min_height)}

@@ -2,16 +2,16 @@ import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from './constants.ts';
 import type { Building } from './types/Building.ts';
 import type { Floor } from './types/Floor.ts';
 import { FLOOR_DEFS } from './types/FloorDefinition.ts';
+import { RESOURCE_DEFS, type ResourceMap } from './types/ResourceDefinition.ts';
 import { as_uint_or_default, type int, type uint } from './types/RestrictedTypes.ts';
 import type { TowerWorker } from './types/TowerWorker.ts';
 import { TRANSPORT_DEFS } from './types/TransportationDefinition.ts';
-import { RESOURCE_DEFS, type ResourceMap } from './types/ResourceDefinition.ts';
 
 export function cost_to_rezone_floor(floor: Floor): ResourceMap<uint> {
     const floor_def = floor.kind ? FLOOR_DEFS.buildables[floor.kind] : FLOOR_DEFS.empty;
     const size = floor.size_left + floor.size_right;
     return Object.fromEntries(
-        Object.entries(floor_def.cost_to_build).map(([key, value]) => [key, as_uint_or_default(value! * size)]),
+        Object.entries(floor_def.cost_to_build).map(([key, value]) => [key, as_uint_or_default((value ?? 0) * size)]),
     );
 }
 
@@ -25,19 +25,16 @@ export function resource_sufficient(a: ResourceMap<uint>, b: ResourceMap<uint>):
     return true;
 }
 
-export function try_resource_subtract(bank: ResourceMap<uint>, cost: ResourceMap<uint>): boolean {
+export function try_resource_subtract(bank: ResourceMap<uint>, cost: ResourceMap<uint>): ResourceMap<uint> {
     const bank_copy = { ...bank };
     for (const resource of Object.values(RESOURCE_DEFS)) {
         const av = bank_copy[resource.kind];
         const bv = cost[resource.kind];
-        if (av === undefined && bv !== undefined) return false;
-        if (av !== undefined && bv !== undefined && av < bv) return false;
+        if (av === undefined && bv !== undefined) return bank;
+        if (av !== undefined && bv !== undefined && av < bv) return bank;
         bank_copy[resource.kind] = as_uint_or_default(av! - bv!);
     }
-    for (const resource of Object.values(RESOURCE_DEFS)) {
-        bank[resource.kind] = bank_copy[resource.kind];
-    }
-    return true;
+    return bank_copy;
 }
 
 export function resources_add(a: ResourceMap<uint>, b: ResourceMap<uint>): ResourceMap<uint> {

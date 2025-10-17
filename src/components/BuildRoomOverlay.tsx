@@ -1,4 +1,4 @@
-import { createContext, memo, useContext, useState } from 'react';
+import { createContext, memo, useContext, useMemo, useState } from 'react';
 import { clamp } from '../clamp.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT, ROOM_HEIGHT, Z_INDEX } from '../constants.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
@@ -6,6 +6,7 @@ import { FloorContext } from '../context/FloorContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { useFloorActions } from '../hooks/useFloorActions.ts';
 import { hori, verti } from '../logicFunctions.ts';
+import type { Building } from '../types/Building.ts';
 import type { Floor } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { int } from '../types/RestrictedTypes.ts';
@@ -100,7 +101,7 @@ const style = {
 } as const;
 
 function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
-    const [, update_building] = useContext(BuildingContext);
+    const [building, update_building] = useContext(BuildingContext);
     const [floor, update_floor] = useContext(FloorContext);
     const def = construction.type === 'room' ? ROOM_DEFS[construction.value] : TRANSPORT_DEFS[construction.value];
     const [bp_location, set_bp_location] = useState<number | null>(null);
@@ -110,6 +111,7 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
         set_bp_location(null);
     });
     const [, set_construction] = useConstructionContext(construction.type);
+    const collision_info = useMemo(() => create_collision_info(building, floor), [building, floor]);
 
     function update() {
         set_construction(construction);
@@ -153,9 +155,8 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
                     floor.size_right - def.min_width,
                 );
                 // if colliding with other rooms, don't update position and just keep the last one
-                for (const other_room of floor.rooms) {
-                    if (loc + def.min_width > other_room.position && loc < other_room.position + other_room.width)
-                        return;
+                for (const other_room of collision_info) {
+                    if (loc + def.min_width > other_room.left && loc < other_room.right) return;
                 }
                 // note: check lower floors for tall rooms
                 set_bp_location(loc);
@@ -206,4 +207,18 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
             )}
         </div>
     );
+}
+
+function create_collision_info(building: Building, floor: Floor): { left: number; right: number }[] {
+    const items = [];
+    for (const f of building.floors.slice(building.top_floor - floor.height)) {
+        for (const room of f.rooms) {
+            if (room.bottom_floor <= f.height && room.height + room.bottom_floor > floor.height)
+                items.push({
+                    left: room.position,
+                    right: room.position + room.width,
+                });
+        }
+    }
+    return items;
 }

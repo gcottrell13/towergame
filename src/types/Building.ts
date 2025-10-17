@@ -1,11 +1,11 @@
 import { PriorityQueue } from '@datastructures-js/priority-queue';
 import type { SaveFileActions } from '../events/SaveFileActions.ts';
 import type { Floor } from './Floor.ts';
+import type { ResourceMap } from './ResourceDefinition.ts';
 import type { int, uint } from './RestrictedTypes.ts';
 import type { SMap } from './SMap.ts';
-import type { Transportation } from './Transportation.ts';
 import type { TowerWorker } from './TowerWorker.ts';
-import type { ResourceMap } from './ResourceDefinition.ts';
+import type { Transportation } from './Transportation.ts';
 
 /**
  * A single building representing one "franchise" or "run"
@@ -14,15 +14,15 @@ export interface Building {
     name: string;
     id: uint;
     position?: int;
-    floors: Floor[];
+    floors: ReadonlyArray<Floor>;
     top_floor: int;
     max_width: uint;
-    transports: SMap<Transportation>;
+    transports: Readonly<SMap<Transportation>>;
 
     rating: uint;
-    new_things_acked: SMap<string>;
+    new_things_acked: Readonly<SMap<string>>;
 
-    action_queue: PriorityQueue<[number, SaveFileActions]> | null;
+    action_queue: Readonly<PriorityQueue<[number, SaveFileActions]>> | null;
 
     /**
      * milliseconds since the building was created
@@ -34,12 +34,12 @@ export interface Building {
     /**
      * The workers that are actively moving about the building. does not include any that are inside rooms.
      */
-    workers: TowerWorker[];
+    workers: ReadonlyArray<TowerWorker>;
 
     max_height: uint;
     max_depth: uint;
 
-    bank: ResourceMap<uint>;
+    bank: Readonly<ResourceMap<uint>>;
     room_id_counter: number;
 }
 

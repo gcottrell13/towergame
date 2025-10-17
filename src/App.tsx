@@ -1,5 +1,5 @@
 import './App.css';
-import { Main } from './components/main.tsx';
+import { Main } from './components/Main.tsx';
 
 const App = () => {
     return (

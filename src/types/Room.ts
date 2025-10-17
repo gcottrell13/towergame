@@ -28,15 +28,15 @@ export interface Room {
     bottom_floor: int;
     height: uint;
     width: uint;
-    total_resources_produced: {
+    total_resources_produced: Readonly<{
         [p: ResourceKind]: uint;
-    };
-    workers: TowerWorker[];
-    storage: { [p: ResourceKind]: uint };
+    }>;
+    workers: ReadonlyArray<TowerWorker>;
+    storage: Readonly<{ [p: ResourceKind]: uint }>;
 
     // precalculated list of rooms to send outputs to
-    output_destinations: RoomId[];
-    output_priorities: { [p: RoomId]: 'prioritize' | 'never' };
+    output_destinations: ReadonlyArray<RoomId>;
+    output_priorities: Readonly<{ [p: RoomId]: 'prioritize' | 'never' }>;
 }
 
 export function Default(): Room {

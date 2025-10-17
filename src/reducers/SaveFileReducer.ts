@@ -1,16 +1,16 @@
-import type {SaveFileActions} from '../events/SaveFileActions.ts';
-import {cost_to_rezone_floor, resources_add, resources_mul, try_resource_subtract} from '../logicFunctions.ts';
-import type {Building} from '../types/Building.ts';
-import {Default as floor_default, type Floor} from '../types/Floor.ts';
-import {FLOOR_DEFS} from '../types/FloorDefinition.ts';
-import {as_int_or_default, type uint} from '../types/RestrictedTypes.ts';
-import {ROOM_DEFS} from '../types/RoomDefinition.ts';
-import type {SaveFile} from '../types/SaveFile.ts';
-import {TRANSPORT_DEFS} from '../types/TransportationDefinition.ts';
-import type {Dispatch} from '../types/dispatch.ts';
-import {Default as room_default, type Room, type RoomId} from '../types/Room.ts';
-import {PriorityQueue} from '@datastructures-js/priority-queue';
-import {Default as transport_default, type Transportation} from '../types/Transportation.ts';
+import type { SaveFileActions } from '../events/SaveFileActions.ts';
+import { cost_to_rezone_floor, resources_add, resources_mul, try_resource_subtract } from '../logicFunctions.ts';
+import type { Building } from '../types/Building.ts';
+import { Default as floor_default, type Floor } from '../types/Floor.ts';
+import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
+import { as_int_or_default, type uint } from '../types/RestrictedTypes.ts';
+import { ROOM_DEFS } from '../types/RoomDefinition.ts';
+import type { SaveFile } from '../types/SaveFile.ts';
+import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
+import type { Dispatch } from '../types/dispatch.ts';
+import { Default as room_default, type RoomId } from '../types/Room.ts';
+import { PriorityQueue } from '@datastructures-js/priority-queue';
+import { Default as transport_default, type Transportation } from '../types/Transportation.ts';
 
 type ActionMap = {
     [p in SaveFileActions['action']]: (
@@ -28,12 +28,11 @@ type ActionMap = {
 const ActionMaps: ActionMap = {
     // ================================================================================================================
     // ================================================================================================================
-    'buy-perm-upgrade'() {
-    },
+    'buy-perm-upgrade'() {},
     // ================================================================================================================
     // ================================================================================================================
     'add-floor'(updated, action) {
-        const {building_id, position} = action;
+        const { building_id, position } = action;
         const building = clone_building(updated, building_id);
         const i = position === 'top' ? 0 : -1;
         const c = building.floors.at(i);
@@ -44,30 +43,32 @@ const ActionMaps: ActionMap = {
             size_right: FLOOR_DEFS.new_floor_size[1],
             height: as_int_or_default((i || 1) + c.height),
         };
-        building.floors.splice(i, 0, floor); // ok to mutate as it's already a cloned array
+        const floors = [...building.floors];
+        floors.splice(i, 0, floor); // ok to mutate as it's already a cloned array
+        building.floors = floors;
         const cost = cost_to_rezone_floor(floor);
-        try_resource_subtract(building.bank, cost);
+        building.bank = try_resource_subtract(building.bank, cost);
         building.top_floor = building.floors[0].height;
     },
     // ================================================================================================================
     // ================================================================================================================
     'buy-room'(updated, action) {
-        const {building_id, floor_id, room} = action;
+        const { building_id, floor_id, room } = action;
         const cost = ROOM_DEFS[room.kind].cost_to_build(room.width, room.height);
         const building = clone_building(updated, building_id);
         const floor = clone_floor(building, floor_id);
-        try_resource_subtract(building.bank, cost);
-        floor.rooms.push({
+        building.bank = try_resource_subtract(building.bank, cost);
+        floor.rooms = [...floor.rooms, {
             ...room_default(),
             ...room,
             id: building.room_id_counter as RoomId,
-        }); // ok to mutate as it's already a cloned array
+        }];
         building.room_id_counter += 1;
     },
     // ================================================================================================================
     // ================================================================================================================
     'buy-transport'(updated, action) {
-        const {building_id, bottom_floor, height, kind, position} = action;
+        const { building_id, bottom_floor, height, kind, position } = action;
         const building = clone_building(updated, building_id);
         const id = Math.max(...Object.values(building.transports).map((x) => x.id)) + 1;
         const transport: Transportation = {
@@ -78,38 +79,40 @@ const ActionMaps: ActionMap = {
             height,
             position,
         };
-        building.transports[id] = transport; // ok to mutate as it's already a cloned array
+        const transports = {...building.transports};
+        transports[id] = transport; // ok to mutate as it's already a cloned array
+        building.transports = transports;
         const cost = TRANSPORT_DEFS[transport.kind].cost_to_build(transport.height);
-        try_resource_subtract(building.bank, cost);
+        building.bank = try_resource_subtract(building.bank, cost);
     },
     // ================================================================================================================
     // ================================================================================================================
     'extend-floor'(updated, action) {
-        const {size_left = 0, size_right = 0, building_id, floor_id} = action;
+        const { size_left = 0, size_right = 0, building_id, floor_id } = action;
         const building = clone_building(updated, building_id);
         const floor = clone_floor(building, floor_id);
         const added_floor = size_left + size_right;
         const cost = floor.kind
             ? resources_add(FLOOR_DEFS.buildables[floor.kind].cost_to_build, FLOOR_DEFS.empty.cost_to_build)
             : FLOOR_DEFS.empty.cost_to_build;
-        try_resource_subtract(building.bank, resources_mul(cost, added_floor));
+        building.bank = try_resource_subtract(building.bank, resources_mul(cost, added_floor));
         floor.size_left = (floor.size_left + size_left) as uint;
         floor.size_right = (floor.size_right + size_right) as uint;
     },
     // ================================================================================================================
     // ================================================================================================================
     'rezone-floor'(updated, action) {
-        const {kind, building_id, floor_id} = action;
+        const { kind, building_id, floor_id } = action;
         const building = clone_building(updated, building_id);
         const floor = clone_floor(building, floor_id);
         const cost = cost_to_rezone_floor(floor);
         floor.kind = kind;
-        try_resource_subtract(building.bank, cost);
+        building.bank = try_resource_subtract(building.bank, cost);
     },
     // ================================================================================================================
     // ================================================================================================================
     'tick-building-time'(updated, action, dispatch) {
-        const {building_id, delta} = action;
+        const { building_id, delta } = action;
         const building = clone_building(updated, building_id);
         building.time_ms = building.time_ms + delta;
         if (building.action_queue === null || building.action_queue.front() === null) return;
@@ -124,7 +127,7 @@ const ActionMaps: ActionMap = {
     // ================================================================================================================
     // ================================================================================================================
     'start-day'(updated, action, dispatch) {
-        const {building_id} = action;
+        const { building_id } = action;
         const building = clone_building(updated, building_id);
         building.day_started = true;
         dispatch(
@@ -138,7 +141,7 @@ const ActionMaps: ActionMap = {
     // ================================================================================================================
     // ================================================================================================================
     'stop-day'(updated, action) {
-        const {building_id} = action;
+        const { building_id } = action;
         const building = clone_building(updated, building_id);
         building.day_started = false;
         building.time_ms -= building.time_ms % building.time_per_day_ms;
@@ -172,13 +175,10 @@ function clone_building(save: SaveFile, building_id: number): Building {
     const b = save.buildings[building_id];
     const clone: Building = {
         ...b,
-        // have to clone the arrays here, otherwise the reducer is not idempotent
-        floors: [...b.floors],
-        transports: {...b.transports},
-        bank: {...b.bank},
-        workers: [...b.workers],
     };
-    save.buildings[building_id] = clone;
+    const buildings = [...save.buildings];
+    buildings[building_id] = clone;
+    save.buildings = buildings;
     return clone;
 }
 
@@ -186,27 +186,24 @@ function clone_floor(building: Building, floor_id: number): Floor {
     const floor = building.floors[building.top_floor - floor_id];
     const clone: Floor = {
         ...floor,
-        // have to clone the arrays here, otherwise the reducer is not idempotent
-        rooms: [...floor.rooms],
     };
-    building.floors[building.top_floor - floor_id] = clone;
+    const floors = [...building.floors];
+    floors[building.top_floor - floor_id] = clone;
+    building.floors = floors;
     return clone;
 }
 
-function clone_room(floor: Floor, room_id: number): Room {
-    const room_index = floor.rooms.findIndex(x => x.id === room_id)!;
-    const room = floor.rooms[room_index];
-    const clone: Room = {
-        ...room,
-        output_destinations: [...room.output_destinations],
-        output_priorities: {...room.output_priorities},
-        total_resources_produced: {...room.total_resources_produced},
-        storage: {...room.storage},
-        workers: [...room.workers],
-    };
-    floor.rooms[room_index] = room;
-    return clone;
-}
+// function clone_room(floor: Floor, room_id: number): Room {
+//     const room_index = floor.rooms.findIndex((x) => x.id === room_id)!;
+//     const room = floor.rooms[room_index];
+//     const clone: Room = {
+//         ...room,
+//     };
+//     const rooms = [...floor.rooms];
+//     rooms[room_index] = room;
+//     floor.rooms = rooms;
+//     return clone;
+// }
 
 function insert_future_action(updated: SaveFile, building_id: number, action: SaveFileActions, delay_ms: number) {
     const building = clone_building(updated, building_id);

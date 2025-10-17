@@ -4,6 +4,7 @@ import { FloorContext } from '../context/FloorContext.ts';
 import { cost_to_rezone_floor, hori, resource_sufficient } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
+import { InlineSpans } from './InlineSpans.tsx';
 
 interface Props {
     floor_kind: FloorKind;
@@ -47,6 +48,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
     const [hovered, set_hovered] = useState(false);
     const [building] = useContext(BuildingContext);
     const [floor, update_floor] = useContext(FloorContext);
+    const size = floor.size_left + floor.size_right;
     const floor_def = FLOOR_DEFS.buildables[floor_kind];
     const cost = cost_to_rezone_floor(floor);
     const sufficient_funds = resource_sufficient(building.bank, cost);
@@ -56,7 +58,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
             className="no-sel"
             style={{
                 ...style,
-                width: hori(floor.size_left + floor.size_right),
+                width: hori(size),
                 left: hori(-floor.size_left),
                 background: sufficient_funds
                     ? 'color-mix(in srgb, lawngreen 30%, transparent)'
@@ -76,29 +78,29 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                 <span
                     style={{
                         ...popover_style,
-                        right: hori(floor.size_left + floor.size_right, 5),
+                        right: hori(size, 5),
                     }}
                 >
-                    <span>Floor {floor.height} rezone:</span>
-                    <span style={{ color: 'gray' }}>
-                        ($ (<ResourceMapDisplay resources={floor_def.cost_to_build} />
-                        )/m x {floor.size_left + floor.size_right}m)
-                    </span>
-                    {floor.rooms.length > 0 ? (
-                        <span style={{ color: 'red' }}>
-                            Destroy {floor.rooms.length} room
-                            {floor.rooms.length === 1 ? '' : 's'}
-                        </span>
-                    ) : null}
-                    <span
-                        style={{
-                            fontSize: 'x-large',
-                            color: sufficient_funds ? 'green' : 'red',
-                        }}
-                    >
-                        = <ResourceMapDisplay resources={cost} />
-                    </span>
-                    {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
+                    <InlineSpans>
+                        Floor {floor.height} rezone:
+                        {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
+                        {floor.rooms.length > 0 && (
+                            <span style={{ color: 'red' }}>
+                                Destroy {floor.rooms.length} room
+                                {floor.rooms.length === 1 ? '' : 's'}
+                            </span>
+                        )}
+                        ((
+                        <ResourceMapDisplay resources={floor_def.cost_to_build} />
+                        )/m x {size}m) =
+                        <ResourceMapDisplay
+                            resources={cost}
+                            style={{
+                                fontSize: 'x-large',
+                                color: sufficient_funds ? 'green' : 'red',
+                            }}
+                        />
+                    </InlineSpans>
                 </span>
             ) : null}
             <span style={tag_style}>{floor.kind ? FLOOR_DEFS.buildables[floor.kind].name : FLOOR_DEFS.empty.name}</span>
