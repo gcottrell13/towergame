@@ -2,10 +2,12 @@ import type { int, uint } from './RestrictedTypes.ts';
 import type { TowerWorker } from './TowerWorker.ts';
 import type { TransportationKind } from './TransportationDefinition.ts';
 
+export type TransportationId = uint & { readonly _t_type: unique symbol };
+
 export interface Transportation {
     kind: TransportationKind;
     name?: string;
-    id: number;
+    id: TransportationId;
     position: int;
     bottom_floor: int;
     height: uint;
@@ -16,7 +18,7 @@ export function Default(): Transportation {
     return {
         kind: '' as TransportationKind,
         name: '',
-        id: 0,
+        id: 0 as TransportationId,
         position: 0 as int,
         bottom_floor: 0 as int,
         height: 0 as uint,

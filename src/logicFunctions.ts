@@ -6,6 +6,8 @@ import { RESOURCE_DEFS, type ResourceMap } from './types/ResourceDefinition.ts';
 import { as_uint_or_default, type int, type uint } from './types/RestrictedTypes.ts';
 import type { TowerWorker } from './types/TowerWorker.ts';
 import { TRANSPORT_DEFS } from './types/TransportationDefinition.ts';
+import {TOWER_WORKER_DEFS, type TowerWorkerKind} from "./types/TowerWorkerDefinition.ts";
+import {ROOM_DEFS} from "./types/RoomDefinition.ts";
 
 export function cost_to_rezone_floor(floor: Floor): ResourceMap<uint> {
     const floor_def = floor.kind ? FLOOR_DEFS.buildables[floor.kind] : FLOOR_DEFS.empty;
@@ -80,6 +82,7 @@ export function pathfind_worker_next_step(
     building: Building,
     max_steps: number,
 ): P {
+    // needs to take distances into account
     if (from[0] === dest_floor) return [dest_floor, dest_pos];
     const visited_floors = new Set();
     visited_floors.add(from[0]);
@@ -119,4 +122,19 @@ export function pathfind_worker_next_step(
         }
     }
     return [...fallback];
+}
+
+export function worker_pool_total(building: Building): { [p in TowerWorkerKind]: number } {
+    const p: { [p in TowerWorkerKind]: number } = {};
+
+    for (const w of Object.values(TOWER_WORKER_DEFS)) {
+        for (const floor of building.floors) {
+            for (const room of floor.rooms) {
+                const prod = ROOM_DEFS[room.kind].workers_produced;
+                const pk = p[w.kind];
+                p[w.kind] = pk ? pk + prod[w.kind] : prod[w.kind];
+            }
+        }
+    }
+    return p;
 }

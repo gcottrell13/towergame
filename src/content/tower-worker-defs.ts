@@ -6,6 +6,7 @@ export const TOWER_WORKER_DEFS_RAW = {
         sprite: images.FACELESS_WALK_GIF,
         planning_capability: 2,
         base_capacity: 1,
+        movement_speed: 1,
     },
 } satisfies SMap<TowerWorkerDefsRaw>;
 
@@ -15,5 +16,6 @@ export interface TowerWorkerDefsRaw {
     sprite: string;
     // how many transports can it plan a path through
     planning_capability: number;
+    movement_speed: number;
     base_capacity: number;
 }

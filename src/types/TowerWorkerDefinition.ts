@@ -11,6 +11,10 @@ export interface TowerWorkerDefinition {
     If the shortest available path length exceeds planning capacity, behavior is undefined.
      */
     planning_capability: uint;
+    /*
+    units of floor per second
+     */
+    movement_speed: number;
     base_capacity: uint;
 }
 
@@ -23,6 +27,7 @@ function def_from_raw(id: string, raw: TowerWorkerDefsRaw): TowerWorkerDefinitio
         kind: id as TowerWorkerKind,
         sprite: raw.sprite,
         planning_capability: as_uint_or_default(raw.planning_capability),
+        movement_speed: raw.movement_speed,
         base_capacity: as_uint_or_default(raw.base_capacity),
     };
 }

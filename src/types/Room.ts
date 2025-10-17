@@ -4,7 +4,7 @@ import type { int, uint } from './RestrictedTypes.ts';
 import type { RoomKind } from './RoomDefinition.ts';
 import type { TowerWorker } from './TowerWorker.ts';
 
-export type RoomId = number & { readonly __type: unique symbol };
+export type RoomId = int & { readonly _r_type: unique symbol };
 
 export type RoomState = DiscriminatedUnion<
     'type',

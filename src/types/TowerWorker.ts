@@ -2,7 +2,10 @@ import type { ResourceKind } from './ResourceDefinition.ts';
 import type { int, uint } from './RestrictedTypes.ts';
 import type { TowerWorkerKind } from './TowerWorkerDefinition.ts';
 
+export type TowerWorkerId = number & { readonly __type: unique symbol };
+
 export interface TowerWorker {
+    id: TowerWorkerId;
     kind: TowerWorkerKind;
     position: [floor: int, pos: number];
     destination: [floor: int, pos: int];
@@ -20,6 +23,7 @@ export interface WorkerStats {
 
 export function Default(): TowerWorker {
     return {
+        id: 0 as TowerWorkerId,
         kind: '' as TowerWorkerKind,
         position: [0 as int, 0],
         destination: [0 as int, 0 as int],

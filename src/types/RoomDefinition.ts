@@ -71,7 +71,7 @@ export interface RoomDefinition {
      */
     resource_requirements?: ResourceMap<uint>;
     production?: ResourceMap<uint>;
-    workers?: { [p in TowerWorkerKind]: number };
+    workers_required?: { [p in TowerWorkerKind]: number };
 
     // if zero or empty, production takes no time, but partially-staffed rooms only have a % chance equal to staffing to produce (per production tick).
     // if greater than zero, partially-staffed rooms produce with % speed, taking longer.
@@ -79,6 +79,8 @@ export interface RoomDefinition {
 
     // if true, then all outputs will be added to the building bank instead of being used for further production
     produce_to_bank: boolean;
+
+    workers_produced: { [p in TowerWorkerKind]: number };
 }
 
 export const ROOM_DEFS: {
@@ -107,9 +109,10 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         overlay: raw.overlay,
         resource_requirements: raw.resource_requirements,
         production: raw.production,
-        workers: raw.workers,
+        workers_required: raw.workers_required,
         production_time: as_uint_or_default(raw.production_time ?? 0),
         produce_to_bank: raw.produce_to_bank ?? false,
+        workers_produced: raw.workers_produced ?? {},
     };
 }
 

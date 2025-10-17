@@ -29,7 +29,7 @@ export const ROOM_DEFS_RAW = {
         cost_to_build: { coin: 50 },
         build_thumb: 'room-hotel-basic-small-empty.png',
         production: { coin: 20 },
-        workers: { faceless: 2 },
+        workers_required: { faceless: 2 },
     },
 } as const satisfies SMap<RoomDefRaw>;
 
@@ -55,10 +55,13 @@ export interface RoomDefRaw {
      */
     resource_requirements?: { [p in ResourceIds]: number };
     production?: { [p in ResourceIds]: number };
-    workers?: { [p in TOWER_WORKER_KINDS]: number };
+    workers_required?: { [p in TOWER_WORKER_KINDS]: number };
     // if zero or empty, production takes no time, but partially-staffed rooms only have a % chance equal to staffing to produce.
     // if greater than zero, partially-staffed rooms produce with % speed, taking longer.
     production_time?: number;
     produce_to_bank?: boolean;
+
+    // how many workers are added to the building pool
+    workers_produced?: { [p in TOWER_WORKER_KINDS]: number };
 }
 export type RoomIds = keyof typeof ROOM_DEFS_RAW;
