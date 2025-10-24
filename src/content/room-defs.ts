@@ -3,7 +3,7 @@ import type { ResourceKind } from '../types/ResourceDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
 import type { SMap } from '../types/SMap.ts';
 import images from './images.ts';
-import type { ResourceIds } from './resource-defs.ts';
+import type { ResourceMapRaw } from './resource-defs.ts';
 import type { TOWER_WORKER_KINDS } from './tower-worker-defs.ts';
 
 export enum RoomCategory {
@@ -15,17 +15,17 @@ export const ROOM_DEFS_RAW = {
         min_width: 4,
         min_height: 1,
         display_name: 'Best Viewed Ad',
-        sprite_active: images.BESTVIEWEDCOMP_GIF,
-        sprite_empty: images.BESTVIEWEDCOMP_GIF,
+        sprite_active: images.rooms.BESTVIEWEDCOMP_GIF,
+        sprite_empty: images.rooms.BESTVIEWEDCOMP_GIF,
         cost_to_build: { coin: 10 },
-        build_thumb: images.BESTVIEWEDCOMP_GIF,
+        build_thumb: images.rooms.BESTVIEWEDCOMP_GIF,
         production: { coin: 1 },
     },
     'hotel-basic-small': {
         min_width: 2,
         display_name: 'Hotel Room',
-        sprite_active: images.ROOM_HOTEL_BASIC_SMALL_OCCUPIED_PNG,
-        sprite_empty: images.ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG,
+        sprite_active: images.rooms.ROOM_HOTEL_BASIC_SMALL_OCCUPIED_PNG,
+        sprite_empty: images.rooms.ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG,
         cost_to_build: { coin: 50 },
         build_thumb: 'room-hotel-basic-small-empty.png',
         production: { coin: 20 },
@@ -48,13 +48,13 @@ export interface RoomDefRaw {
     category?: RoomCategory;
     overlay?: () => Promise<() => ReactElement>;
 
-    cost_to_build: { [p in ResourceIds]: number } | ((width: uint, height: uint) => { [p: ResourceKind]: uint });
+    cost_to_build: ResourceMapRaw<number> | ((width: uint, height: uint) => { [p: ResourceKind]: uint });
 
     /**
      * If empty, production happens only once per day
      */
-    resource_requirements?: { [p in ResourceIds]: number };
-    production?: { [p in ResourceIds]: number };
+    resource_requirements?: ResourceMapRaw<number>;
+    production?: ResourceMapRaw<number>;
     workers_required?: { [p in TOWER_WORKER_KINDS]: number };
     // if zero or empty, production takes no time, but partially-staffed rooms only have a % chance equal to staffing to produce.
     // if greater than zero, partially-staffed rooms produce with % speed, taking longer.
@@ -63,5 +63,7 @@ export interface RoomDefRaw {
 
     // how many workers are added to the building pool
     workers_produced?: { [p in TOWER_WORKER_KINDS]: number };
+
+    upgrades?: [to: RoomIds, cost: ResourceMapRaw<number>][];
 }
 export type RoomIds = keyof typeof ROOM_DEFS_RAW;

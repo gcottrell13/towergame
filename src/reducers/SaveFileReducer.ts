@@ -1,10 +1,11 @@
 import type { SaveFileActions } from '../events/SaveFileActions.ts';
 import {
-    cost_to_rezone_floor, pathfind_worker_next_step,
+    cost_to_rezone_floor,
     resources_add,
     resources_mul,
     try_resource_subtract,
-    worker_pool_total
+    worker_spawn,
+    worker_pool_total,
 } from '../logicFunctions.ts';
 import type { Building } from '../types/Building.ts';
 import { Default as floor_default, type Floor, type FloorId } from '../types/Floor.ts';
@@ -13,12 +14,10 @@ import { as_int_or_default, type uint } from '../types/RestrictedTypes.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import type { SaveFile } from '../types/SaveFile.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
-import type { Dispatch } from '../types/dispatch.ts';
 import { Default as room_default, type RoomId } from '../types/Room.ts';
 import { PriorityQueue } from '@datastructures-js/priority-queue';
 import { Default as transport_default, type Transportation, type TransportationId } from '../types/Transportation.ts';
-import {TOWER_WORKER_DEFS} from "../types/TowerWorkerDefinition.ts";
-import type {TowerWorkerId} from "../types/TowerWorker.ts";
+import { TOWER_WORKER_DEFS } from '../types/TowerWorkerDefinition.ts';
 
 type ActionMap = {
     [p in SaveFileActions['action']]: (
@@ -29,7 +28,7 @@ type ActionMap = {
                 action: p;
             }
         >,
-        dispatch: Dispatch<[SaveFileActions, number]>,
+        dispatch: (action: SaveFileActions, delay?: number) => void,
     ) => void;
 };
 
@@ -159,8 +158,9 @@ const ActionMaps: ActionMap = {
     },
     // ================================================================================================================
     // ================================================================================================================
-    'worker-move-start'(updated, action, dispatch) {
-        const { building_id, dest_floor, dest_position, from_floor, from_position, worker_kind, payload } = action;
+    'worker-spawn'(updated, action, dispatch) {
+        // spawns a worker from their home room in order to take resources to another room.
+        const { building_id, from_position, worker_kind } = action;
         const building = clone_building(updated, building_id);
         const total = worker_pool_total(building);
         for (const worker of Object.values(building.workers)) {
@@ -170,33 +170,27 @@ const ActionMaps: ActionMap = {
             return dispatch(action, 1000);
         }
         const def = TOWER_WORKER_DEFS[worker_kind];
-        const [fnext, pnext] = pathfind_worker_next_step([from_floor, from_position], [dest_floor, dest_position], building, def.planning_capability);
-        const worker_id = building.worker_id_counter + 1 as TowerWorkerId;
-        building.worker_id_counter = worker_id;
-        const workers = {...building.workers};
-        building.workers = workers;
-        workers[worker_id] = {
-            id: worker_id,
-            kind: worker_kind,
-            position: [from_floor, from_position],
-            destination: [dest_floor, dest_position],
-            next_step: [fnext, pnext],
-            stats: {
-                capacity: def.base_capacity,
-                payload,
-                speed: def.movement_speed,
-                status: 'working',
+        const { worker_id, pnext } = worker_spawn(building, action);
+        dispatch(
+            {
+                action: 'worker-move-end',
+                building_id,
+                worker_id,
             },
-        };
-        dispatch({
-            action: 'worker-move-end',
-            building_id,
-            worker_id,
-        }, Math.abs(from_position - pnext) * 1000 / def.movement_speed);
+            (Math.abs(from_position - pnext) * 1000) / def.movement_speed,
+        );
     },
     // ================================================================================================================
     // ================================================================================================================
-    'worker-move-end'(updated, action) {},
+    'worker-move-start'(updated, action) {
+        // add the worker back into the building
+    },
+    'worker-move-end'(updated, action) {
+        // do these in order until one succeeds:
+        // 1. check if reached destination; deposit resources; despawn worker and add back to room
+        // 2. check if reached transportation; remove from building and add worker to transport
+        // 3. despawn or attempt pathfinding to destination again
+    },
     // ================================================================================================================
     // ================================================================================================================
 };

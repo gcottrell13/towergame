@@ -66,6 +66,8 @@ export interface RoomDefinition {
     category: RoomCategory;
     overlay?: () => Promise<() => ReactElement>;
 
+    upgrades: [to: RoomKind, cost: ResourceMap<uint>][];
+
     /**
      * If empty, production happens only once per day
      */
@@ -113,6 +115,7 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         production_time: as_uint_or_default(raw.production_time ?? 0),
         produce_to_bank: raw.produce_to_bank ?? false,
         workers_produced: raw.workers_produced ?? {},
+        upgrades: (raw.upgrades as unknown as RoomDefinition['upgrades']) ?? [],
     };
 }
 

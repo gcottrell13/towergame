@@ -3,7 +3,7 @@ import images from './images.ts';
 
 export const RESOURCE_DEFS_RAW = {
     coin: {
-        sprite: images.COIN_PNG,
+        sprite: images.resources.COIN_PNG,
     },
 } satisfies SMap<ResourceDefRaw>;
 

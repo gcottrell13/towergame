@@ -10,6 +10,8 @@ import { BuildMenu } from './BuildMenu.tsx';
 import { RoomBuilderTotalMemo } from './BuildRoomOverlay.tsx';
 import { FloorComponentMemo, TopRoofComponent } from './FloorComponent.tsx';
 import { TransportationComponentMemo } from './TransportationComponent.tsx';
+import { TowerWorkerComponentMemo } from './TowerWorkerComponent.tsx';
+import { DayTimerDisplay } from './DayTimerDisplay.tsx';
 
 interface Props {
     building: Building;
@@ -29,7 +31,7 @@ export function BuildingComponent({ building, show_build_menu = true }: Props) {
     return (
         <BuildingContext value={[building, update]}>
             <Ground building={building} />
-            <TimerDisplay />
+            <DayTimerDisplay />
             {show_build_menu && <BuildMenu />}
             <div
                 ref={ref}
@@ -48,6 +50,9 @@ export function BuildingComponent({ building, show_build_menu = true }: Props) {
                 <RoomBuilderTotalMemo />
                 {Object.entries(building.transports).map(([_id, t]) => (
                     <TransportationComponentMemo key={`${t.height}-${t.position}`} transport={t} />
+                ))}
+                {Object.values(building.workers).map((worker) => (
+                    <TowerWorkerComponentMemo worker={worker} key={worker.id} />
                 ))}
             </div>
         </BuildingContext>
@@ -79,68 +84,5 @@ function Ground({ building }: { building: Building }) {
                 }}
             />
         </div>
-    );
-}
-
-const NOON = 12 * 60 * 1000;
-function TimerDisplay() {
-    const [building, update] = useContext(BuildingContext);
-    const day_number = Math.floor(building.time_ms / building.time_per_day_ms) + 1;
-    const sday_start = NOON - Math.floor((building.time_per_day_ms * 2) / 3);
-    const day_start = Math.round(sday_start / 60_000) * 60_000;
-    const time = building.time_ms % building.time_per_day_ms;
-    return (
-        <div
-            style={{
-                position: 'fixed',
-                display: 'flex',
-                justifyContent: 'center',
-                width: 'calc(100vw)',
-                padding: '4px',
-            }}
-        >
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '3px',
-                }}
-            >
-                {building.day_started && (
-                    <>
-                        <span>Day {day_number}</span>
-                        <Time time={time + day_start} />
-                        <span style={{ display: 'flex', gap: '4px' }}>
-                            <Time time={day_start} style={{ fontSize: 'small' }} />
-                            <progress max={building.time_per_day_ms} value={time} />
-                            <Time time={day_start + building.time_per_day_ms} style={{ fontSize: 'small' }} />
-                        </span>
-                    </>
-                )}
-                {!building.day_started && (
-                    <button
-                        type={'button'}
-                        onClick={() =>
-                            update({
-                                action: 'start-day',
-                            })
-                        }
-                    >
-                        Start Day {day_number}
-                    </button>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function Time({ time, style }: { time: number; style?: React.CSSProperties }) {
-    const mod12 = (time / 60 / 1000) % 12;
-    const minute = (time / 1000) % 60;
-    return (
-        <span style={style}>
-            {Math.floor(mod12) || 12}:{String(Math.floor(minute)).padStart(2, '0')} {time > NOON ? 'pm' : 'am'}
-        </span>
     );
 }

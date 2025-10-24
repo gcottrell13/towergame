@@ -14,7 +14,7 @@ export const TRANSPORT_DEFS_RAW = {
     stairwell: {
         name: 'Stairwell',
         type: TransportationType.Stairs,
-        sprite_empty: images.STAIRWELL1_PNG,
+        sprite_empty: images.transports.STAIRWELL1_PNG,
         max_height: 5,
         width: 1,
         cost_per_floor: { coin: 10 },
@@ -22,7 +22,7 @@ export const TRANSPORT_DEFS_RAW = {
     'elevator-small': {
         name: 'Small Elevator',
         type: TransportationType.Elevator,
-        sprite_empty: images.STAIRWELL1_PNG,
+        sprite_empty: images.transports.STAIRWELL1_PNG,
         max_height: 15,
         width: 2,
         cost_per_floor: { coin: 20 },

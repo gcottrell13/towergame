@@ -4,10 +4,10 @@ import type { FloorKind } from '../types/FloorDefinition.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
 import type { RoomKind } from '../types/RoomDefinition.ts';
 import type { Transportation } from '../types/Transportation.ts';
-import type {TowerWorkerId, WorkerStats} from '../types/TowerWorker.ts';
+import type { TowerWorkerId, WorkerStats } from '../types/TowerWorker.ts';
 import type { BuildingId } from '../types/Building.ts';
 import type { FloorId } from '../types/Floor.ts';
-import type {TowerWorkerKind} from "../types/TowerWorkerDefinition.ts";
+import type { TowerWorkerKind } from '../types/TowerWorkerDefinition.ts';
 
 export type SaveFileActions = DiscriminatedUnion<
     'action',
@@ -52,7 +52,7 @@ export type SaveFileActions = DiscriminatedUnion<
         'stop-day': {
             building_id: BuildingId;
         };
-        'worker-move-start': {
+        'worker-spawn': {
             // we want a worker of this kind, whenever they are available
             building_id: BuildingId;
             worker_kind: TowerWorkerKind;
@@ -62,10 +62,14 @@ export type SaveFileActions = DiscriminatedUnion<
             dest_floor: int;
             dest_position: int;
         };
-        'worker-move-end': {
+        'worker-move-start': {
             building_id: BuildingId;
             worker_id: TowerWorkerId;
         }
+        'worker-move-end': {
+            building_id: BuildingId;
+            worker_id: TowerWorkerId;
+        };
     }
 >;
 
