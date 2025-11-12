@@ -9,7 +9,7 @@ export interface Floor {
     kind: FloorKind | null;
     size_left: uint;
     size_right: uint;
-    rooms: ReadonlyArray<Room>;
+    rooms: Room[];
 }
 
 export function Default(): Floor {

@@ -14,7 +14,7 @@ export function RoomComponent({ room }: Props) {
     // const [_construction] = useConstructionContext('destroy_room');
     return (
         <div
-            className="fit-content no-sel"
+            className="fit-content"
             id={`${room.kind}-${room.position}`}
             style={{
                 left: hori(room.position),

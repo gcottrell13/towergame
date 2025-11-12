@@ -13,7 +13,7 @@ export function TransportationComponent({ transport }: Props) {
 
     return (
         <div
-            className="fit-content no-sel"
+            className="fit-content"
             id={`${transport.kind}-${transport.position}`}
             style={{
                 left: hori(transport.position),

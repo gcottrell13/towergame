@@ -1,8 +1,8 @@
 import type { DiscriminatedUnion } from './DiscriminatedUnion.ts';
-import type { ResourceKind } from './ResourceDefinition.ts';
+import type { ResourceMap } from './ResourceDefinition.ts';
 import type { int, uint } from './RestrictedTypes.ts';
 import type { RoomKind } from './RoomDefinition.ts';
-import type { TowerWorker } from './TowerWorker.ts';
+import type { TowerWorkerKind } from './TowerWorkerDefinition.ts';
 
 export type RoomId = int & { readonly _r_type: unique symbol };
 
@@ -13,7 +13,7 @@ export type RoomState = DiscriminatedUnion<
         WaitingForResources: {
             // resources that have not been delivered, nor scheduled for delivery. If this is empty, then all inputs
             // are accounted for, but may not be delivered yet.
-            needs: { [p: ResourceKind]: uint };
+            needs: ResourceMap<uint>;
             // used to determine priority for delivery
             waiting_since: uint;
         };
@@ -28,15 +28,18 @@ export interface Room {
     bottom_floor: int;
     height: uint;
     width: uint;
-    total_resources_produced: Readonly<{
-        [p: ResourceKind]: uint;
-    }>;
-    workers: ReadonlyArray<TowerWorker>;
-    storage: Readonly<{ [p: ResourceKind]: uint }>;
+    // running total of resources produced in this room
+    total_resources_produced: ResourceMap<uint>;
+    // workers employed in this room
+    workers: { [p: TowerWorkerKind]: uint };
+    // resources stored in this room
+    storage: ResourceMap<uint>;
 
-    // precalculated list of rooms to send outputs to
-    output_destinations: ReadonlyArray<RoomId>;
-    output_priorities: Readonly<{ [p: RoomId]: 'prioritize' | 'never' }>;
+    // precalculated list of rooms to send outputs or workers to
+    output_destinations: RoomId[];
+    output_priorities: { [p: RoomId]: 'prioritize' | 'never' };
+    // which rooms have which kinds of workers in what quantity
+    produced_workers_committed: [RoomId, TowerWorkerKind, uint][];
 }
 
 export function Default(): Room {
@@ -49,9 +52,10 @@ export function Default(): Room {
         width: 0 as uint,
         height: 0 as uint,
         bottom_floor: 0 as int,
-        workers: [],
+        workers: {},
         storage: {},
         output_priorities: {},
         output_destinations: [],
+        produced_workers_committed: [],
     };
 }

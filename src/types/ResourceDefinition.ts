@@ -15,7 +15,7 @@ export const RESOURCE_DEFS: {
     [p: ResourceKind]: ResourceDefinition;
 } = Object.fromEntries(Object.entries(RESOURCE_DEFS_RAW).map(([key, value]) => [key, def_from_raw(key, value)]));
 
-export type ResourceMap<T> = Partial<{ [p: ResourceKind]: T }>;
+export type ResourceMap<T> = { [p: ResourceKind]: T };
 
 function def_from_raw(id: string, raw: ResourceDefRaw): ResourceDefinition {
     return {

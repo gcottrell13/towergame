@@ -65,13 +65,13 @@ export type SaveFileActions = DiscriminatedUnion<
         'worker-move-start': {
             building_id: BuildingId;
             worker_id: TowerWorkerId;
-        }
+        };
         'worker-move-end': {
             building_id: BuildingId;
             worker_id: TowerWorkerId;
         };
     }
->;
+> & { delay_ms?: number };
 
 export type BuildingActions = ExtendsOmit<SaveFileActions, 'building_id'>;
 export type TransportActions = ExtendsOmit<BuildingActions, 'transport_id'>;

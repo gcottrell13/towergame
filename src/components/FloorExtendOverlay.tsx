@@ -1,11 +1,11 @@
 import { useCallback, useContext } from 'react';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import { hori, resource_sufficient, resources_add, resources_mul, verti } from '../logicFunctions.ts';
+import { hori, mapping_mul, mapping_add, mapping_sufficient, verti } from '../logicFunctions.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
-import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
 import { InlineSpans } from './InlineSpans.tsx';
+import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
 
 const overlay_style = {
     position: 'absolute',
@@ -37,12 +37,12 @@ export function FloorExtendOverlay() {
     let left = null;
 
     const cost_build = floor.kind
-        ? resources_add(FLOOR_DEFS.buildables[floor.kind].cost_to_build, FLOOR_DEFS.empty.cost_to_build)
+        ? mapping_add(FLOOR_DEFS.buildables[floor.kind].cost_to_build, FLOOR_DEFS.empty.cost_to_build)
         : FLOOR_DEFS.empty.cost_to_build;
 
     if (expand_right > 0) {
-        const cost = resources_mul(cost_build, expand_right);
-        const sufficient_funds = resource_sufficient(building.bank, cost);
+        const cost = mapping_mul(cost_build, expand_right);
+        const sufficient_funds = mapping_sufficient(building.bank, cost);
         right = (
             <div
                 style={{
@@ -86,8 +86,8 @@ export function FloorExtendOverlay() {
         );
     }
     if (expand_left > 0) {
-        const cost = resources_mul(cost_build, expand_left);
-        const sufficient_funds = resource_sufficient(building.bank, cost);
+        const cost = mapping_mul(cost_build, expand_left);
+        const sufficient_funds = mapping_sufficient(building.bank, cost);
         left = (
             <div
                 style={{
@@ -152,8 +152,8 @@ export function NewFloorOverlay() {
     }, [update_building]);
 
     const size = FLOOR_DEFS.new_floor_size[0] + FLOOR_DEFS.new_floor_size[1];
-    const cost = resources_mul(FLOOR_DEFS.empty.cost_to_build, size);
-    const sufficient_funds = resource_sufficient(building.bank, cost);
+    const cost = mapping_mul(FLOOR_DEFS.empty.cost_to_build, size);
+    const sufficient_funds = mapping_sufficient(building.bank, cost);
 
     const big_green: React.CSSProperties = {
         fontSize: 'x-large',
@@ -177,7 +177,7 @@ export function NewFloorOverlay() {
                 update();
             }}
         >
-            <div className="hover-child-display no-sel">
+            <div className="hover-child-display">
                 <span
                     style={{
                         ...popover_style,

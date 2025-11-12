@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import pick from 'lodash/pick';
+import { create } from 'zustand/react';
+import { useShallow } from 'zustand/react/shallow';
 import type { FloorKind } from '../types/FloorDefinition.ts';
 import type { RoomKind } from '../types/RoomDefinition.ts';
 import type { TransportationKind } from '../types/TransportationDefinition.ts';
@@ -13,20 +15,25 @@ type STATE_TYPE = {
     transport: { value: TransportationKind };
 };
 
-const subscribers: {
-    [p in keyof STATE_TYPE]: React.Dispatch<React.SetStateAction<map_distribute<p> | null>>[];
-} = {
-    room: [],
-    rezone: [],
-    destroy_room: [],
-    extend_floor: [],
-    transport: [],
-};
-let current_state_name: keyof STATE_TYPE | null = null;
-let current_state: map_distribute<keyof STATE_TYPE> | null = null;
-
 // the conditional is a little trick to distribute this mapped type over all the items in a union
 type map_distribute<T extends keyof STATE_TYPE> = T extends unknown ? { type: T } & STATE_TYPE[T] : never;
+
+type Store = Partial<STATE_TYPE> & {
+    current: keyof STATE_TYPE | null;
+    update<T extends keyof STATE_TYPE>(s: map_distribute<T> | null): void;
+};
+
+const constructionStore = create<Store>((set, get) => ({
+    current: null,
+    update(s) {
+        const current = get().current;
+        if (current) set({ [current]: undefined });
+        if (s) {
+            const { type } = s;
+            set({ [type]: s, current: type });
+        }
+    },
+}));
 
 /**
  * subscribe to just the construction contexts that you need
@@ -35,37 +42,10 @@ type map_distribute<T extends keyof STATE_TYPE> = T extends unknown ? { type: T 
 export function useConstructionContext<T extends keyof STATE_TYPE>(
     ...keys: T[]
 ): [map_distribute<T> | null, (s: map_distribute<T> | null) => void] {
+    const { update, current, ...rest } = constructionStore(
+        useShallow((state) => pick(state, 'update', 'current', ...keys)),
+    );
+    if (!update) return [null, () => {}];
     // @ts-expect-error
-    const [state, set_state] = useState<map_distribute<T> | null>(current_state);
-    useEffect(() => {
-        for (const key of keys) subscribers[key].push(set_state);
-        return () => {
-            for (const key of keys) {
-                const i = subscribers[key].indexOf(set_state);
-                if (i >= 0) {
-                    subscribers[key].splice(i, 1);
-                }
-            }
-        };
-    }, [keys]);
-    const set = useCallback((v: map_distribute<T> | null) => {
-        if (v === current_state) {
-            return;
-        }
-        const key = v?.type ?? null;
-        if (current_state_name !== null && current_state_name !== key) {
-            for (const sub of subscribers[current_state_name]) {
-                sub(null);
-            }
-        }
-        current_state_name = key;
-        current_state = v;
-        if (key !== null) {
-            for (const sub of subscribers[key]) {
-                // @ts-expect-error
-                sub(v);
-            }
-        }
-    }, []);
-    return [state, set];
+    return [current ? (rest[current] ?? null) : null, update];
 }

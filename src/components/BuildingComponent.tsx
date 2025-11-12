@@ -41,6 +41,7 @@ export function BuildingComponent({ building, show_build_menu = true }: Props) {
                     position: 'absolute',
                     height: verti(2),
                     top: `calc(100vh + ${top})`,
+                    animationPlayState: paused ? 'paused' : 'running',
                 }}
             >
                 {Object.values(building.floors).map((floor) => (

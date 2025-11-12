@@ -5,7 +5,4 @@ import { type Building, Default } from '../types/Building.ts';
 /**
  * Provides a building, plus an update function. The parameter will have the building context id injected automatically.
  */
-export const BuildingContext = createContext<[Building, (action: BuildingActions, delay_ms?: number) => void]>([
-    Default(),
-    () => {},
-]);
+export const BuildingContext = createContext<[Building, (action: BuildingActions) => void]>([Default(), () => {}]);

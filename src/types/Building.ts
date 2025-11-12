@@ -1,4 +1,3 @@
-import { PriorityQueue } from '@datastructures-js/priority-queue';
 import type { SaveFileActions } from '../events/SaveFileActions.ts';
 import type { Floor } from './Floor.ts';
 import type { ResourceMap } from './ResourceDefinition.ts';
@@ -17,15 +16,15 @@ export interface Building {
     name: string;
     id: BuildingId;
     position?: int;
-    floors: ReadonlyArray<Floor>;
+    floors: Floor[];
     top_floor: int;
     max_width: uint;
-    transports: Readonly<SMap<Transportation>>;
+    transports: SMap<Transportation>;
 
     rating: uint;
-    new_things_acked: Readonly<SMap<string>>;
+    new_things_acked: SMap<string>;
 
-    action_queue: Readonly<PriorityQueue<[number, SaveFileActions]>> | null;
+    action_queue: [number, SaveFileActions][] | null;
 
     /**
      * milliseconds since the building was created
@@ -37,12 +36,12 @@ export interface Building {
     /**
      * The workers that are actively moving about the building. does not include any that are inside rooms.
      */
-    workers: Readonly<NMap<TowerWorker>>;
+    workers: NMap<TowerWorker>;
 
     max_height: uint;
     max_depth: uint;
 
-    bank: Readonly<ResourceMap<uint>>;
+    bank: ResourceMap<uint>;
     room_id_counter: number;
     worker_id_counter: number;
 }
@@ -63,7 +62,7 @@ export function Default(): Building {
         max_height: 0 as uint,
         max_depth: 0 as uint,
         workers: {},
-        action_queue: new PriorityQueue(([t]) => t),
+        action_queue: [],
         bank: {},
         room_id_counter: 0,
         worker_id_counter: 0,

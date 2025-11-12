@@ -12,14 +12,19 @@
     },
     "dependencies": {
         "@datastructures-js/priority-queue": "^6.3.4",
+        "immer": "^10.2.0",
+        "lodash": "^4.17.21",
         "react": "^19.1.1",
-        "react-dom": "^19.1.1"
+        "react-dom": "^19.1.1",
+        "use-immer": "^0.11.0",
+        "zustand": "^5.0.8"
     },
     "devDependencies": {
         "@biomejs/biome": "2.2.3",
         "@eslint/js": "^9.35.0",
         "@rsbuild/core": "^1.5.6",
         "@rsbuild/plugin-react": "^1.4.0",
+        "@types/lodash": "^4.17.20",
         "@types/node": "^24.5.2",
         "@types/react": "^19.1.13",
         "@types/react-dom": "^19.1.9",

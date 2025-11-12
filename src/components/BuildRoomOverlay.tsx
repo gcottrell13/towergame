@@ -16,16 +16,13 @@ import { useRoomExtender } from './RoomExtender.tsx';
 
 const ResizingRoomCtx = createContext<[boolean, (x: boolean) => void]>([false, () => {}]);
 
-// number of floors
-const extra_height = 10;
-
 type T = 'room' | 'transport';
 type V = ReturnType<typeof useConstructionContext<T>>;
 type V2 = NonNullable<V[0]>;
 
 export function RoomBuilderTotal() {
     const [building] = useContext(BuildingContext);
-    const [construction, set_construction] = useConstructionContext('room', 'transport');
+    const [construction] = useConstructionContext('room', 'transport');
     const [choosing_height, set_choosing_height] = useState(false);
 
     if (!construction) return null;
@@ -34,19 +31,14 @@ export function RoomBuilderTotal() {
 
     return (
         <div
-            onContextMenu={(ev) => {
-                ev.preventDefault();
-                set_construction(null);
-                set_choosing_height(false);
-            }}
             className={'room-builder-total'}
             style={{
                 zIndex: Z_INDEX.builder_overlay,
                 position: 'absolute',
                 left: hori(-building.max_width),
-                top: verti(-(building.top_floor + extra_height)),
+                top: verti(-building.top_floor),
                 width: hori(building.max_width * 2),
-                height: verti(building.top_floor - bottom_floor.height + extra_height),
+                height: verti(building.top_floor - bottom_floor.height),
             }}
         >
             <ResizingRoomCtx value={[choosing_height, set_choosing_height]}>
@@ -78,7 +70,7 @@ function RoomBuilderFloor({ floor, construction }: { floor: Floor; construction:
             <div
                 style={{
                     position: 'absolute',
-                    top: verti(-(floor.height - 1 - extra_height)),
+                    top: verti(building.top_floor - floor.height - 1),
                     left: hori(building.max_width - floor.size_left),
                 }}
             >
@@ -141,7 +133,6 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
 
     return (
         <div
-            className={'no-sel'}
             style={{
                 ...style,
                 width: hori(floor.size_right + floor.size_left),

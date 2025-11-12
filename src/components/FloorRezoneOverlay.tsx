@@ -1,10 +1,10 @@
 import { useContext, useState } from 'react';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import { cost_to_rezone_floor, hori, resource_sufficient } from '../logicFunctions.ts';
+import {cost_to_rezone_floor, hori, mapping_sufficient} from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
-import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
 import { InlineSpans } from './InlineSpans.tsx';
+import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
 
 interface Props {
     floor_kind: FloorKind;
@@ -51,11 +51,10 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
     const size = floor.size_left + floor.size_right;
     const floor_def = FLOOR_DEFS.buildables[floor_kind];
     const cost = cost_to_rezone_floor(floor);
-    const sufficient_funds = resource_sufficient(building.bank, cost);
+    const sufficient_funds = mapping_sufficient(building.bank, cost);
     return (
         <div
             id={`rezone-${floor.height}`}
-            className="no-sel"
             style={{
                 ...style,
                 width: hori(size),

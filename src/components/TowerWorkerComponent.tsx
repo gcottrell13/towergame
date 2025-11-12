@@ -18,6 +18,7 @@ function TowerWorkerComponent({ worker }: Props) {
         left: spawning ? hori(pos) : hori(npos),
         top: verti(-floor),
         transition: `left ${Math.abs(npos - pos) / speed}s linear`,
+        animationPlayState: 'inherit',
     };
     useEffect(() => {
         setTimeout(() => {

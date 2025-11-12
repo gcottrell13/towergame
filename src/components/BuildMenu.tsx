@@ -2,14 +2,14 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { RoomCategory } from '../content/room-defs.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
+import { mapping_sufficient } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
+import type { ResourceMap } from '../types/ResourceDefinition.ts';
+import type { uint } from '../types/RestrictedTypes.ts';
 import { ROOM_DEFS, type RoomKind } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS, type TransportationKind } from '../types/TransportationDefinition.ts';
 import { PinSide } from './PinSide.tsx';
-import { resource_sufficient } from '../logicFunctions.ts';
 import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
-import type { ResourceMap } from '../types/ResourceDefinition.ts';
-import type { uint } from '../types/RestrictedTypes.ts';
 
 const build_menu_style = {
     position: 'fixed',
@@ -64,7 +64,7 @@ export function BuildMenu() {
     useEffect(() => {
         if (construction?.type !== 'room') return;
         const def = ROOM_DEFS[construction.value];
-        if (!resource_sufficient(building.bank, def.cost_to_build(def.min_width, def.min_height))) {
+        if (!mapping_sufficient(building.bank, def.cost_to_build(def.min_width, def.min_height))) {
             set_construction(null);
         }
     }, [construction, building.bank, set_construction]);
@@ -209,7 +209,7 @@ function FloorSelector() {
                     return (
                         <div
                             key={id}
-                            className={'no-sel first-child-grow'}
+                            className={'first-child-grow'}
                             style={{
                                 marginTop: '10px',
                                 display: 'flex',
@@ -327,7 +327,7 @@ function BuildButton({ selected, cost, set }: { selected: boolean; cost: Resourc
                 alignItems: 'center',
                 gap: '5px',
             }}
-            disabled={selected || !resource_sufficient(building.bank, cost)}
+            disabled={selected || !mapping_sufficient(building.bank, cost)}
             onClick={set}
         >
             Build

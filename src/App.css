@@ -7,6 +7,8 @@ html {
 
 * {
     font-size: inherit;
+    animation-play-state: inherit;
+    user-select: none;
 }
 
 div::-webkit-scrollbar {
@@ -15,6 +17,12 @@ div::-webkit-scrollbar {
 
 main {
     margin-bottom: auto;
+    width: 100vw;
+    height: 100vh;
+}
+
+.static-bg {
+    position: fixed;
     width: 100vw;
     height: 100vh;
 }
@@ -55,8 +63,8 @@ button.hover-color:hover {
     background-color: color-mix(in srgb, gray, transparent);
 }
 
-.no-sel {
-    user-select: none;
+.user-select {
+    user-select: revert;
 }
 
 .fit-content {

@@ -1,14 +1,20 @@
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from './constants.ts';
+import merge from 'lodash/merge';
 import type { SaveFileActions } from './events/SaveFileActions.ts';
 import type { Building } from './types/Building.ts';
-import type { Floor } from './types/Floor.ts';
+import type { Floor, FloorId } from './types/Floor.ts';
 import { FLOOR_DEFS } from './types/FloorDefinition.ts';
-import { RESOURCE_DEFS, type ResourceMap } from './types/ResourceDefinition.ts';
+import { type ResourceMap } from './types/ResourceDefinition.ts';
 import { as_uint_or_default, type int, type uint } from './types/RestrictedTypes.ts';
 import { ROOM_DEFS } from './types/RoomDefinition.ts';
 import type { TowerWorker, TowerWorkerId } from './types/TowerWorker.ts';
 import { TOWER_WORKER_DEFS, type TowerWorkerKind } from './types/TowerWorkerDefinition.ts';
 import { TRANSPORT_DEFS } from './types/TransportationDefinition.ts';
+import type { Room } from './types/Room.ts';
+
+// a hack to get the proper keys
+export const keys: <T extends {[p in string]: any}>(obj: T) => (keyof T)[] = Object.keys;
+export const entries: <T extends {[p in string]: any}>(obj: T) => [key: keyof T, value: T[keyof T]][] = Object.entries;
 
 export function cost_to_rezone_floor(floor: Floor): ResourceMap<uint> {
     const floor_def = floor.kind ? FLOOR_DEFS.buildables[floor.kind] : FLOOR_DEFS.empty;
@@ -18,42 +24,58 @@ export function cost_to_rezone_floor(floor: Floor): ResourceMap<uint> {
     );
 }
 
-export function resource_sufficient(a: ResourceMap<uint>, b: ResourceMap<uint>): boolean {
-    for (const resource of Object.values(RESOURCE_DEFS)) {
-        const av = a[resource.kind];
-        const bv = b[resource.kind];
-        if (av === undefined && bv !== undefined) return false;
-        if (av !== undefined && bv !== undefined && av < bv) return false;
+export function mapping_sufficient<O extends {[p: string]: number}>(
+    value: O,
+    target: O,
+): boolean {
+    for (const key in target) {
+        const av = value[key];
+        const bv = target[key];
+        if (av === undefined) return false;
+        if (av < bv) return false;
     }
     return true;
 }
 
-export function try_resource_subtract(bank: ResourceMap<uint>, cost: ResourceMap<uint>): ResourceMap<uint> {
-    const bank_copy = { ...bank };
-    for (const resource of Object.values(RESOURCE_DEFS)) {
-        const av = bank_copy[resource.kind];
-        const bv = cost[resource.kind];
-        if (av === undefined && bv !== undefined) return bank;
-        if (av !== undefined && bv !== undefined && av < bv) return bank;
-        bank_copy[resource.kind] = as_uint_or_default(av! - bv!);
+export function try_mapping_subtract<O extends {[p: string]: number}>(
+    source: O,
+    target: O,
+    output: O,
+): boolean {
+    const source_copy = { ...source };
+    for (const key in target) {
+        const av = source_copy[key];
+        const bv = target[key];
+        if (av === undefined && bv !== undefined) return false;
+        if (av !== undefined && bv !== undefined && av < bv) return false;
+        source_copy[key] = av! - bv! as O[Extract<keyof O, string>];
     }
-    return bank_copy;
+    merge(output, source_copy);
+    return true;
 }
 
-export function resources_add(a: ResourceMap<uint>, b: ResourceMap<uint>): ResourceMap<uint> {
-    const sum: ResourceMap<uint> = {};
-    for (const resource of Object.values(RESOURCE_DEFS)) {
-        const av = a[resource.kind];
-        const bv = b[resource.kind];
-        if (av !== undefined && bv !== undefined) sum[resource.kind] = as_uint_or_default(av + bv);
+export function mapping_add<O extends {[p: string]: number}>(
+    a: O,
+    b: O,
+): O {
+    const sum: O = { ...a };
+    for (const key in b) {
+        const av = a[key];
+        const bv = b[key];
+        if (av !== undefined) sum[key] = (av + bv) as O[Extract<keyof O, string>];
+        else sum[key] = bv;
     }
     return sum;
 }
-export function resources_mul(a: ResourceMap<uint>, n: number): ResourceMap<uint> {
-    const sum: ResourceMap<uint> = {};
-    for (const resource of Object.values(RESOURCE_DEFS)) {
-        const av = a[resource.kind];
-        if (av !== undefined) sum[resource.kind] = as_uint_or_default(av * n);
+
+export function mapping_mul<O extends {[p: string]: number}>(
+    a: O,
+    n: number,
+): O {
+    const sum: O = { ...a };
+    for (const resource in a) {
+        const av = a[resource];
+        if (av !== undefined) sum[resource] = (av * n) as O[Extract<keyof O, string>];
     }
     return sum;
 }
@@ -77,6 +99,7 @@ export function verti(units: number | undefined | null, plus: number = 0) {
 }
 
 type P = NonNullable<TowerWorker['next_step']>;
+
 export function pathfind_worker_next_step(
     from: readonly [floor: int, pos: int],
     [dest_floor, dest_pos]: [floor: int, pos: int],
@@ -176,4 +199,40 @@ export function worker_spawn(
         },
     };
     return { worker_id, pnext };
+}
+
+export function* get_floors_from_floor(building: Building, floor_id: FloorId) {
+    for (const i of counter()) {
+        const a = building.floors[floor_id + i];
+        if (a) yield a;
+        if (i === 0)
+            continue;
+        const b = building.floors[floor_id + -i];
+        if (b) yield b;
+        if (!a && !b) return 'done';
+    }
+}
+
+/**
+ * - yields numbers
+ * - returns strings
+ * - can be passed in booleans
+ */
+function* counter(start: number = 0): Generator<number, string, boolean | undefined> {
+    let i = start;
+    while (true) {
+        if (yield i++) {
+            break;
+        }
+    }
+    return 'done!';
+}
+
+export function workers_remaining_to_provide(room: Room): { [p: TowerWorkerKind]: uint } {
+    const workers_remaining = { ...ROOM_DEFS[room.kind].workers_produced };
+    for (const [, kind, amount] of room.produced_workers_committed) {
+        workers_remaining[kind] = (workers_remaining[kind] - amount) as uint;
+        if (workers_remaining[kind] === 0) delete workers_remaining[kind];
+    }
+    return workers_remaining;
 }
