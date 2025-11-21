@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from 'react';
-import { hori, verti } from '../logicFunctions.ts';
 import type { TowerWorker } from '../types/TowerWorker.ts';
 import { TOWER_WORKER_DEFS } from '../types/TowerWorkerDefinition.ts';
+import { hori, verti } from '../logic/positioning.ts';
 
 interface Props {
     worker: TowerWorker;

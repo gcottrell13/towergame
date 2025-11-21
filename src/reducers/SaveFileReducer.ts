@@ -1,26 +1,21 @@
 import type { SaveFileActions } from '../events/SaveFileActions.ts';
 import isEmpty from 'lodash/isEmpty';
-import {
-    cost_to_rezone_floor,
-    get_floors_from_floor,
-    mapping_sufficient,
-    mapping_mul,
-    try_mapping_subtract,
-    worker_pool_total,
-    worker_spawn,
-    workers_remaining_to_provide, mapping_add,
-    keys,
-} from '../logicFunctions.ts';
+import { cost_to_rezone_floor, worker_pool_total } from '../logicFunctions.ts';
 import { Default as floor_default, type Floor, type FloorId } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { as_int_or_default, type uint } from '../types/RestrictedTypes.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
 import type { SaveFile } from '../types/SaveFile.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
-import {Default as room_default, type Room, type RoomId} from '../types/Room.ts';
+import { Default as room_default, type Room, type RoomId, type RoomWithState } from '../types/Room.ts';
 import { PriorityQueue } from '@datastructures-js/priority-queue';
 import { Default as transport_default, type Transportation, type TransportationId } from '../types/Transportation.ts';
 import { TOWER_WORKER_DEFS } from '../types/TowerWorkerDefinition.ts';
+import { mapping_add, mapping_mul, mapping_sufficient, try_mapping_subtract } from '../logic/mappingComparison.ts';
+import { worker_spawn } from '../logic/workerSpawn.ts';
+import { apply_workers } from '../logic/applyWorkers.ts';
+import { entries, keys } from '../betterObjectFunctions.ts';
+import { is } from '../is.ts';
 
 type ActionMap = {
     [p in SaveFileActions['action']]: (
@@ -56,50 +51,44 @@ const ActionMaps: ActionMap = {
             height: as_int_or_default((i || 1) + c.height) as FloorId,
         };
         const cost = cost_to_rezone_floor(floor);
-        if (!try_mapping_subtract(building.bank, cost, building.bank))
-            return;
+        if (!try_mapping_subtract(building.bank, cost, building.bank)) return;
         building.floors.splice(i, 0, floor);
         building.top_floor = building.floors[0].height;
     },
     // ================================================================================================================
     // ================================================================================================================
-    'buy-room'(updated, action) {
+    'buy-room'(updated, action, dispatch) {
         const { building_id, floor_id, room } = action;
         const def = ROOM_DEFS[room.kind];
         const cost = def.cost_to_build(room.width, room.height);
         const building = updated.buildings[building_id];
         const floor = building.floors[building.top_floor - floor_id];
-        if (!try_mapping_subtract(building.bank, cost, building.bank))
-            return;
+        if (!try_mapping_subtract(building.bank, cost, building.bank)) return;
 
         const new_room = {
             ...room_default(),
             ...room,
             id: building.room_id_counter as RoomId,
         };
-        floor.rooms.push(new_room);
-
-        const workers_remaining = workers_remaining_to_provide(new_room);
-
+        floor.room_ids.push(new_room.id);
+        building.rooms[new_room.id] = new_room;
         building.room_id_counter += 1;
         if (!isEmpty(def.workers_produced)) {
-            // distribute workers to nearby rooms that require more workers
-            for (const i of get_floors_from_floor(building, floor_id)) {
-                for (const room of i.rooms) {
-                    if (!mapping_sufficient(room.workers, ROOM_DEFS[room.kind].workers_required)) {
-                        const missing: Room['workers'] = {};
-                        if (try_mapping_subtract(ROOM_DEFS[room.kind].workers_required, room.workers, missing) && !isEmpty(missing)) {
-                            for (const key of keys(missing)) {
-                                if (missing[key] > 0 && workers_remaining[key] > 0) {
-                                    const min = Math.min(missing[key], workers_remaining[key]) as uint;
-                                    workers_remaining[key] = workers_remaining[key] - min as uint;
-                                    new_room.produced_workers_committed.push([room.id, key, min]);
-                                    room.workers[key] = (room.workers[key] ?? 0) + min as uint;
-                                }
-                            }
-                        }
-                    }
-                }
+            // assign workers to other rooms
+            const rooms = Object.values(building.rooms)
+                .filter((room) => ROOM_DEFS[room.kind].workers_required)
+                .sort((a, b) => Math.abs(a.bottom_floor - floor_id) - Math.abs(b.bottom_floor - floor_id));
+            for (const filled of apply_workers([new_room], rooms)) {
+                dispatch({ action: 'room-tick', building_id, room_id: filled.id });
+            }
+        }
+        if (!isEmpty(def.workers_required)) {
+            // assign workers into this room
+            const rooms = Object.values(building.rooms)
+                .filter((room) => ROOM_DEFS[room.kind].workers_produced)
+                .sort((a, b) => Math.abs(a.bottom_floor - floor_id) - Math.abs(b.bottom_floor - floor_id));
+            for (const filled of apply_workers(rooms, [new_room])) {
+                dispatch({action: 'room-tick', building_id, room_id: filled.id});
             }
         }
     },
@@ -144,8 +133,7 @@ const ActionMaps: ActionMap = {
         const building = updated.buildings[building_id];
         const floor = building.floors[building.top_floor - floor_id];
         const cost = cost_to_rezone_floor(floor);
-        if (try_mapping_subtract(building.bank, cost, building.bank))
-            floor.kind = kind;
+        if (try_mapping_subtract(building.bank, cost, building.bank)) floor.kind = kind;
     },
     // ================================================================================================================
     // ================================================================================================================
@@ -215,6 +203,53 @@ const ActionMaps: ActionMap = {
         // 1. check if reached destination; deposit resources; despawn worker and add back to room
         // 2. check if reached transportation; remove from building and add worker to transport
         // 3. despawn or attempt pathfinding to destination again
+    },
+    // ================================================================================================================
+    // ================================================================================================================
+    'room-tick'(save, action, dispatch) {
+        // check if enough workers are present and enough materials are in storage.
+        // if yes, consume resources, produce outputs. Spawn workers for transport.
+        const { building_id, room_id } = action;
+        const building = save.buildings[building_id];
+        const room = building.rooms[room_id];
+        const def = ROOM_DEFS[room.kind];
+        if (
+            mapping_sufficient(room.workers, def.workers_required) &&
+            try_mapping_subtract(room.storage, def.resource_requirements, room.storage)
+        ) {
+            mapping_add(room.storage, def.production);
+            const priority_targets = entries(room.output_priorities)
+                .filter((p) => p[1] === 'prioritize')
+                .map((p) => building.rooms[p[0]])
+                .filter(is<RoomWithState<'WaitingForResources'>, Room>((x) => x.state?.type === 'WaitingForResources'))
+                .sort(
+                    (a, b) =>
+                        b.state.waiting_since - a.state.waiting_since /* a higher waiting time should come first */,
+                );
+
+            for (const output_room of priority_targets) {
+                for (const resource_id of keys(output_room.state.needs)) {
+                    if (room.storage[resource_id]) {
+                        const amount = Math.min(
+                            output_room.state.needs[resource_id],
+                            room.storage[resource_id],
+                        ) as uint;
+                        output_room.state.needs[resource_id] = (output_room.state.needs[resource_id] - amount) as uint;
+                        room.storage[resource_id] = (room.storage[resource_id] - amount) as uint;
+                        dispatch({
+                            action: 'worker-spawn',
+                            building_id,
+                            dest_floor: output_room.bottom_floor,
+                            dest_position: output_room.position,
+                            from_floor: room.bottom_floor,
+                            from_position: room.position,
+                            payload: [resource_id, amount],
+                            worker_kind: keys(def.workers_required)[0],
+                        });
+                    }
+                }
+            }
+        }
     },
     // ================================================================================================================
     // ================================================================================================================

@@ -5,7 +5,7 @@ import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { useFloorActions } from '../hooks/useFloorActions.ts';
-import { hori, verti } from '../logicFunctions.ts';
+import { hori, verti } from '../logic/positioning.ts';
 import type { Building } from '../types/Building.ts';
 import type { Floor } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
@@ -203,7 +203,8 @@ function BuildRoomOverlay({ construction }: BuildRoomOverlayProps) {
 function create_collision_info(building: Building, floor: Floor): { left: number; right: number }[] {
     const items = [];
     for (const f of building.floors.slice(building.top_floor - floor.height)) {
-        for (const room of f.rooms) {
+        for (const room_id of f.room_ids) {
+            const room = building.rooms[room_id];
             if (room.bottom_floor <= f.height && room.height + room.bottom_floor > floor.height)
                 items.push({
                     left: room.position,

@@ -22,7 +22,7 @@ export function ResourceMapDisplay({ resources, style, show_counts = true }: Pro
         <>
             {Object.values(RESOURCE_DEFS).map((def) => {
                 const r = resources[def.kind];
-                if (!r) return;
+                if (!r) return null;
                 return (
                     <span key={def.kind} style={{ ...flex, ...style }}>
                         <img style={img_size} src={def.sprite} alt={def.kind} />

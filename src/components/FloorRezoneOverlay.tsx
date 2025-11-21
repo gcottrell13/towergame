@@ -1,7 +1,9 @@
 import { useContext, useState } from 'react';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import {cost_to_rezone_floor, hori, mapping_sufficient} from '../logicFunctions.ts';
+import { mapping_sufficient } from '../logic/mappingComparison.ts';
+import { hori } from '../logic/positioning.ts';
+import { cost_to_rezone_floor } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 import { InlineSpans } from './InlineSpans.tsx';
 import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
@@ -83,10 +85,10 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
                     <InlineSpans>
                         Floor {floor.height} rezone:
                         {!sufficient_funds && <span style={{ color: 'red' }}>Insufficient Funds</span>}
-                        {floor.rooms.length > 0 && (
+                        {floor.room_ids.length > 0 && (
                             <span style={{ color: 'red' }}>
-                                Destroy {floor.rooms.length} room
-                                {floor.rooms.length === 1 ? '' : 's'}
+                                Destroy {floor.room_ids.length} room
+                                {floor.room_ids.length === 1 ? '' : 's'}
                             </span>
                         )}
                         ((

@@ -1,5 +1,5 @@
 import { Default as building } from '../types/Building.ts';
-import { Default as floor } from '../types/Floor.ts';
+import { type FloorId, Default as floor } from '../types/Floor.ts';
 import type { FloorKind } from '../types/FloorDefinition.ts';
 import type { ResourceMap } from '../types/ResourceDefinition.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
@@ -19,21 +19,21 @@ export const TEST_SAVE: SaveFile = {
             floors: [
                 {
                     ...floor(),
-                    height: 2 as int,
+                    height: 2 as FloorId,
                     kind: 'basic' as FloorKind,
                     size_left: 8 as uint,
                     size_right: 8 as uint,
                 },
                 {
                     ...floor(),
-                    height: 1 as int,
+                    height: 1 as FloorId,
                     kind: 'basic' as FloorKind,
                     size_left: 20 as uint,
                     size_right: 20 as uint,
                 },
                 {
                     ...floor(),
-                    height: 0 as int,
+                    height: 0 as FloorId,
                     size_left: 23 as uint,
                     size_right: 20 as uint,
                 },

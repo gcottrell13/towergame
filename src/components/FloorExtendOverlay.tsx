@@ -1,7 +1,8 @@
 import { useCallback, useContext } from 'react';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
-import { hori, mapping_mul, mapping_add, mapping_sufficient, verti } from '../logicFunctions.ts';
+import { mapping_add, mapping_mul, mapping_sufficient } from '../logic/mappingComparison.ts';
+import { hori, verti } from '../logic/positioning.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
 import { InlineSpans } from './InlineSpans.tsx';

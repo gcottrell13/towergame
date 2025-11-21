@@ -1,11 +1,12 @@
 import type { SaveFileActions } from '../events/SaveFileActions.ts';
 import type { Floor } from './Floor.ts';
+import type { NMap } from './NMap.ts';
 import type { ResourceMap } from './ResourceDefinition.ts';
 import type { int, uint } from './RestrictedTypes.ts';
+import type { Room, RoomId } from './Room.ts';
 import type { SMap } from './SMap.ts';
 import type { TowerWorker } from './TowerWorker.ts';
 import type { Transportation } from './Transportation.ts';
-import type { NMap } from './NMap.ts';
 
 export type BuildingId = uint & { readonly _b_type: unique symbol };
 
@@ -17,6 +18,7 @@ export interface Building {
     id: BuildingId;
     position?: int;
     floors: Floor[];
+    rooms: { [p: RoomId]: Room };
     top_floor: int;
     max_width: uint;
     transports: SMap<Transportation>;
@@ -64,6 +66,7 @@ export function Default(): Building {
         workers: {},
         action_queue: [],
         bank: {},
+        rooms: {},
         room_id_counter: 0,
         worker_id_counter: 0,
     };

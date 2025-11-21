@@ -36,7 +36,6 @@ export interface Room {
     storage: ResourceMap<uint>;
 
     // precalculated list of rooms to send outputs or workers to
-    output_destinations: RoomId[];
     output_priorities: { [p: RoomId]: 'prioritize' | 'never' };
     // which rooms have which kinds of workers in what quantity
     produced_workers_committed: [RoomId, TowerWorkerKind, uint][];
@@ -55,7 +54,8 @@ export function Default(): Room {
         workers: {},
         storage: {},
         output_priorities: {},
-        output_destinations: [],
         produced_workers_committed: [],
     };
 }
+
+export type RoomWithState<T extends RoomState['type']> = Room & { state: Extract<RoomState, { type: T }> };

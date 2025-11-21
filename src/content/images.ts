@@ -3,6 +3,7 @@ import ___assets__floors__empty_floor_bg_png from './assets/floors/empty-floor-b
 import ___assets__floors__roof1_png from './assets/floors/roof1.png';
 import ___assets__resources__coin_png from './assets/resources/coin.png';
 import ___assets__rooms__bestviewedcomp_gif from './assets/rooms/bestviewedcomp.gif';
+import ___assets__rooms__faceless_spawn_png from './assets/rooms/faceless-spawn.png';
 import ___assets__rooms__room_hotel_basic_small_empty_png from './assets/rooms/room-hotel-basic-small-empty.png';
 import ___assets__rooms__room_hotel_basic_small_occupied_png from './assets/rooms/room-hotel-basic-small-occupied.png';
 import ___assets__transports__stairwell1_png from './assets/transports/stairwell1.png';
@@ -17,6 +18,7 @@ export namespace resources {
 }
 export namespace rooms {
     export const BESTVIEWEDCOMP_GIF = ___assets__rooms__bestviewedcomp_gif;
+    export const FACELESS_SPAWN_PNG = ___assets__rooms__faceless_spawn_png;
     export const ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG = ___assets__rooms__room_hotel_basic_small_empty_png;
     export const ROOM_HOTEL_BASIC_SMALL_OCCUPIED_PNG = ___assets__rooms__room_hotel_basic_small_occupied_png;
 }

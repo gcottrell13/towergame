@@ -15,6 +15,7 @@ export type TOWER_WORKER_KINDS = keyof typeof TOWER_WORKER_DEFS_RAW;
 export interface TowerWorkerDefsRaw {
     sprite_moving: string;
     sprite_stationary?: string;
+    portrait?: string;
     // how many transports can it plan a path through
     planning_capability: number;
     movement_speed: number;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { clamp } from '../clamp.ts';
 import { FLOOR_HEIGHT, PIXELS_PER_UNIT } from '../constants.ts';
-import { hori, verti } from '../logicFunctions.ts';
+import { hori, verti } from '../logic/positioning.ts';
 import { as_uint_or_default, type uint } from '../types/RestrictedTypes.ts';
 
 interface HasWidth {

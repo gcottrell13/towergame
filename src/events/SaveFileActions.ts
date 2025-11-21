@@ -8,6 +8,7 @@ import type { TowerWorkerId, WorkerStats } from '../types/TowerWorker.ts';
 import type { BuildingId } from '../types/Building.ts';
 import type { FloorId } from '../types/Floor.ts';
 import type { TowerWorkerKind } from '../types/TowerWorkerDefinition.ts';
+import type { RoomId } from '../types/Room.ts';
 
 export type SaveFileActions = DiscriminatedUnion<
     'action',
@@ -69,6 +70,11 @@ export type SaveFileActions = DiscriminatedUnion<
         'worker-move-end': {
             building_id: BuildingId;
             worker_id: TowerWorkerId;
+        };
+        'room-tick': {
+            // not intended to always be run for every room. just when something needs to happen
+            building_id: BuildingId;
+            room_id: RoomId;
         };
     }
 > & { delay_ms?: number };

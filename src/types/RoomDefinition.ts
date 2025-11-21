@@ -71,13 +71,12 @@ export interface RoomDefinition {
     /**
      * If empty, production happens only once per day
      */
-    resource_requirements?: ResourceMap<uint>;
-    production?: ResourceMap<uint>;
+    resource_requirements: ResourceMap<uint>;
+    production: ResourceMap<uint>;
     workers_required: { [p: TowerWorkerKind]: uint };
 
-    // if zero or empty, production takes no time, but partially-staffed rooms only have a % chance equal to staffing to produce (per production tick).
-    // if greater than zero, partially-staffed rooms produce with % speed, taking longer.
-    production_time: uint;
+    // how many times per day will this room produce resources, assuming fully stocked?
+    productions_per_day?: uint;
 
     // if true, then all outputs will be added to the building bank instead of being used for further production
     produce_to_bank: boolean;
@@ -109,10 +108,10 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         build_thumb: raw.build_thumb,
         sprite_active: raw.sprite_active,
         overlay: raw.overlay,
-        resource_requirements: raw.resource_requirements,
-        production: raw.production,
+        resource_requirements: raw.resource_requirements ?? {},
+        production: raw.production ?? {},
         workers_required: raw.workers_required ?? {},
-        production_time: as_uint_or_default(raw.production_time ?? 0),
+        productions_per_day: raw.productions_per_day as uint,
         produce_to_bank: raw.produce_to_bank ?? false,
         workers_produced: raw.workers_produced ?? {},
         upgrades: (raw.upgrades as unknown as RoomDefinition['upgrades']) ?? [],

@@ -27,9 +27,18 @@ export const ROOM_DEFS_RAW = {
         sprite_active: images.rooms.ROOM_HOTEL_BASIC_SMALL_OCCUPIED_PNG,
         sprite_empty: images.rooms.ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG,
         cost_to_build: { coin: 50 },
-        build_thumb: 'room-hotel-basic-small-empty.png',
+        build_thumb: images.rooms.ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG,
         production: { coin: 20 },
         workers_required: { faceless: 2 },
+    },
+    'faceless-spawn': {
+        min_width: 2,
+        display_name: 'FacelessSpawn',
+        sprite_empty: images.rooms.FACELESS_SPAWN_PNG,
+        sprite_active: images.rooms.FACELESS_SPAWN_PNG,
+        cost_to_build: {},
+        build_thumb: images.rooms.FACELESS_SPAWN_PNG,
+        workers_produced: { faceless: 10 },
     },
 } as const satisfies SMap<RoomDefRaw>;
 
@@ -56,9 +65,7 @@ export interface RoomDefRaw {
     resource_requirements?: ResourceMapRaw<number>;
     production?: ResourceMapRaw<number>;
     workers_required?: { [p in TOWER_WORKER_KINDS]: number };
-    // if zero or empty, production takes no time, but partially-staffed rooms only have a % chance equal to staffing to produce.
-    // if greater than zero, partially-staffed rooms produce with % speed, taking longer.
-    production_time?: number;
+    productions_per_day?: number;
     produce_to_bank?: boolean;
 
     // how many workers are added to the building pool

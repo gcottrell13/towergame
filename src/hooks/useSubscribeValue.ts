@@ -1,26 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-export type Listener<T> = (s: T | null) => void;
-export type ListenerState<K extends symbol | number | string, T = K> = { [p in K]?: Listener<T>[] };
-
-function get_subscriber<K extends symbol | number | string, T = K>(
-    ids: K[],
-    listener_state: ListenerState<K, T>,
-    listener: Listener<T>,
-) {
-    for (const id of ids) {
-        listener_state[id] = [...(listener_state[id] ?? []), listener];
-    }
-    return () => {
-        for (const id of ids) {
-            listener_state[id] = listener_state[id]?.filter((x) => x !== listener);
-            if (listener_state[id]?.length === 0) {
-                // make sure we clean up any unused values in order to prevent a memory leak
-                delete listener_state[id];
-            }
-        }
-    };
-}
+type Listener<T> = (s: T | null) => void;
+type ListenerState<K extends symbol | number | string, T = K> = { [p in K]?: Listener<T>[] };
 
 // a little hack to get the common props from a union
 type CommonProps<T> = Pick<T, keyof T>;
@@ -39,9 +20,10 @@ export function createValueSubscriberState<
 >(map_fn?: (t: T | null) => K | null | undefined) {
     const state: { state: T | null } = { state: null };
     const listeners: ListenerState<K, T> = {};
+    let global_listeners: Listener<T>[] = [];
 
     /**
-     * @param subscribers particular values that this instance is interested in
+     * @param subscribers particular values that this instance is interested in. If no values are provided, then subscribe to *all* changes.
      */
     function useSubscribeValue<K2 extends K>(...subscribers: K2[]) {
         type X = T extends symbol | number | string ? T : Extract<T, { [p in TProp]: K2 }>;
@@ -50,9 +32,28 @@ export function createValueSubscriberState<
         const [current_value, set_state] = useState<X | null>(null);
 
         useEffect(() => {
-            const unsub = get_subscriber(subs_memo, listeners, (x) => set_state(x as X));
+            // create listener function: NOTE: this might be made better if we play with typescript some more
+            const listener = (x: T | null) => set_state(x as X);
+
+            // set up subscriptions
+            for (const id of subs_memo) {
+                listeners[id] = [...(listeners[id] ?? []), listener];
+            }
+            // if no ids, add self to global listeners
+            if (subs_memo.length === 0) global_listeners.push(listener);
+
+            // return cleanup function
             return () => {
-                unsub();
+                // remove self from old subscribed ids
+                for (const id of subs_memo) {
+                    listeners[id] = listeners[id]?.filter((x) => x !== listener);
+                    if (listeners[id]?.length === 0) {
+                        // make sure we clean up any unused values in order to prevent a memory leak
+                        delete listeners[id];
+                    }
+                }
+                // if no ids, remove self from global listeners
+                if (subs_memo.length === 0) global_listeners = global_listeners.filter((x) => x !== listener);
             };
         }, [subs_memo]);
 
@@ -65,6 +66,8 @@ export function createValueSubscriberState<
                 // update new subscribers with new value
                 const new_key = map_fn ? (map_fn(value) ?? null) : (value as K | null);
                 if (new_key !== null && listeners[new_key]) for (const l of listeners[new_key]) l(value);
+                // update the global listeners
+                for (const l of global_listeners) l(value);
                 // record new value in state
                 state.state = value;
             },

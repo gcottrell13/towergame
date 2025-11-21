@@ -1,6 +1,6 @@
 import type { FloorKind } from './FloorDefinition.ts';
 import type { int, uint } from './RestrictedTypes.ts';
-import type { Room } from './Room.ts';
+import type { RoomId } from './Room.ts';
 
 export type FloorId = int & { readonly _f_type: unique symbol };
 
@@ -9,7 +9,7 @@ export interface Floor {
     kind: FloorKind | null;
     size_left: uint;
     size_right: uint;
-    rooms: Room[];
+    room_ids: RoomId[];
 }
 
 export function Default(): Floor {
@@ -17,7 +17,7 @@ export function Default(): Floor {
         height: 0 as FloorId,
         size_right: 0 as uint,
         size_left: 0 as uint,
-        rooms: [],
+        room_ids: [],
         kind: '' as FloorKind,
     };
 }

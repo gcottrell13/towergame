@@ -4,14 +4,15 @@ import { PausedContext } from '../context/PausedContext.ts';
 import { useBuildingActions } from '../hooks/useBuildingActions.ts';
 import { useBuildingTick } from '../hooks/useBuildingTick.ts';
 import { useScroll } from '../hooks/useScroll.ts';
-import { hori, verti } from '../logicFunctions.ts';
+import { hori, verti } from '../logic/positioning.ts';
 import type { Building } from '../types/Building.ts';
 import { BuildMenu } from './BuildMenu.tsx';
 import { RoomBuilderTotalMemo } from './BuildRoomOverlay.tsx';
-import { FloorComponentMemo, TopRoofComponent } from './FloorComponent.tsx';
-import { TransportationComponentMemo } from './TransportationComponent.tsx';
-import { TowerWorkerComponentMemo } from './TowerWorkerComponent.tsx';
 import { DayTimerDisplay } from './DayTimerDisplay.tsx';
+import { FloorComponentMemo, TopRoofComponent } from './FloorComponent.tsx';
+import { RoomInfo } from './RoomInfo.tsx';
+import { TowerWorkerComponentMemo } from './TowerWorkerComponent.tsx';
+import { TransportationComponentMemo } from './TransportationComponent.tsx';
 
 interface Props {
     building: Building;
@@ -32,7 +33,16 @@ export function BuildingComponent({ building, show_build_menu = true }: Props) {
         <BuildingContext value={[building, update]}>
             <Ground building={building} />
             <DayTimerDisplay />
-            {show_build_menu && <BuildMenu />}
+            <div id={'static-items'} style={{ position: 'fixed' }}>
+                {show_build_menu && (
+                    <div style={{ display: 'inline-block' }}>
+                        <BuildMenu />
+                    </div>
+                )}
+                <div style={{ display: 'inline-block' }}>
+                    <RoomInfo />
+                </div>
+            </div>
             <div
                 ref={ref}
                 id={`building-${building.id}`}

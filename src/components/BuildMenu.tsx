@@ -2,7 +2,6 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { RoomCategory } from '../content/room-defs.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
-import { mapping_sufficient } from '../logicFunctions.ts';
 import { FLOOR_DEFS, type FloorKind } from '../types/FloorDefinition.ts';
 import type { ResourceMap } from '../types/ResourceDefinition.ts';
 import type { uint } from '../types/RestrictedTypes.ts';
@@ -10,9 +9,10 @@ import { ROOM_DEFS, type RoomKind } from '../types/RoomDefinition.ts';
 import { TRANSPORT_DEFS, type TransportationKind } from '../types/TransportationDefinition.ts';
 import { PinSide } from './PinSide.tsx';
 import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
+import { mapping_sufficient } from '../logic/mappingComparison.ts';
 
 const build_menu_style = {
-    position: 'fixed',
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     alignContent: 'space-around',

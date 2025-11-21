@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Z_INDEX } from '../constants.ts';
-import { hori, verti } from '../logicFunctions.ts';
+import { hori, verti } from '../logic/positioning.ts';
 import type { Transportation } from '../types/Transportation.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 

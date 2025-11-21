@@ -4,12 +4,12 @@ import { BuildingContext } from '../context/BuildingContext.ts';
 import { FloorContext } from '../context/FloorContext.ts';
 import { useConstructionContext } from '../hooks/useConstructionContext.ts';
 import { useFloorActions } from '../hooks/useFloorActions.ts';
+import { hori, verti } from '../logic/positioning.ts';
 import type { Floor } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { FloorExtendOverlay, NewFloorOverlay } from './FloorExtendOverlay.tsx';
 import { FloorRezoneOverlay } from './FloorRezoneOverlay.tsx';
 import { RoomComponentMemo } from './RoomComponent.tsx';
-import { hori, verti } from '../logicFunctions.ts';
 
 interface Props {
     floor: Floor;
@@ -46,8 +46,8 @@ export function FloorComponent({ floor }: Props) {
                     <FloorRezoneOverlay floor_kind={construction.value} />
                 )}
                 {construction?.type === 'extend_floor' && <FloorExtendOverlay />}
-                {floor.rooms.map((room) => (
-                    <RoomComponentMemo key={room.position} room={room} />
+                {floor.room_ids.map((room_id) => (
+                    <RoomComponentMemo key={room_id} room={building.rooms[room_id]} />
                 ))}
             </div>
         </FloorContext>

@@ -7,6 +7,7 @@ export interface TowerWorkerDefinition {
     kind: TowerWorkerKind;
     sprite_moving: string;
     sprite_stationary: string;
+    portrait: string;
     /*
     How many transports can it plan a path through.
     If the shortest available path length exceeds planning capacity, behavior is undefined.
@@ -28,6 +29,7 @@ function def_from_raw(id: string, raw: TowerWorkerDefsRaw): TowerWorkerDefinitio
         kind: id as TowerWorkerKind,
         sprite_moving: raw.sprite_moving,
         sprite_stationary: raw.sprite_stationary ?? raw.sprite_moving,
+        portrait: raw.portrait ?? raw.sprite_stationary ?? raw.sprite_moving,
         planning_capability: as_uint_or_default(raw.planning_capability),
         movement_speed: raw.movement_speed,
         base_capacity: as_uint_or_default(raw.base_capacity),
