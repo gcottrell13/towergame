@@ -48,7 +48,7 @@ export interface Building {
     worker_id_counter: number;
 }
 
-export function Default(): Building {
+export function Default(items?: Partial<Building>): Building {
     return {
         top_floor: 0 as int,
         floors: [],
@@ -69,5 +69,6 @@ export function Default(): Building {
         rooms: {},
         room_id_counter: 0,
         worker_id_counter: 0,
+        ...items,
     };
 }

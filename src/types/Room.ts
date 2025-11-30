@@ -39,9 +39,10 @@ export interface Room {
     output_priorities: { [p: RoomId]: 'prioritize' | 'never' };
     // which rooms have which kinds of workers in what quantity
     produced_workers_committed: [RoomId, TowerWorkerKind, uint][];
+    time_produced_today: uint;
 }
 
-export function Default(): Room {
+export function Default(items?: Partial<Room>): Room {
     return {
         id: 0 as RoomId,
         total_resources_produced: {},
@@ -55,6 +56,8 @@ export function Default(): Room {
         storage: {},
         output_priorities: {},
         produced_workers_committed: [],
+        time_produced_today: 0 as uint,
+        ...items,
     };
 }
 

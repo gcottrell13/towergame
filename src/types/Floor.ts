@@ -12,12 +12,13 @@ export interface Floor {
     room_ids: RoomId[];
 }
 
-export function Default(): Floor {
+export function Default(items?: Partial<Floor>): Floor {
     return {
         height: 0 as FloorId,
         size_right: 0 as uint,
         size_left: 0 as uint,
         room_ids: [],
         kind: '' as FloorKind,
+        ...items,
     };
 }

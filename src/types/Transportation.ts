@@ -14,7 +14,7 @@ export interface Transportation {
     occupancy: ReadonlyArray<TowerWorker>;
 }
 
-export function Default(): Transportation {
+export function Default(items?: Partial<Transportation>): Transportation {
     return {
         kind: '' as TransportationKind,
         name: '',
@@ -23,5 +23,6 @@ export function Default(): Transportation {
         bottom_floor: 0 as int,
         height: 0 as uint,
         occupancy: [],
+        ...items,
     };
 }
