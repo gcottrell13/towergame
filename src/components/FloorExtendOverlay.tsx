@@ -43,7 +43,7 @@ export function FloorExtendOverlay() {
 
     if (expand_right > 0) {
         const cost = mapping_mul(cost_build, expand_right);
-        const sufficient_funds = mapping_sufficient(building.bank, cost);
+        const sufficient_funds = mapping_sufficient(building.wallet, cost);
         right = (
             <div
                 style={{
@@ -88,7 +88,7 @@ export function FloorExtendOverlay() {
     }
     if (expand_left > 0) {
         const cost = mapping_mul(cost_build, expand_left);
-        const sufficient_funds = mapping_sufficient(building.bank, cost);
+        const sufficient_funds = mapping_sufficient(building.wallet, cost);
         left = (
             <div
                 style={{
@@ -154,7 +154,7 @@ export function NewFloorOverlay() {
 
     const size = FLOOR_DEFS.new_floor_size[0] + FLOOR_DEFS.new_floor_size[1];
     const cost = mapping_mul(FLOOR_DEFS.empty.cost_to_build, size);
-    const sufficient_funds = mapping_sufficient(building.bank, cost);
+    const sufficient_funds = mapping_sufficient(building.wallet, cost);
 
     const big_green: React.CSSProperties = {
         fontSize: 'x-large',

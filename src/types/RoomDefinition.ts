@@ -76,10 +76,10 @@ export interface RoomDefinition {
     workers_required: { [p: TowerWorkerKind]: uint };
 
     // how many times per day will this room produce resources, assuming fully stocked?
-    productions_per_day?: uint;
+    max_productions_per_day?: uint;
 
-    // if true, then all outputs will be added to the building bank instead of being used for further production
-    produce_to_bank: boolean;
+    // if true, then all outputs will be added to the tower wallet instead of the room storage
+    produce_to_wallet: boolean;
 
     workers_produced: { [p: TowerWorkerKind]: uint };
 }
@@ -111,8 +111,8 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         resource_requirements: raw.resource_requirements ?? {},
         production: raw.production ?? {},
         workers_required: raw.workers_required ?? {},
-        productions_per_day: raw.productions_per_day as uint,
-        produce_to_bank: raw.produce_to_bank ?? false,
+        max_productions_per_day: raw.max_productions_per_day ? as_uint_or_default(raw.max_productions_per_day) : void 0,
+        produce_to_wallet: raw.produce_to_wallet ?? false,
         workers_produced: raw.workers_produced ?? {},
         upgrades: (raw.upgrades as unknown as RoomDefinition['upgrades']) ?? [],
     };

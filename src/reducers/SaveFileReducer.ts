@@ -44,14 +44,13 @@ const ActionMaps: ActionMap = {
         const i = position === 'top' ? 0 : -1;
         const c = building.floors.at(i);
         if (!c) return;
-        const floor: Floor = {
-            ...floor_default(),
+        const floor: Floor = floor_default({
             size_left: FLOOR_DEFS.new_floor_size[0],
             size_right: FLOOR_DEFS.new_floor_size[1],
             height: as_int_or_default((i || 1) + c.height) as FloorId,
-        };
+        });
         const cost = cost_to_rezone_floor(floor);
-        if (!try_mapping_subtract(building.bank, cost, building.bank)) return;
+        if (!try_mapping_subtract(building.wallet, cost, building.wallet)) return;
         building.floors.splice(i, 0, floor);
         building.top_floor = building.floors[0].height;
     },
@@ -63,13 +62,12 @@ const ActionMaps: ActionMap = {
         const cost = def.cost_to_build(room.width, room.height);
         const building = updated.buildings[building_id];
         const floor = building.floors[building.top_floor - floor_id];
-        if (!try_mapping_subtract(building.bank, cost, building.bank)) return;
+        if (!try_mapping_subtract(building.wallet, cost, building.wallet)) return;
 
-        const new_room = {
-            ...room_default(),
+        const new_room = room_default({
             ...room,
             id: building.room_id_counter as RoomId,
-        };
+        });
         floor.room_ids.push(new_room.id);
         building.rooms[new_room.id] = new_room;
         building.room_id_counter += 1;
@@ -98,16 +96,15 @@ const ActionMaps: ActionMap = {
         const { building_id, bottom_floor, height, kind, position } = action;
         const building = updated.buildings[building_id];
         const id = (Math.max(...Object.values(building.transports).map((x) => x.id)) + 1) as TransportationId;
-        const transport: Transportation = {
-            ...transport_default(),
+        const transport: Transportation = transport_default({
             id,
             bottom_floor,
             kind,
             height,
             position,
-        };
+        });
         const cost = TRANSPORT_DEFS[transport.kind].cost_to_build(transport.height);
-        if (try_mapping_subtract(building.bank, cost, building.bank)) {
+        if (try_mapping_subtract(building.wallet, cost, building.wallet)) {
             building.transports[id] = transport;
         }
     },
@@ -121,7 +118,7 @@ const ActionMaps: ActionMap = {
         const cost = floor.kind
             ? mapping_add(FLOOR_DEFS.buildables[floor.kind].cost_to_build, FLOOR_DEFS.empty.cost_to_build)
             : FLOOR_DEFS.empty.cost_to_build;
-        if (try_mapping_subtract(building.bank, mapping_mul(cost, added_floor), building.bank)) {
+        if (try_mapping_subtract(building.wallet, mapping_mul(cost, added_floor), building.wallet)) {
             floor.size_left = (floor.size_left + size_left) as uint;
             floor.size_right = (floor.size_right + size_right) as uint;
         }
@@ -133,7 +130,7 @@ const ActionMaps: ActionMap = {
         const building = updated.buildings[building_id];
         const floor = building.floors[building.top_floor - floor_id];
         const cost = cost_to_rezone_floor(floor);
-        if (try_mapping_subtract(building.bank, cost, building.bank)) floor.kind = kind;
+        if (try_mapping_subtract(building.wallet, cost, building.wallet)) floor.kind = kind;
     },
     // ================================================================================================================
     // ================================================================================================================
@@ -147,7 +144,7 @@ const ActionMaps: ActionMap = {
             const front = queue.front();
             if (!front || front[0] > building.time_ms) break;
             const next = queue.dequeue();
-            if (next) dispatch({ ...next[1], delay_ms: 1 });
+            if (next) dispatch(next[1]);
         }
         building.action_queue = queue.toArray();
     },
@@ -162,6 +159,10 @@ const ActionMaps: ActionMap = {
             building_id: building_id,
             delay_ms: building.time_per_day_ms,
         });
+        // room-day-start all rooms
+        for (const room_id of keys(building.rooms)) {
+            dispatch({action: 'room-day-start', building_id, room_id});
+        }
     },
     // ================================================================================================================
     // ================================================================================================================
@@ -170,6 +171,7 @@ const ActionMaps: ActionMap = {
         const building = updated.buildings[building_id];
         building.day_started = false;
         building.time_ms -= building.time_ms % building.time_per_day_ms;
+        // TODO: instantly resolve any pending worker-move-end actions and teleport them to their destination
     },
     // ================================================================================================================
     // ================================================================================================================
@@ -206,6 +208,15 @@ const ActionMaps: ActionMap = {
     },
     // ================================================================================================================
     // ================================================================================================================
+    'room-day-start'(save, action, dispatch) {
+        const { building_id, room_id } = action;
+        const building = save.buildings[building_id];
+        const room = building.rooms[room_id];
+        room.time_produced_today = 0 as uint;
+        dispatch({action: 'room-tick', building_id, room_id});
+    },
+    // ================================================================================================================
+    // ================================================================================================================
     'room-tick'(save, action, dispatch) {
         // check if enough workers are present and enough materials are in storage.
         // if yes, consume resources, produce outputs. Spawn workers for transport.
@@ -214,10 +225,17 @@ const ActionMaps: ActionMap = {
         const room = building.rooms[room_id];
         const def = ROOM_DEFS[room.kind];
         if (
-            mapping_sufficient(room.workers, def.workers_required) &&
-            try_mapping_subtract(room.storage, def.resource_requirements, room.storage)
+            (def.max_productions_per_day ? room.time_produced_today < def.max_productions_per_day : true)
+            && mapping_sufficient(room.workers, def.workers_required)
+            && try_mapping_subtract(room.storage, def.resource_requirements, room.storage)
         ) {
-            mapping_add(room.storage, def.production);
+            room.total_resources_produced = mapping_add(room.total_resources_produced, def.production);
+            if (def.produce_to_wallet) {
+                building.wallet = mapping_add(building.wallet, def.production);
+                // it doesn't make sense to mobilize workers if we send straight to the wallet
+                return;
+            }
+            room.storage = mapping_add(room.storage, def.production);
             const priority_targets = entries(room.output_priorities)
                 .filter((p) => p[1] === 'prioritize')
                 .map((p) => building.rooms[p[0]])

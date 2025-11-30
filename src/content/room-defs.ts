@@ -19,7 +19,8 @@ export const ROOM_DEFS_RAW = {
         sprite_empty: images.rooms.BESTVIEWEDCOMP_GIF,
         cost_to_build: { coin: 10 },
         build_thumb: images.rooms.BESTVIEWEDCOMP_GIF,
-        production: { coin: 1 },
+        production: { coin: 5 },
+        produce_to_wallet: true,
     },
     'hotel-basic-small': {
         min_width: 2,
@@ -30,6 +31,7 @@ export const ROOM_DEFS_RAW = {
         build_thumb: images.rooms.ROOM_HOTEL_BASIC_SMALL_EMPTY_PNG,
         production: { coin: 20 },
         workers_required: { faceless: 2 },
+        max_productions_per_day: 1,
     },
     'faceless-spawn': {
         min_width: 2,
@@ -65,8 +67,10 @@ export interface RoomDefRaw {
     resource_requirements?: ResourceMapRaw<number>;
     production?: ResourceMapRaw<number>;
     workers_required?: { [p in TOWER_WORKER_KINDS]: number };
-    productions_per_day?: number;
-    produce_to_bank?: boolean;
+    max_productions_per_day?: number;
+
+    // should this room produce directly to the tower's wallet?
+    produce_to_wallet?: boolean;
 
     // how many workers are added to the building pool
     workers_produced?: { [p in TOWER_WORKER_KINDS]: number };

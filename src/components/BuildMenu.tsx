@@ -64,10 +64,10 @@ export function BuildMenu() {
     useEffect(() => {
         if (construction?.type !== 'room') return;
         const def = ROOM_DEFS[construction.value];
-        if (!mapping_sufficient(building.bank, def.cost_to_build(def.min_width, def.min_height))) {
+        if (!mapping_sufficient(building.wallet, def.cost_to_build(def.min_width, def.min_height))) {
             set_construction(null);
         }
-    }, [construction, building.bank, set_construction]);
+    }, [construction, building.wallet, set_construction]);
 
     /// ====================================================================================================
     /// ====================================================================================================
@@ -118,7 +118,7 @@ export function BuildMenu() {
                     gap: '2px',
                 }}
             >
-                Resources: <ResourceMapDisplay resources={building.bank} />
+                Resources: <ResourceMapDisplay resources={building.wallet} />
             </div>
             {construction && (
                 <div style={{ ...itemPadding, display: 'flex', gap: '5px' }}>
@@ -327,7 +327,7 @@ function BuildButton({ selected, cost, set }: { selected: boolean; cost: Resourc
                 alignItems: 'center',
                 gap: '5px',
             }}
-            disabled={selected || !mapping_sufficient(building.bank, cost)}
+            disabled={selected || !mapping_sufficient(building.wallet, cost)}
             onClick={set}
         >
             Build

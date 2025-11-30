@@ -109,3 +109,12 @@ button.flat-button {
 .blur-behind {
     backdrop-filter: blur(5px); /* https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter */
 }
+
+@keyframes slideUp {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-50px);
+    }
+}

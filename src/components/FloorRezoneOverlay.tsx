@@ -53,7 +53,7 @@ export function FloorRezoneOverlay({ floor_kind }: Props) {
     const size = floor.size_left + floor.size_right;
     const floor_def = FLOOR_DEFS.buildables[floor_kind];
     const cost = cost_to_rezone_floor(floor);
-    const sufficient_funds = mapping_sufficient(building.bank, cost);
+    const sufficient_funds = mapping_sufficient(building.wallet, cost);
     return (
         <div
             id={`rezone-${floor.height}`}

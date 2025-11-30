@@ -23,6 +23,17 @@ export function try_mapping_subtract<O extends { [p: string]: number }>(source: 
     return true;
 }
 
+export function mapping_subtract<O extends { [p: string]: number }>(a: O, b: O, keep_zeroes: boolean = true): O {
+    const source_copy = { ...a };
+    for (const key in b) {
+        const av = source_copy[key] ?? 0;
+        const bv = b[key] ?? 0;
+        source_copy[key] = (av - bv) as O[Extract<keyof O, string>];
+        if (source_copy[key] === 0 && !keep_zeroes) delete source_copy[key];
+    }
+    return source_copy;
+}
+
 export function mapping_add<O extends { [p: string]: number }>(a: O, b: O): O {
     const sum: O = { ...a };
     for (const key in b) {

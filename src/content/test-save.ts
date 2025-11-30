@@ -3,41 +3,37 @@ import { type FloorId, Default as floor } from '../types/Floor.ts';
 import type { FloorKind } from '../types/FloorDefinition.ts';
 import type { ResourceMap } from '../types/ResourceDefinition.ts';
 import type { int, uint } from '../types/RestrictedTypes.ts';
-import type { SaveFile } from '../types/SaveFile.ts';
+import { type SaveFile, Default as save } from '../types/SaveFile.ts';
 
-export const TEST_SAVE: SaveFile = {
+export const TEST_SAVE: SaveFile = save({
     buildings: [
-        {
-            ...building(),
+        building({
             name: 'building',
             max_width: 30 as uint,
             position: 50 as int,
             top_floor: 2 as int,
             max_height: 10 as uint,
-            bank: { coin: 1000 } as ResourceMap<uint>,
+            wallet: { coin: 1000 } as ResourceMap<uint>,
             new_things_acked: {},
             floors: [
-                {
-                    ...floor(),
+                floor({
                     height: 2 as FloorId,
                     kind: 'basic' as FloorKind,
                     size_left: 8 as uint,
                     size_right: 8 as uint,
-                },
-                {
-                    ...floor(),
+                }),
+                floor({
                     height: 1 as FloorId,
                     kind: 'basic' as FloorKind,
                     size_left: 20 as uint,
                     size_right: 20 as uint,
-                },
-                {
-                    ...floor(),
+                }),
+                floor({
                     height: 0 as FloorId,
                     size_left: 23 as uint,
                     size_right: 20 as uint,
-                },
+                }),
             ],
-        },
+        }),
     ],
-};
+});

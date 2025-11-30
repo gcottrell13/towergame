@@ -12,8 +12,8 @@ import { AllBuildings } from './AllBuildings.tsx';
 export function Main() {
     const [state, dispatch] = useImmerReducer<SaveFile, SaveFileActions>(SaveFileReducer, TEST_SAVE);
 
-    const [, set_construction] = useConstructionContext();
-    const [, set_selected_room] = useSelectedRoom();
+    const [, set_construction] = useConstructionContext.all();
+    const [, set_selected_room] = useSelectedRoom.all();
 
     const cancel_construction = useCallback(
         (ev: React.MouseEvent) => {

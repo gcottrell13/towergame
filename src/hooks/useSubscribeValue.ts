@@ -26,36 +26,42 @@ export function createValueSubscriberState<
      * @param subscribers particular values that this instance is interested in. If no values are provided, then subscribe to *all* changes.
      */
     function useSubscribeValue<K2 extends K>(...subscribers: K2[]) {
-        type X = T extends symbol | number | string ? T : Extract<T, { [p in TProp]: K2 }>;
         // biome-ignore lint/correctness/useExhaustiveDependencies: sorted subscribers
         const subs_memo = useMemo(() => subscribers, subscribers.toSorted());
+        return useBase(subs_memo);
+    }
+
+    function useBase<K2 extends K>(subscribers: K2[] | null) {
+        type X = T extends symbol | number | string ? T : Extract<T, { [p in TProp]: K2 }>;
         const [current_value, set_state] = useState<X | null>(null);
 
         useEffect(() => {
             // create listener function: NOTE: this might be made better if we play with typescript some more
             const listener = (x: T | null) => set_state(x as X);
 
-            // set up subscriptions
-            for (const id of subs_memo) {
-                listeners[id] = [...(listeners[id] ?? []), listener];
-            }
             // if no ids, add self to global listeners
-            if (subs_memo.length === 0) global_listeners.push(listener);
+            if (subscribers === null) global_listeners.push(listener);
+            // set up subscriptions
+            else
+                for (const id of subscribers) {
+                    listeners[id] = [...(listeners[id] ?? []), listener];
+                }
 
             // return cleanup function
             return () => {
-                // remove self from old subscribed ids
-                for (const id of subs_memo) {
-                    listeners[id] = listeners[id]?.filter((x) => x !== listener);
-                    if (listeners[id]?.length === 0) {
-                        // make sure we clean up any unused values in order to prevent a memory leak
-                        delete listeners[id];
-                    }
-                }
                 // if no ids, remove self from global listeners
-                if (subs_memo.length === 0) global_listeners = global_listeners.filter((x) => x !== listener);
+                if (subscribers === null) global_listeners = global_listeners.filter((x) => x !== listener);
+                // remove self from old subscribed ids
+                else
+                    for (const id of subscribers) {
+                        listeners[id] = listeners[id]?.filter((x) => x !== listener);
+                        if (listeners[id]?.length === 0) {
+                            // make sure we clean up any unused values in order to prevent a memory leak
+                            delete listeners[id];
+                        }
+                    }
             };
-        }, [subs_memo]);
+        }, [subscribers]);
 
         const set_current = useCallback(
             (value: T | null) => {
@@ -77,5 +83,9 @@ export function createValueSubscriberState<
         return [current_value, set_current] as const;
     }
 
-    return useSubscribeValue;
+    return Object.assign(useSubscribeValue, {
+        all() {
+            return useBase(null);
+        },
+    });
 }

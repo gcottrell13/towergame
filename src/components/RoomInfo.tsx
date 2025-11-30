@@ -5,10 +5,11 @@ import { entries } from '../betterObjectFunctions.ts';
 import { BuildingContext } from '../context/BuildingContext.ts';
 import { useSelectedRoom } from '../hooks/useSelectedRoom.ts';
 import { ROOM_DEFS } from '../types/RoomDefinition.ts';
+import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
 import { WorkerMapDisplay } from './WorkerMapDisplay.tsx';
 
 export function RoomInfo() {
-    const [selected] = useSelectedRoom();
+    const [selected] = useSelectedRoom.all();
     const [building] = useContext(BuildingContext);
     if (selected === null) return null;
     const room = building.rooms[selected];
@@ -19,6 +20,11 @@ export function RoomInfo() {
                 Selected room: {def.display_name} - ID {room.id}
             </span>
             <span>Floor: {room.bottom_floor}</span>
+            {!isEmpty(room.total_resources_produced) && (
+                <span>
+                    Resources Produced: <ResourceMapDisplay resources={room.total_resources_produced} />
+                </span>
+            )}
             {!isEmpty(room.workers) && (
                 <span>
                     Workers:

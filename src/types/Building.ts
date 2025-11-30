@@ -43,7 +43,7 @@ export interface Building {
     max_height: uint;
     max_depth: uint;
 
-    bank: ResourceMap<uint>;
+    wallet: ResourceMap<uint>;
     room_id_counter: number;
     worker_id_counter: number;
 }
@@ -65,7 +65,7 @@ export function Default(items?: Partial<Building>): Building {
         max_depth: 0 as uint,
         workers: {},
         action_queue: [],
-        bank: {},
+        wallet: {},
         rooms: {},
         room_id_counter: 0,
         worker_id_counter: 0,

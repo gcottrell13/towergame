@@ -76,10 +76,14 @@ export type SaveFileActions = DiscriminatedUnion<
             building_id: BuildingId;
             room_id: RoomId;
         };
+        'room-day-start': {
+            building_id: BuildingId;
+            room_id: RoomId;
+        }
     }
 > & { delay_ms?: number };
 
 export type BuildingActions = ExtendsOmit<SaveFileActions, 'building_id'>;
 export type TransportActions = ExtendsOmit<BuildingActions, 'transport_id'>;
 export type FloorActions = ExtendsOmit<BuildingActions, 'floor_id'>;
-export type RoomActions = ExtendsOmit<FloorActions, 'room_id'>;
+export type RoomActions = ExtendsOmit<BuildingActions, 'room_id'>;
