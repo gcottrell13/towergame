@@ -16,6 +16,10 @@ export type SaveFileActions = DiscriminatedUnion<
         'buy-perm-upgrade': {
             name: string;
         };
+        'increase-tier': {
+            building_id: BuildingId;
+            tier: uint;
+        };
         'buy-room': {
             building_id: BuildingId;
             floor_id: FloorId;
@@ -79,7 +83,7 @@ export type SaveFileActions = DiscriminatedUnion<
         'room-day-start': {
             building_id: BuildingId;
             room_id: RoomId;
-        }
+        };
     }
 > & { delay_ms?: number };
 

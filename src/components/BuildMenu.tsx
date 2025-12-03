@@ -10,6 +10,7 @@ import { TRANSPORT_DEFS, type TransportationKind } from '../types/Transportation
 import { PinSide } from './PinSide.tsx';
 import { ResourceMapDisplay } from './ResourceMapDisplay.tsx';
 import { mapping_sufficient } from '../logic/mappingComparison.ts';
+import { EncyclopediaModal } from './encyclopedia/Encyclopedia.tsx';
 
 const build_menu_style = {
     position: 'relative',
@@ -150,6 +151,8 @@ export function BuildMenu() {
 
 function RoomSelector() {
     const [construction, set_construction] = useConstructionContext('room');
+    const [show, set_show] = useState<RoomKind | null>(null);
+
     return (
         <div className={'overflow-y-scroll'}>
             {Object.keys(ROOM_DEFS)
@@ -169,7 +172,9 @@ function RoomSelector() {
                                 gap: '10px',
                             }}
                         >
-                            <span>{def.display_name}</span>
+                            <span className={'pointer'} onClick={() => set_show(def.id)}>
+                                {def.display_name}
+                            </span>
                             <img src={def.sprite_empty} alt={def.sprite_empty} />
                             <BuildButton
                                 selected={construction?.value === def.id}
@@ -184,6 +189,9 @@ function RoomSelector() {
                         </div>
                     );
                 })}
+            {show && (
+                <EncyclopediaModal show onClose={() => set_show(null)} closeOnOutsideClick initial={{ room: show }} />
+            )}
         </div>
     );
 }

@@ -1,6 +1,8 @@
 import type { Building } from './Building.ts';
 import type { ResourceMap } from './ResourceDefinition.ts';
 import type { uint } from './RestrictedTypes.ts';
+import type { RoomKind } from './RoomDefinition.ts';
+import type { FloorKind } from './FloorDefinition.ts';
 
 /**
  * Represents the overall player's status across all play time.
@@ -8,12 +10,20 @@ import type { uint } from './RestrictedTypes.ts';
 export interface SaveFile {
     buildings: Building[];
     wallet: ResourceMap<uint>;
+
+    // keeps track of what rooms have been seen across all runs
+    rooms_seen: RoomKind[];
+
+    // keeps track of what floors have been seen across all runs
+    floors_seen: FloorKind[];
 }
 
 export function Default(items?: Partial<SaveFile>): SaveFile {
     return {
         buildings: [],
         wallet: {},
+        rooms_seen: [],
+        floors_seen: [],
         ...items,
     };
 }

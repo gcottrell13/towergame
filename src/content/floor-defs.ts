@@ -54,6 +54,7 @@ export interface FloorDefRaw {
      */
     tier?: number;
     rooms?: RoomIds[];
+    readme?: string;
 }
 export interface FloorDefsRaw {
     roofs: SMap<FloorDefRaw>;

@@ -4,7 +4,7 @@ import { cost_to_rezone_floor, worker_pool_total } from '../logicFunctions.ts';
 import { Default as floor_default, type Floor, type FloorId } from '../types/Floor.ts';
 import { FLOOR_DEFS } from '../types/FloorDefinition.ts';
 import { as_int_or_default, type uint } from '../types/RestrictedTypes.ts';
-import { ROOM_DEFS } from '../types/RoomDefinition.ts';
+import {ROOM_DEFS} from '../types/RoomDefinition.ts';
 import type { SaveFile } from '../types/SaveFile.ts';
 import { TRANSPORT_DEFS } from '../types/TransportationDefinition.ts';
 import { Default as room_default, type Room, type RoomId, type RoomWithState } from '../types/Room.ts';
@@ -36,6 +36,17 @@ const ActionMaps: ActionMap = {
     // ================================================================================================================
     // ================================================================================================================
     'buy-perm-upgrade'() {},
+    // ================================================================================================================
+    // ================================================================================================================
+    'increase-tier'(save, action) {
+        const {building_id, tier} = action;
+        const building = save.buildings[building_id];
+        building.rating = tier;
+
+        // add items to the save file "seen" props
+        save.rooms_seen = [...new Set(keys(ROOM_DEFS).filter(kind => ROOM_DEFS[kind].tier <= tier))];
+        save.floors_seen = [...new Set(keys(FLOOR_DEFS.buildables).filter(kind => FLOOR_DEFS.buildables[kind].tier <= tier))];
+    },
     // ================================================================================================================
     // ================================================================================================================
     'add-floor'(updated, action) {
@@ -86,7 +97,7 @@ const ActionMaps: ActionMap = {
                 .filter((room) => ROOM_DEFS[room.kind].workers_produced)
                 .sort((a, b) => Math.abs(a.bottom_floor - floor_id) - Math.abs(b.bottom_floor - floor_id));
             for (const filled of apply_workers(rooms, [new_room])) {
-                dispatch({action: 'room-tick', building_id, room_id: filled.id});
+                dispatch({ action: 'room-tick', building_id, room_id: filled.id });
             }
         }
     },
@@ -161,7 +172,7 @@ const ActionMaps: ActionMap = {
         });
         // room-day-start all rooms
         for (const room_id of keys(building.rooms)) {
-            dispatch({action: 'room-day-start', building_id, room_id});
+            dispatch({ action: 'room-day-start', building_id, room_id });
         }
     },
     // ================================================================================================================
@@ -213,7 +224,7 @@ const ActionMaps: ActionMap = {
         const building = save.buildings[building_id];
         const room = building.rooms[room_id];
         room.time_produced_today = 0 as uint;
-        dispatch({action: 'room-tick', building_id, room_id});
+        dispatch({ action: 'room-tick', building_id, room_id });
     },
     // ================================================================================================================
     // ================================================================================================================
@@ -225,9 +236,9 @@ const ActionMaps: ActionMap = {
         const room = building.rooms[room_id];
         const def = ROOM_DEFS[room.kind];
         if (
-            (def.max_productions_per_day ? room.time_produced_today < def.max_productions_per_day : true)
-            && mapping_sufficient(room.workers, def.workers_required)
-            && try_mapping_subtract(room.storage, def.resource_requirements, room.storage)
+            (def.max_productions_per_day ? room.time_produced_today < def.max_productions_per_day : true) &&
+            mapping_sufficient(room.workers, def.workers_required) &&
+            try_mapping_subtract(room.storage, def.resource_requirements, room.storage)
         ) {
             room.total_resources_produced = mapping_add(room.total_resources_produced, def.production);
             if (def.produce_to_wallet) {

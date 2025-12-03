@@ -21,6 +21,7 @@ export const ROOM_DEFS_RAW = {
         build_thumb: images.rooms.BESTVIEWEDCOMP_GIF,
         production: { coin: 5 },
         produce_to_wallet: true,
+        readme: 'Simply produces some extra money every day.',
     },
     'hotel-basic-small': {
         min_width: 2,
@@ -32,6 +33,7 @@ export const ROOM_DEFS_RAW = {
         production: { coin: 20 },
         workers_required: { faceless: 2 },
         max_productions_per_day: 1,
+        produce_to_wallet: true,
     },
     'faceless-spawn': {
         min_width: 2,
@@ -58,6 +60,8 @@ export interface RoomDefRaw {
     tier?: number;
     category?: RoomCategory;
     overlay?: () => Promise<() => ReactElement>;
+
+    readme?: string;
 
     cost_to_build: ResourceMapRaw<number> | ((width: uint, height: uint) => { [p: ResourceKind]: uint });
 

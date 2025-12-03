@@ -18,6 +18,8 @@ export interface FloorDefinition {
     cost_to_build: ResourceMap<uint>;
     tier: uint;
 
+    readme: string;
+
     rooms: RoomKind[];
 }
 
@@ -52,5 +54,6 @@ function def_from_raw(id: string, item: FloorDefRaw): FloorDefinition {
         ),
         // @ts-expect-error
         rooms: item.rooms ?? [],
+        readme: item.readme ?? '',
     };
 }

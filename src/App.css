@@ -50,6 +50,10 @@ Utils
     pointer-events: none;
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 button {
     cursor: pointer;
     font-size: 0.8em;
@@ -97,6 +101,7 @@ button.hover-color:hover {
 .hover-parent-display .hover-child-display {
     display: none;
 }
+
 .hover-parent-display:hover .hover-child-display {
     display: block;
 }
@@ -117,4 +122,8 @@ button.flat-button {
     to {
         transform: translateY(-50px);
     }
+}
+
+.modal-content {
+    padding: 1rem;
 }

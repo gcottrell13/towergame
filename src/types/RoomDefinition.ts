@@ -41,21 +41,23 @@ export interface RoomDefinition {
      * @default null
      * @optional
      */
-    sprite_active: string | null;
+    sprite_active: string | undefined;
     sprite_empty: string;
 
     /**
      * @default null
      */
-    sprite_active_night: string | null;
+    sprite_active_night: string | undefined;
     /**
      * @default null
      */
-    sprite_empty_night: string | null;
+    sprite_empty_night: string | undefined;
 
     cost_to_build(width: number, height: number): ResourceMap<uint>;
 
     build_thumb: string;
+
+    readme: string;
 
     /**
      * what tier will unlock this room
@@ -115,6 +117,7 @@ function def_from_raw(id: string, raw: RoomDefRaw): RoomDefinition {
         produce_to_wallet: raw.produce_to_wallet ?? false,
         workers_produced: raw.workers_produced ?? {},
         upgrades: (raw.upgrades as unknown as RoomDefinition['upgrades']) ?? [],
+        readme: raw.readme ?? '',
     };
 }
 
