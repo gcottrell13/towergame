@@ -1,6 +1,8 @@
 import isEmpty from 'lodash/isEmpty';
 import { ROOM_DEFS, type RoomDefinition, type RoomKind } from '../../types/RoomDefinition.ts';
 import { ResourceMapDisplay } from '../ResourceMapDisplay.tsx';
+import { useState } from 'react';
+import { as_uint_or_default } from '../../types/RestrictedTypes.ts';
 
 interface Props {
     room_kind: RoomKind;
@@ -13,22 +15,21 @@ export function EncyclopediaRoom({ room_kind }: Props) {
         // some null props are OK, but it has to be explicit here.
         // some props may be combined into one display; this is also fine.
         sprite_active: null,
-        display_name: def.display_name,
+        display_name: <span style={{fontSize: 'larger'}}>{def.display_name}</span>,
         readme: def.readme,
-        production: !isEmpty(def.production) ? (
+        cost_to_build: !isEmpty(def.cost_to_build(def.min_width, def.min_height)) && <CostCalculator def={def} />,
+        production: !isEmpty(def.production) && (
             <div>
-                Produce <ResourceMapDisplay resources={def.production} />
+                Produce {def.max_productions_per_day && <>up to {def.max_productions_per_day} time{def.max_productions_per_day > 1 ? 's' : ''} per day</>}:
+                <ResourceMapDisplay resources={def.production} />
             </div>
-        ) : null,
-        max_productions_per_day: def.max_productions_per_day ? (
-            <div>Produce Max {def.max_productions_per_day} times per day</div>
-        ) : null,
+        ),
+        max_productions_per_day: null,
         produce_to_wallet: null,
         workers_produced: null,
         workers_required: null,
         resource_requirements: null,
         upgrades: null,
-        cost_to_build: null,
         min_height: null,
         min_width: null,
         width_multiples_of: null,
@@ -45,12 +46,54 @@ export function EncyclopediaRoom({ room_kind }: Props) {
         tier: null,
     } satisfies { [p in keyof RoomDefinition]: React.ReactNode };
     return (
-        <div style={{ display: 'flex', gap: '5px', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', gap: '5px', flexDirection: 'column', width: '100%' }}>
             {Object.entries(props)
                 .filter(([, value]) => value)
                 .map(([key, value]) => (
-                    <span key={key}>{value}</span>
+                    <span key={key} className={'encyc-content-item'}>
+                        {value}
+                    </span>
                 ))}
+        </div>
+    );
+}
+
+function CostCalculator({ def }: { def: RoomDefinition }) {
+    const [w, setw] = useState(def.min_width);
+    const [h, seth] = useState(def.min_height);
+    return (
+        <div>
+            Cost:
+            <br />
+            {def.min_width !== def.max_width && (
+                <label>
+                    Width
+                    <input
+                        style={{ marginLeft: '5px', width: '45px' }}
+                        type={'number'}
+                        min={def.min_width / def.width_multiples_of}
+                        max={def.max_width / def.width_multiples_of}
+                        step={1}
+                        value={w / def.width_multiples_of}
+                        onChange={(e) => setw(as_uint_or_default(e.target.valueAsNumber * def.width_multiples_of))}
+                    />
+                </label>
+            )}
+            {def.min_height !== def.max_height && (
+                <label>
+                    Height
+                    <input
+                        style={{ marginLeft: '5px', width: '45px' }}
+                        type={'number'}
+                        min={def.min_height}
+                        max={def.max_height}
+                        step={1}
+                        value={h}
+                        onChange={(e) => seth(as_uint_or_default(e.target.valueAsNumber))}
+                    />
+                </label>
+            )}
+            <ResourceMapDisplay resources={def.cost_to_build(w, h)} />
         </div>
     );
 }

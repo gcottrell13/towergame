@@ -175,7 +175,12 @@ function RoomSelector() {
                             <span className={'pointer'} onClick={() => set_show(def.id)}>
                                 {def.display_name}
                             </span>
-                            <img src={def.sprite_empty} alt={def.sprite_empty} />
+                            <img
+                                className={'pointer'}
+                                src={def.sprite_empty}
+                                alt={def.sprite_empty}
+                                onClick={() => set_show(def.id)}
+                            />
                             <BuildButton
                                 selected={construction?.value === def.id}
                                 cost={min_cost}

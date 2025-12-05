@@ -1,4 +1,4 @@
-import {useCallback, useEffect} from 'react';
+import { useCallback, useEffect } from 'react';
 import { useImmerReducer } from 'use-immer';
 import { TEST_SAVE } from '../content/test-save.ts';
 import { SaveFileContext } from '../context/SaveFileContext.ts';
@@ -8,8 +8,8 @@ import { useSelectedRoom } from '../hooks/useSelectedRoom.ts';
 import { SaveFileReducer } from '../reducers/SaveFileReducer.ts';
 import type { SaveFile } from '../types/SaveFile.ts';
 import { AllBuildings } from './AllBuildings.tsx';
-import type {BuildingId} from "../types/Building.ts";
-import type {uint} from "../types/RestrictedTypes.ts";
+import type { BuildingId } from '../types/Building.ts';
+import type { uint } from '../types/RestrictedTypes.ts';
 
 interface Props {
     allow_right_click: boolean;
@@ -18,13 +18,10 @@ interface Props {
 export function Main({ allow_right_click }: Props) {
     const [state, dispatch] = useImmerReducer<SaveFile, SaveFileActions>(SaveFileReducer, TEST_SAVE);
 
-    useEffect(
-        () => {
-            // TODO: Remove this
-            dispatch({action: 'increase-tier', building_id: 0 as BuildingId, tier: 0 as uint});
-        },
-        [],
-    );
+    useEffect(() => {
+        // TODO: Remove this
+        dispatch({ action: 'increase-tier', building_id: 0 as BuildingId, tier: 0 as uint });
+    }, []);
 
     const [, set_construction] = useConstructionContext.all();
     const [, set_selected_room] = useSelectedRoom.all();

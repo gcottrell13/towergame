@@ -14,14 +14,14 @@ export const ROOM_DEFS_RAW = {
     'ad-1': {
         min_width: 4,
         min_height: 1,
-        display_name: 'Best Viewed Ad',
+        display_name: 'Advertisement',
         sprite_active: images.rooms.BESTVIEWEDCOMP_GIF,
         sprite_empty: images.rooms.BESTVIEWEDCOMP_GIF,
         cost_to_build: { coin: 10 },
         build_thumb: images.rooms.BESTVIEWEDCOMP_GIF,
         production: { coin: 5 },
         produce_to_wallet: true,
-        readme: 'Simply produces some extra money every day.',
+        readme: 'Earn some extra cash by watching this short video!',
     },
     'hotel-basic-small': {
         min_width: 2,
@@ -40,9 +40,10 @@ export const ROOM_DEFS_RAW = {
         display_name: 'FacelessSpawn',
         sprite_empty: images.rooms.FACELESS_SPAWN_PNG,
         sprite_active: images.rooms.FACELESS_SPAWN_PNG,
-        cost_to_build: {},
+        cost_to_build: { coin: 50 },
         build_thumb: images.rooms.FACELESS_SPAWN_PNG,
         workers_produced: { faceless: 10 },
+        readme: 'Provides some workers',
     },
 } as const satisfies SMap<RoomDefRaw>;
 

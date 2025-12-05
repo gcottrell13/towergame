@@ -1,12 +1,12 @@
+import { useContext, useState } from 'react';
+import { entries } from '../../betterObjectFunctions.ts';
+import { SaveFileContext } from '../../context/SaveFileContext.ts';
 import { FLOOR_DEFS, type FloorKind } from '../../types/FloorDefinition.ts';
 import { ROOM_DEFS, type RoomKind } from '../../types/RoomDefinition.ts';
 import type { TransportationKind } from '../../types/TransportationDefinition.ts';
-import { entries } from '../../betterObjectFunctions.ts';
-import { useContext, useState } from 'react';
-import { EncyclopediaRoom } from './EncyclopediaRoom.tsx';
 import { Modal, type ModalProps } from '../Modal.tsx';
 import { EncyclopediaFloor } from './EncyclopediaFloor.tsx';
-import { SaveFileContext } from '../../context/SaveFileContext.ts';
+import { EncyclopediaRoom } from './EncyclopediaRoom.tsx';
 
 interface Props {
     initial?:
@@ -26,7 +26,9 @@ interface Props {
 
 export function Encyclopedia({ initial = 'top' }: Props) {
     const [location, set_location] = useState(initial);
-    const items = side_items(set_location);
+    const items = get_side_items(set_location);
+    const room_items = get_room_items(set_location);
+    const floor_items = get_floor_items(set_location);
     if (location === 'top')
         return (
             <Layout side_items={items} active={location}>
@@ -66,7 +68,7 @@ export function Encyclopedia({ initial = 'top' }: Props) {
     if (location === 'rooms')
         return (
             <Layout side_items={items} active={location}>
-                <Layout active={''} side_items={room_items(set_location)}>
+                <Layout active={''} side_items={room_items}>
                     Rooms
                 </Layout>
             </Layout>
@@ -80,7 +82,7 @@ export function Encyclopedia({ initial = 'top' }: Props) {
     if (location === 'floors')
         return (
             <Layout side_items={items} active={location}>
-                <Layout active={''} side_items={floor_items(set_location)}>
+                <Layout active={''} side_items={floor_items}>
                     Floors
                 </Layout>
             </Layout>
@@ -88,7 +90,7 @@ export function Encyclopedia({ initial = 'top' }: Props) {
     if ('room' in location) {
         return (
             <Layout side_items={items} active={'rooms'}>
-                <Layout active={location.room} side_items={room_items(set_location)}>
+                <Layout active={location.room} side_items={room_items}>
                     <EncyclopediaRoom room_kind={location.room} />
                 </Layout>
             </Layout>
@@ -97,7 +99,7 @@ export function Encyclopedia({ initial = 'top' }: Props) {
     if ('floor' in location) {
         return (
             <Layout side_items={items} active={'floors'}>
-                <Layout active={location.floor} side_items={floor_items(set_location)}>
+                <Layout active={location.floor} side_items={floor_items}>
                     <EncyclopediaFloor floor_kind={location.floor} />
                 </Layout>
             </Layout>
@@ -143,7 +145,7 @@ interface LayoutProps {
  */
 function Layout({ active, side_items, children }: LayoutProps & React.PropsWithChildren) {
     return (
-        <div style={{ display: 'flex', gap: '5px', height: '100%' }}>
+        <div style={{ display: 'flex', gap: '5px', height: '100%', width: '100%' }}>
             <div
                 style={{
                     boxSizing: 'border-box',
@@ -162,6 +164,7 @@ function Layout({ active, side_items, children }: LayoutProps & React.PropsWithC
                         key={name}
                         onClick={on_click}
                         style={{
+                            overflow: 'clip',
                             borderRadius: 0,
                             padding: '5px',
                             backgroundColor: active === name ? 'darkgray' : 'lightgray',
@@ -181,7 +184,7 @@ function Layout({ active, side_items, children }: LayoutProps & React.PropsWithC
  * generates the top-level list of buttons
  * @param update_func
  */
-function side_items(update_func: (p: NonNullable<Props['initial']>) => void): LayoutProps['side_items'] {
+function get_side_items(update_func: (p: NonNullable<Props['initial']>) => void): LayoutProps['side_items'] {
     return [
         ['top', 'Top', () => update_func('top')],
         ['tower-wallet', 'Tower Wallet', () => update_func('tower-wallet')],
@@ -194,7 +197,7 @@ function side_items(update_func: (p: NonNullable<Props['initial']>) => void): La
  * generates the list of rooms to look at
  * @param update_func
  */
-function room_items(update_func: (p: NonNullable<Props['initial']>) => void): LayoutProps['side_items'] {
+function get_room_items(update_func: (p: NonNullable<Props['initial']>) => void): LayoutProps['side_items'] {
     const [save] = useContext(SaveFileContext);
 
     return entries(ROOM_DEFS)
@@ -203,7 +206,7 @@ function room_items(update_func: (p: NonNullable<Props['initial']>) => void): La
             ([kind, def]) =>
                 [
                     kind,
-                    <Item name={def.display_name} sprite={def.sprite_active} />,
+                    <Item key={0} name={def.display_name} sprite={def.sprite_active} />,
                     () => update_func({ room: kind }),
                 ] as const,
         );
@@ -213,13 +216,17 @@ function room_items(update_func: (p: NonNullable<Props['initial']>) => void): La
  * generates the list of floors to look at
  * @param update_func
  */
-function floor_items(update_func: (p: NonNullable<Props['initial']>) => void): LayoutProps['side_items'] {
+function get_floor_items(update_func: (p: NonNullable<Props['initial']>) => void): LayoutProps['side_items'] {
     const [save] = useContext(SaveFileContext);
     return entries(FLOOR_DEFS.buildables)
         .filter(([kind]) => save.floors_seen.includes(kind))
         .map(
             ([kind, def]) =>
-                [kind, <Item name={def.name} sprite={def.background} />, () => update_func({ floor: kind })] as const,
+                [
+                    kind,
+                    <Item key={0} name={def.name} sprite={def.background} />,
+                    () => update_func({ floor: kind }),
+                ] as const,
         );
 }
 

@@ -127,3 +127,8 @@ button.flat-button {
 .modal-content {
     padding: 1rem;
 }
+
+.encyc-content-item {
+    border-bottom: 2px gray solid;
+    padding-bottom: 5px;
+}

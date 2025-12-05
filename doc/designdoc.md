@@ -66,6 +66,8 @@ a single tower that has its own:
 - timer
 - research tree
 - resource count (wallet)
+- RNG seed that pre-determines the "random" events that happen, and when they happen
+  - the player can specify a seed when they start a new tower
 - a tier/rating that goes up according to (some of?) these criteria (wip):
   - quantity of workers
   - time spent in run
@@ -236,9 +238,17 @@ information about everything that has been unlocked at one point
 
 ## Tower loading screen
 list all current towers and their status
+- thumbnail or full detail?
+- RNG seed
+- production stats
+- research progress
 
 ## Previous towers
 store information about previous towers that have died
+- thumbnail or full detail?
+- RNG seed
+- production stats
+- research progress
 
 ## Production graph
 use IndexedDB via the Dexie library to store time-series data and calculate the production graph
